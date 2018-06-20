@@ -1,82 +1,86 @@
 Function Write-UMLClassDiagram {
-<#
-.SYNOPSIS
-    This script allows to document automatically existing script(s)/module(s) containing classes by generating the corresponding UML Diagram.
-.DESCRIPTION
-    Automatically generate a UML diagram of scripts/Modules that contain powershell classes.
+    <#
+    .SYNOPSIS
+        This script allows to document automatically existing script(s)/module(s) containing classes by generating the corresponding UML Diagram.
+    .DESCRIPTION
+        Automatically generate a UML diagram of scripts/Modules that contain powershell classes.
 
-.PARAMETER Path
+    .PARAMETER Path
 
-The path that contains the classes that need to be documented. 
-The path parameter should point to either a .ps1 and .psm1 file.
+    The path that contains the classes that need to be documented. 
+    The path parameter should point to either a .ps1 and .psm1 file.
 
-.PARAMETER ExportFolder
+    .PARAMETER ExportFolder
 
-This optional parameter, allows to specifiy an alternative export folder. By default, the diagram is created in the same folder as the source file.
+    This optional parameter, allows to specifiy an alternative export folder. By default, the diagram is created in the same folder as the source file.
 
-.PARAMETER OutputFormat
+    .PARAMETER OutputFormat
 
-    Using the parameter OutputFormat, it is possible change the default output format (.png) to one of the following ones:
+        Using the parameter OutputFormat, it is possible change the default output format (.png) to one of the following ones:
 
-    'jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot'
+        'jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot'
 
-.PARAMETER Show
+    .PARAMETER Show
 
-Open's the generated diagram immediatly
+    Open's the generated diagram immediatly
 
-.EXAMPLE
+    .EXAMPLE
 
-#Generate a UML diagram of the classes located in MyClass.Ps1
-# The diagram will be automatically created in the same folder as the file that contains the classes (C:\Classes).
+    #Generate a UML diagram of the classes located in MyClass.Ps1
+    # The diagram will be automatically created in the same folder as the file that contains the classes (C:\Classes).
 
-Write-UMLClassDiagram.ps1 -File C:\Classes\MyClass.ps1
+    Write-UMLClassDiagram.ps1 -File C:\Classes\MyClass.ps1
 
-.EXAMPLE
-    #Various output formats are available using the parameter "OutPutFormat"
+    .EXAMPLE
+        #Various output formats are available using the parameter "OutPutFormat"
 
-    Write-UMLClassDiagram.ps1 -File C:\Classes\Logging.psm1 -ExportFolder C:\admin\ -OutputFormat gif
-
-
-    Directory: C:\admin
+        Write-UMLClassDiagram.ps1 -File C:\Classes\Logging.psm1 -ExportFolder C:\admin\ -OutputFormat gif
 
 
-Mode                LastWriteTime         Length Name
-----                -------------         ------ ----
--a----       12.06.2018     07:47          58293 Logging.gif
+        Directory: C:\admin
 
-.NOTES
-    Author: Stéphane van Gulick
-    Version: 0.7.1
-    www: www.powershellDistrict.com
-    Report bugs or ask for feature requests here:
-    https://github.com/Stephanevg/Write-UMLClassDiagram
-#>
 
-[CmdletBinding()]
-Param(
+    Mode                LastWriteTime         Length Name
+    ----                -------------         ------ ----
+    -a----       12.06.2018     07:47          58293 Logging.gif
+
+    .NOTES
+        Author: Stéphane van Gulick
+        Version: 0.7.1
+        www: www.powershellDistrict.com
+        Report bugs or ask for feature requests here:
+        https://github.com/Stephanevg/Write-UMLClassDiagram
+    #>
+
+    [CmdletBinding()]
+    Param(
     
-    [parameter(Mandatory=$true)]
-    [ValidateScript({
-            test-Path $_
-    })]
-    [System.IO.FileInfo]
-    $Path,
+        [parameter(Mandatory=$true)]
+        [ValidateScript({
+                test-Path $_
+        })]
+        [System.IO.FileInfo]
+        $Path,
 
 
-    [parameter(Mandatory=$false)]
-    [System.IO.DirectoryInfo]
-    $ExportFolder,
+        [parameter(Mandatory=$false)]
+        [System.IO.DirectoryInfo]
+        $ExportFolder,
 
-    [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
-    [string]
-    $OutputFormat = 'png',
+        [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
+        [string]
+        $OutputFormat = 'png',
 
-    [Switch]$Show
-)
+        [Switch]$Show,
+
+        [parameter(Mandatory = $False)]
+        [Switch]
+        $PassThru
+    )
     if(!((get-module -listavailable -name psgraph ))){
         throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
     }
-    Import-Module psgraph
+    Import-Module psgraph -Force
 
     $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
 
@@ -89,7 +93,29 @@ Param(
     #Methods are called FunctionMemberAst
     #Properties are called PropertyMemberAst
 
-    $g = Graph {
+    #region preparing paths
+
+    [System.IO.FileInfo]$File = $Path.FullName
+    $FileName = $file.BaseName + "." + $OutputFormat
+    if(!($ExportFolder)){
+
+        
+        $SourceFolder = $file.Directory.FullName
+        $FullExportPath = join-Path -Path $SourceFolder -ChildPath $FileName
+        
+    }else{
+        if($ExportFolder.Exists){
+
+            $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $FileName
+        }else{
+            throw "$($ExportFolder.FullName) Doesn't exist"
+        }
+
+    }
+
+    #endregion
+
+    $Graph = Graph {
             subgraph -Attributes @{label=($Path.BaseName)} -ScriptBlock {
 
             
@@ -186,7 +212,7 @@ Param(
                     if($Class.BaseTypes.Count -ge 1){
                         Foreach($BaseType in $Class.BaseTypes){
                             
-                            $Parent = $BaseType.TypeName.FullName
+                            #$Parent = $BaseType.TypeName.FullName
                             edge -From $BaseType.TypeName.FullName -To $($class.Name)
                         }
                         
@@ -196,23 +222,17 @@ Param(
 
             }#End SubGraph 
     }#End Graph
-    [System.IO.FileInfo]$File = $Path.FullName
-    $FileName = $file.BaseName + "." + $OutputFormat
-    if(!($ExportFolder)){
-
-        
-        $SourceFolder = $file.Directory.FullName
-        $FullExportPath = join-Path -Path $SourceFolder -ChildPath $FileName
-        
-    }else{
-
-        $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $FileName
-
-    }
-    $g | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
+    
+    $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
 
     If($Show){
-        $g | Show-PSGraph
+        $Graph | Show-PSGraph
+    }
+
+    if($PassThru){
+        $Graph
+    }else{
+        $Export
     }
 
 }
