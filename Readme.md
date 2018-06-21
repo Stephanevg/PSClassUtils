@@ -89,3 +89,15 @@ Below is the export of the Class Diagram of a module I wrote that helps to manag
 
 
 ![Class.HostsManagement](https://github.com/Stephanevg/Class.HostsManagement/blob/master/Class.HostsManagement.png?raw=true)
+
+### Get-ClassConstructors
+
+Coming soon...
+
+### Get-ClassProperties
+
+Coming soon...
+
+### Get-ClassMethods
+
+Coming soon...
