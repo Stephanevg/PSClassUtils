@@ -2,12 +2,12 @@
 
 This module contains tools to ease the work with Powershell Classes.
 
-The most usefull feature is probably the one **that it can generate UML Class Diagrams in png format of your scripts / modules.** (See Write-UMLClassDiagram)
+The most usefull feature is probably the one **that it can generate UML Class Diagrams in png format of your scripts / modules.** (See Write-ClassDiagram)
 
 ## Functions currently available:
 
 ```powershell
-Write-UMLClassDiagram
+Write-ClassDiagram
 Get-ClassConstructors
 Get-ClassMethods
 Get-ClassProperties
@@ -16,7 +16,7 @@ Get-ClassProperties
 
 
 
-### Write-UMLClassDiagram
+### Write-ClassDiagram
 
 Allows to generate UML diagrams of powerShell scripts / modules that contain PowerShell classes.
 
@@ -67,9 +67,9 @@ Class Wep : Woop {
 
 ```
 
-#### Calling Write-UMLClassDiagram
+#### Calling Write-ClassDiagram
 ```Powershell
-.\Write-UMLClassDiagram.ps1 -Path ".\Inheritance.ps1"
+.\Write-ClassDiagram.ps1 -Path ".\Inheritance.ps1"
 ```
 
 #### Results
@@ -78,7 +78,7 @@ Class Wep : Woop {
 
 ## Live examples from existing modules on the internet:
 
-I took the 'liberty' to run Write-UMLClassDiagram on some well known modules available on the internet that are classed based.
+I took the 'liberty' to run Write-ClassDiagram on some well known modules available on the internet that are classed based.
 These are all great modules, and I recommend you have a look at them!
 
 
