@@ -1,4 +1,4 @@
-Function Write-UMLClassDiagram {
+Function Write-ClassDiagram {
     <#
     .SYNOPSIS
         This script allows to document automatically existing script(s)/module(s) containing classes by generating the corresponding UML Diagram.
@@ -29,12 +29,12 @@ Function Write-UMLClassDiagram {
     #Generate a UML diagram of the classes located in MyClass.Ps1
     # The diagram will be automatically created in the same folder as the file that contains the classes (C:\Classes).
 
-    Write-UMLClassDiagram.ps1 -File C:\Classes\MyClass.ps1
+    Write-ClassDiagram.ps1 -File C:\Classes\MyClass.ps1
 
     .EXAMPLE
         #Various output formats are available using the parameter "OutPutFormat"
 
-        Write-UMLClassDiagram.ps1 -File C:\Classes\Logging.psm1 -ExportFolder C:\admin\ -OutputFormat gif
+        Write-ClassDiagram.ps1 -File C:\Classes\Logging.psm1 -ExportFolder C:\admin\ -OutputFormat gif
 
 
         Directory: C:\admin
@@ -49,7 +49,7 @@ Function Write-UMLClassDiagram {
         Version: 0.7.1
         www: www.powershellDistrict.com
         Report bugs or ask for feature requests here:
-        https://github.com/Stephanevg/Write-UMLClassDiagram
+        https://github.com/Stephanevg/Write-ClassDiagram
     #>
 
     [CmdletBinding()]
