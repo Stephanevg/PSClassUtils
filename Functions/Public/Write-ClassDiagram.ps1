@@ -24,6 +24,13 @@ Function Write-ClassDiagram {
 
     Open's the generated diagram immediatly
 
+    .PARAMETER IgnoreCase
+        By default, Class names MUST be case identical to have the Write-ClassDiagram cmdlet generate the correct inheritence tree.
+        When the switch -IgnoreCase is specified, All class names will be converted to 'Titlecase' to force the case, and ensure the inheritence is correctly drawed in the Class Diagram.
+    
+    .PARAMETER PassThru
+        When specified, the raw Graph inn GraphViz format will be returned back in String format.
+
     .EXAMPLE
 
     #Generate a UML diagram of the classes located in MyClass.Ps1
@@ -46,7 +53,7 @@ Function Write-ClassDiagram {
 
     .NOTES
         Author: Stéphane van Gulick
-        Version: 0.7.1
+        Version: 0.8.0
         www: www.powershellDistrict.com
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-ClassDiagram
@@ -55,7 +62,7 @@ Function Write-ClassDiagram {
     [CmdletBinding()]
     Param(
     
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true)]
         [ValidateScript({
                 test-Path $_
         })]
@@ -63,7 +70,7 @@ Function Write-ClassDiagram {
         $Path,
 
 
-        [parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [System.IO.DirectoryInfo]
         $ExportFolder,
 
@@ -71,11 +78,16 @@ Function Write-ClassDiagram {
         [string]
         $OutputFormat = 'png',
 
+        [Parameter(Mandatory = $False)]
         [Switch]$Show,
 
-        [parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $False)]
         [Switch]
-        $PassThru
+        $PassThru,
+
+        [Parameter(Mandatory = $False)]
+        [Switch]
+        $IgnoreCase
     )
     if(!((get-module -listavailable -name psgraph ))){
         throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
@@ -122,12 +134,18 @@ Function Write-ClassDiagram {
                 Foreach ($Class in $Classes) {
 
                     $Properties = $Class.members | ? {$_ -is [System.Management.Automation.Language.PropertyMemberAst]}
-                    $RecordName = $Class.Name
+                    If($IgnoreCase){
+                        $RecordName = ConvertTo-titleCase -String $Class.Name
+                    }else{
+
+                        $RecordName =  $Class.Name
+                    }
+                    
                     $Constructors = $Class.members | ? {$_.IsConstructor -eq $true}
                     $AllMembers = @()
                     $AllMembers = $Class.members | ? {$_.IsConstructor -eq $false} #| Select Name,@{name="type";expression = {$_.PropertyType.Extent.Text}}
 
-                    Record $RecordName {
+                    Record -Name $RecordName {
 
                         #Properties
 
@@ -204,16 +222,23 @@ Function Write-ClassDiagram {
                         }
                     
                 
-                    }
-                }
+                    }#End Record
+                }#end foreach Class
 
-                #Inheritence
+
+                #Inheritence (Creating Edges)
                 Foreach($Class in $Classes){
                     if($Class.BaseTypes.Count -ge 1){
                         Foreach($BaseType in $Class.BaseTypes){
+                            if($IgnoreCase){
+                                $Parent = ConvertTo-titleCase -String $Class.Name
+                                $Child = ConvertTo-titleCase -String $BaseType.TypeName.FullName
+                            }Else{
+                                $Parent = $Class.Name
+                                $Child = $BaseType.TypeName.FullName
+                            }
                             
-                            #$Parent = $BaseType.TypeName.FullName
-                            edge -From $BaseType.TypeName.FullName -To $($class.Name)
+                            edge -From $Child -To $Parent
                         }
                         
                     }#End If
