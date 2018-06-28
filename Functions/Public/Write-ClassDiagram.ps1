@@ -62,12 +62,21 @@ Function Write-ClassDiagram {
     [CmdletBinding()]
     Param(
     
-        [Parameter(Mandatory=$true)]
+        
+        [Parameter(Mandatory=$true,ParameterSetName='File')]
         [ValidateScript({
                 test-Path $_
         })]
         [System.IO.FileInfo]
         $Path,
+
+        [Parameter(Mandatory=$true,ParameterSetName='Folder')]
+        [ValidateScript({
+                test-Path $_
+        })]
+
+        [System.IO.DirectoryInfo]
+        $FolderPath,
 
 
         [Parameter(Mandatory=$false)]
@@ -94,31 +103,35 @@ Function Write-ClassDiagram {
     }
     Import-Module psgraph -Force
 
-    $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
-
-    $type = $ast.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-    $Enums = $type | ? {$_.IsEnum -eq $true}
-    $Classes = $type | ? {$_.IsClass -eq $true}
-
-
-
     #Methods are called FunctionMemberAst
     #Properties are called PropertyMemberAst
 
     #region preparing paths
 
-    [System.IO.FileInfo]$File = $Path.FullName
-    $FileName = $file.BaseName + "." + $OutputFormat
-    if(!($ExportFolder)){
+    if ($Path){
+        [System.IO.FileInfo]$File = $Path.FullName
+        $ExportFileName = $file.BaseName + "." + $OutputFormat
+
+    }elseif($FolderPath){
+        $ExportFileName = "Solution" + "." + $OutputFormat
 
         
-        $SourceFolder = $file.Directory.FullName
-        $FullExportPath = join-Path -Path $SourceFolder -ChildPath $FileName
+    }
+
+    if(!($ExportFolder)){
+
+        if($FolderPath){
+            $SourceFolder = $FolderPath.FullName
+        }else{
+
+            $SourceFolder = $file.Directory.FullName
+        }
+        $FullExportPath = join-Path -Path $SourceFolder -ChildPath $ExportFileName
         
     }else{
         if($ExportFolder.Exists){
 
-            $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $FileName
+            $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
         }else{
             throw "$($ExportFolder.FullName) Doesn't exist"
         }
@@ -127,8 +140,30 @@ Function Write-ClassDiagram {
 
     #endregion
 
+
+    if($Path){
+        #Regular way
+        $AllItems = $Path
+    }ElseIf($FolderPath){
+        
+        $AllItems = Get-ChildItem -path $FolderPath.FullName -Recurse
+
+    }
+
+    
+    
+    
+    
     $Graph = Graph {
-            subgraph -Attributes @{label=($Path.BaseName)} -ScriptBlock {
+        Foreach($File in $AllItems){
+    
+            $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.FullName, [ref]$null, [ref]$Null)
+        
+            $type = $ast.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
+            $Enums = $type | ? {$_.IsEnum -eq $true}
+            $Classes = $type | ? {$_.IsClass -eq $true}
+        
+            subgraph -Attributes @{label=($File.BaseName)} -ScriptBlock {
 
             
                 Foreach ($Class in $Classes) {
@@ -245,7 +280,8 @@ Function Write-ClassDiagram {
                     
                 }#End Inheritence
 
-            }#End SubGraph 
+            }#End SubGraph
+        } 
     }#End Graph
     
     $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
@@ -261,3 +297,5 @@ Function Write-ClassDiagram {
     }
 
 }
+
+ Write-ClassDiagram -FolderPath C:\Users\taavast3\OneDrive\Scripting\Repository\Projects\OpenSource\PoshBot\PoshBot\Classes -Show -IgnoreCase
