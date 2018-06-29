@@ -1,6 +1,8 @@
-Import-module "..\.\PowershellClassUtils.psm1" -Force
+#$ScriptPath = Split-Path $MyInvocation.MyCommand.Path
 
-InModuleScope PowershellClassUtils -ScriptBlock {
+Import-module "..\.\PSClassUtils.psm1" -Force
+
+InModuleScope PSClassUtils -ScriptBlock {
 
     Describe "Testing Class: 'ClassConstructor'" {
 

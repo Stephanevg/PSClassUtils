@@ -53,7 +53,7 @@ Function Write-ClassDiagram {
 
     .NOTES
         Author: Stéphane van Gulick
-        Version: 0.8.1
+        Version: 0.8.2
         www: www.powershellDistrict.com
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-ClassDiagram
@@ -98,10 +98,16 @@ Function Write-ClassDiagram {
         [Switch]
         $IgnoreCase
     )
-    if(!((get-module -listavailable -name psgraph ))){
-        throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
+    if(!(Get-Module -Name PSGraph)){
+        #Module is not loaded
+        if(!(get-module -listavailable -name psgraph )){
+            #Module is not present
+            throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
+        }else{
+            Import-Module psgraph -Force
+        }
     }
-    Import-Module psgraph -Force
+    
 
     #Methods are called FunctionMemberAst
     #Properties are called PropertyMemberAst
