@@ -3,7 +3,7 @@ version: 1.0.{build}
 environment:
   PSgalleryKey:
     secure: wl8DNkBd6QUSBAEWxCNTTW+cVn32ub6kWSqZxAUrpx4/QPnWYGiLWEj+ZaFp5cuA
-
+ 
 install:
 - ps: >-
     
