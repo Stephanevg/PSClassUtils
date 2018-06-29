@@ -11,9 +11,12 @@ install:
     Install-Module -Name PSScriptAnalyzer -Force;
     Install-Module -Name Pester -Force -verbose;
     Start-Sleep -Seconds 2;
-    Import-Module PSGraph;
-    Start-Sleep -Seconds 2;
-    Install-GraphViz;
+    # Install GraphViz from the Chocolatey repo
+    Register-PackageSource -Name Chocolatey -ProviderName Chocolatey -Location http://chocolatey.org/api/v2/
+    Find-Package graphviz | Install-Package -ForceBootstrap
+
+    # Install PSGraph from the Powershell Gallery
+    Find-Module PSGraph | Install-Module
 build: off
 test_script:
 - ps: >-
