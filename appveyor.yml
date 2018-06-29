@@ -23,9 +23,9 @@ test_script:
 - ps: >-
     import-module pester;
     start-sleep -seconds 2;
-    Import-Module PSgraph
+    Import-Module PSgraph;
     start-sleep -seconds 2;
-    Get-Module
+    Get-Module;
     Get-Module Pester;
     Get-Module PSClassUtils;
     write-verbose "invoking pester";
