@@ -1,11 +1,11 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
-Import-module "..\.\PowershellClassUtils.psm1" -Force
+Import-module "..\.\PSClassUtils.psm1" -Force
 
 Describe "Testing Write-ClassDiagram" {
 
-$TestCaseClass = @"
+$TestCaseClass = @'
     
     Class Woop {
         [String]$String
@@ -35,11 +35,11 @@ $TestCaseClass = @"
         }
     }
     
-"@
+'@
 
-InModuleScope "PowershellClassUtils" {
-$ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
- $TestCaseClass | Out-File -FilePath $ClassScript -Force
+InModuleScope "PSClassUtils" {
+    $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
+    $TestCaseClass | Out-File -FilePath $ClassScript -Force
 
 
         it 'Parameter: -Path: Should return Object of type [FileInfo]' {
@@ -52,10 +52,15 @@ $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
             $Ret.DirectoryName | should be $Testdrive.FullName
         }
 
+        it 'Parameter: -Path: Should throw when folder is passed' {
+            {Write-ClassDiagram -Path $Testdrive} | should throw
+            
+        }
+
         it "Parameter: -ExportPath 'Should throw if file name is added.'" {
             $Guid = [Guid]::NewGuid().Guid + ".txt"
             $File = Join-Path -Path $Testdrive -ChildPath $Guid
-            #$null = mkdir $NewFolder
+            
             {Write-ClassDiagram -Path $ClassScript -ExportFolder $File} | should throw
             
         }
@@ -90,6 +95,106 @@ $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
         }
 
 
+        
+
+    $TestCaseSensitityClass = @'
+    
+        Class WooP {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+        
+        Class Wap : wOOp {
+            [String]$prop3
+        
+            DoChildthing(){}
+        
+        }
+        
+        Class Wep : WoOp {
+            [String]$prop4
+        
+            DoOtherChildThing(){
+        
+            }
+        }
+        
+'@      
+
+        it 'Parameter: -IgnoreCase: Should create correct graph ignoring case' {
+            $ClassScriptCaseSensitive = Join-Path -Path $Testdrive -ChildPath "WoopClassCase.ps1"
+            $TestCaseSensitityClass | Out-File -FilePath $ClassScriptCaseSensitive -Force
+            $a = Write-ClassDiagram -Path $ClassScriptCaseSensitive -PassThru -IgnoreCase
+            $a -cmatch '"Woop" \[label=.*' | should not benullOrEmpty
+            $a -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
+            $a -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
+            $a -cmatch 'wOOp' | should beNullOrEmpty
+            $a -cmatch 'WoOp' | should beNullOrEmpty
+            $a -cmatch 'WooP' | should beNullOrEmpty
+        }
+
+        $File1 = @'
+    
+        Class Woop {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+'@
+    
+    $File2 = @'
+        Class Wap : Woop {
+            [String]$prop3
+        
+            DoChildthing(){}
+        
+        }
+'@
+    $File3 = @'
+        Class Wep : Woop {
+            [String]$prop4
+        
+            DoOtherChildThing(){
+        
+            }
+        }
+        
+'@
+        it "Parameter: -FolderPath: Should create graph from classes located in seperate files in a specific folder"{
+            $FolderPathFolder = join-Path -Path $Testdrive -ChildPath "FolderPath"
+            $null = mkdir $FolderPathFolder
+            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
+            $File1 | Out-File -FilePath $Path_File1 -Force
+
+            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
+            $File2 | Out-File -FilePath $Path_File2 -Force
+
+            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
+            $File3 | Out-File -FilePath $Path_File3 -Force
+
+            $b = Write-ClassDiagram -FolderPath $FolderPathFolder -PassThru
+            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
+            $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
+
+        }
+
+        #It is best to keep this test at the end, and it will unload the module PSGraph, and can cause some issues while testing.
         it 'Should throw if psgraph module is not found' {
             if(get-Module psgraph){
 
