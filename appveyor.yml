@@ -7,9 +7,12 @@ environment:
 install:
 - ps: >-
     Install-PackageProvider -Name NuGet -Force;
+    Install-Module -Name PSGraph -Force -verbose;
     Install-Module -Name PSScriptAnalyzer -Force;
     Install-Module -Name Pester -Force -verbose;
-    Install-Module -Name PSGraph -Force -verbose;
+    Start-Sleep -Seconds 2;
+    Import-Module PSGraph;
+    Start-Sleep -Seconds 2;
     Install-GraphViz;
 build: off
 test_script:
