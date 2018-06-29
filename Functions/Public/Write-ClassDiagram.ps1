@@ -58,7 +58,7 @@ Function Write-ClassDiagram {
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-ClassDiagram
     #>
-
+ 
     [CmdletBinding()]
     Param(
     
