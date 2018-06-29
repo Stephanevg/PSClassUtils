@@ -9,6 +9,7 @@ install:
     Install-PackageProvider -Name NuGet -Force;
     Install-Module -Name PSScriptAnalyzer -Force;
     Install-Module -Name Pester -Force -verbose;
+    Install-Module -Name PSGraph -Force -verbose;
 build: off
 test_script:
 - ps: >-
