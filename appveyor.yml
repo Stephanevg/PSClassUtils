@@ -6,9 +6,9 @@ environment:
 
 install:
 - ps: >-
-    Install-PackageProvider -Name NuGet -Force
-    Install-Module -Name PSScriptAnalyzer -Force
-    Install-Module -Name Pester -Force -verbose 
+    Install-PackageProvider -Name NuGet -Force;
+    Install-Module -Name PSScriptAnalyzer -Force;
+    Install-Module -Name Pester -Force -verbose;
 build: off
 test_script:
 - ps: >-
