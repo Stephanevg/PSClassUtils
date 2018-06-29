@@ -10,6 +10,7 @@ install:
     Install-Module -Name PSScriptAnalyzer -Force;
     Install-Module -Name Pester -Force -verbose;
     Install-Module -Name PSGraph -Force -verbose;
+    Install-GraphViz;
 build: off
 test_script:
 - ps: >-
