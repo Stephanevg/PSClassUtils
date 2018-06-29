@@ -53,7 +53,7 @@ Function Write-ClassDiagram {
 
     .NOTES
         Author: Stéphane van Gulick
-        Version: 0.8.0
+        Version: 0.8.1
         www: www.powershellDistrict.com
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-ClassDiagram
@@ -113,7 +113,7 @@ Function Write-ClassDiagram {
         $ExportFileName = $file.BaseName + "." + $OutputFormat
 
     }elseif($FolderPath){
-        $ExportFileName = "Solution" + "." + $OutputFormat
+        $ExportFileName = "Diagram" + "." + $OutputFormat
 
         
     }
@@ -297,5 +297,3 @@ Function Write-ClassDiagram {
     }
 
 }
-
- Write-ClassDiagram -FolderPath C:\Users\taavast3\OneDrive\Scripting\Repository\Projects\OpenSource\PoshBot\PoshBot\Classes -Show -IgnoreCase
