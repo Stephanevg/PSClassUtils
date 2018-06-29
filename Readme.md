@@ -1,4 +1,4 @@
-# PowerShell ClassUtils
+# PSClassUtils
 
 This module contains tools to ease the work with Powershell Classes.
 

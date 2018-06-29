@@ -1,11 +1,11 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
-Import-module "..\.\PowershellClassUtils.psm1" -Force
+Import-module "..\.\PSClassUtils.psm1" -Force
 
 Describe "Testing Get-ClassProperty"{
     
-    InModuleScope PowershellClassUtils {
+    InModuleScope PSClassUtils {
 
 
         $TestCaseClass = @'
