@@ -12,7 +12,7 @@ install:
     Install-Module -Name Pester -Force -verbose;
     Start-Sleep -Seconds 2;
     # Install GraphViz from the Chocolatey repo
-    Register-PackageSource -Name Chocolatey -ProviderName Chocolatey -Location http://chocolatey.org/api/v2/ -Force
+    Register-PackageSource -Name Chocolatey -ProviderName Chocolatey -Location http://chocolatey.org/api/v2/ -Force -Trusted
     
     Find-Package graphviz | Install-Package -ForceBootstrap
 
