@@ -1,6 +1,6 @@
-Import-module "..\.\PowershellClassUtils.psm1" -Force
+Import-module "..\.\PSClassUtils.psm1" -Force
 
-InModuleScope PowershellClassUtils -ScriptBlock {
+InModuleScope PSClassUtils -ScriptBlock {
 
     Describe "Testing Class-ClassProperty" {
 
