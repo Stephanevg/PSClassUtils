@@ -1,0 +1,50 @@
+version: 1.0.{build}
+clone_folder: 'C:\Program Files\WindowsPowerShell\Modules\PSClassUtils\'
+
+environment:
+  PSgalleryKey:
+    secure: wl8DNkBd6QUSBAEWxCNTTW+cVn32ub6kWSqZxAUrpx4/QPnWYGiLWEj+ZaFp5cuA
+ 
+install:
+- ps: >-
+    
+    Install-PackageProvider -Name Chocolatey -force;
+    Register-PackageSource -Name Chocolatey -ProviderName Chocolatey -Location http://chocolatey.org/api/v2/ -Force -Trusted;
+    Find-Package graphviz -Source "http://chocolatey.org/api/v2/"  | Install-Package -ForceBootstrap -Force;
+    Start-Sleep -Seconds 2;
+
+    Install-PackageProvider -Name NuGet -Force;
+    Install-Module -Name PSGraph -Force -verbose;
+    Install-Module -Name PSScriptAnalyzer -Force;
+    Install-Module -Name Pester -Force -verbose;
+    
+    
+    
+    Start-Sleep -Seconds 2;
+    # Install GraphViz from the Chocolatey repo
+    
+
+    # Install PSGraph from the Powershell Gallery
+    #Find-Module PSGraph | Install-Module
+build: off
+test_script:
+- ps: >-
+    import-module pester;
+    start-sleep -seconds 2;
+    Import-Module PSgraph;
+    start-sleep -seconds 2;
+    Get-Module;
+    Get-Module Pester;
+    Get-Module PSClassUtils;
+    write-verbose "invoking pester";
+    $res = Invoke-Pester -Path ".\Tests" -OutputFormat NUnitXml -OutputFile TestsResults.xml -PassThru;
+    (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\TestsResults.xml));
+    if ($res.FailedCount -gt 0) { throw "$($res.FailedCount) tests failed."};
+
+    
+    if($res.FailedCount -eq 0){
+        publish-module -Name PSClassUtils -NuGetApiKey $Env:PSgalleryKey;
+        write-host "Module deployed to the psgallery" -foregroundcolor green;
+    }else{
+        write-host "Module not deployed to the psgallery" -foregroundcolor Yellow;
+    }
