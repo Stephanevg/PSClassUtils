@@ -3,7 +3,7 @@ $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
 Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
 
-Describe "Testing Write-ClassDiagram" {
+Describe "Testing Write-CUClassDiagram" {
 
 $TestCaseClass = @'
     
@@ -43,17 +43,17 @@ InModuleScope "PSClassUtils" {
 
 
         it 'Parameter: -Path: Should return Object of type [FileInfo]' {
-            $ret = Write-ClassDiagram -Path $ClassScript
+            $ret = Write-CUClassDiagram -Path $ClassScript
             $ret.GetType().Name | should be 'FileInfo'
         }
 
         it 'Parameter: -Path: Should Create a graph in same folder' {
-            $ret = Write-ClassDiagram -Path $ClassScript
+            $ret = Write-CUClassDiagram -Path $ClassScript
             $Ret.DirectoryName | should be $Testdrive.FullName
         }
 
         it 'Parameter: -Path: Should throw when folder is passed' {
-            {Write-ClassDiagram -Path $Testdrive} | should throw
+            {Write-CUClassDiagram -Path $Testdrive} | should throw
             
         }
 
@@ -61,7 +61,7 @@ InModuleScope "PSClassUtils" {
             $Guid = [Guid]::NewGuid().Guid + ".txt"
             $File = Join-Path -Path $Testdrive -ChildPath $Guid
             
-            {Write-ClassDiagram -Path $ClassScript -ExportFolder $File} | should throw
+            {Write-CUClassDiagram -Path $ClassScript -ExportFolder $File} | should throw
             
         }
 
@@ -69,7 +69,7 @@ InModuleScope "PSClassUtils" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
             $null = mkdir $NewFolder
-            $ret = Write-ClassDiagram -Path $ClassScript -ExportFolder $NewFolder
+            $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
 
@@ -77,19 +77,19 @@ InModuleScope "PSClassUtils" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
             $null = mkdir $NewFolder
-            $ret = Write-ClassDiagram -Path $ClassScript -ExportFolder $NewFolder
+            $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
 
         it 'Parameter: -OutputFormat: Should Create a graph in Other format' {
-            $ret = Write-ClassDiagram -Path $ClassScript -OutputFormat gif
+            $ret = Write-CUClassDiagram -Path $ClassScript -OutputFormat gif
             $ret.extension | should be ".gif"
         }
 
         
 
         it 'Parameter: -Passthru: Should return psgraph object' {
-            $ret = Write-ClassDiagram -Path $ClassScript -PassThru
+            $ret = Write-CUClassDiagram -Path $ClassScript -PassThru
             $ret.GetType().Name | should not be "FileInfo"
             $ret[0] | should be 'digraph g {'
         }
@@ -132,7 +132,7 @@ InModuleScope "PSClassUtils" {
         it 'Parameter: -IgnoreCase: Should create correct graph ignoring case' {
             $ClassScriptCaseSensitive = Join-Path -Path $Testdrive -ChildPath "WoopClassCase.ps1"
             $TestCaseSensitityClass | Out-File -FilePath $ClassScriptCaseSensitive -Force
-            $a = Write-ClassDiagram -Path $ClassScriptCaseSensitive -PassThru -IgnoreCase
+            $a = Write-CUClassDiagram -Path $ClassScriptCaseSensitive -PassThru -IgnoreCase
             $a -cmatch '"Woop" \[label=.*' | should not benullOrEmpty
             $a -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $a -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
@@ -187,7 +187,7 @@ InModuleScope "PSClassUtils" {
             $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
             $File3 | Out-File -FilePath $Path_File3 -Force
 
-            $b = Write-ClassDiagram -FolderPath $FolderPathFolder -PassThru
+            $b = Write-CUClassDiagram -FolderPath $FolderPathFolder -PassThru
             $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
             $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
@@ -205,7 +205,7 @@ InModuleScope "PSClassUtils" {
                 return $null
             }
 
-            {Write-ClassDiagram -Path $ClassScript } | should throw
+            {Write-CUClassDiagram -Path $ClassScript } | should throw
             Assert-MockCalled get-module
         }
 

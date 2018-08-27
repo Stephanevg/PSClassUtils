@@ -1,11 +1,11 @@
-Function Get-ClassConstructors{
+Function Get-CUClassConstructor{
     <#
     .SYNOPSIS
         This function returns all existing constructors of a specific powershell class.
     .DESCRIPTION
         The Powershell Class must be loaded in memory for this function to work.
     .EXAMPLE
-         Get-ClassConstructors -ClassName woop
+         Get-CUClassConstructor -ClassName woop
 
         Name ReturnType Properties
         ---- ---------- ----------

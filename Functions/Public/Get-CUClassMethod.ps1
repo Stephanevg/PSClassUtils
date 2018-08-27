@@ -1,4 +1,4 @@
-Function Get-ClassMethods{
+Function Get-CUClassMethod{
     <#
     .SYNOPSIS
         This function returns all existing methods of a specific powershell class.
@@ -6,7 +6,7 @@ Function Get-ClassMethods{
         The Powershell Class must be loaded in memory for this function to work.
     .EXAMPLE
 
-         Get-ClassMethods -ClassName wap
+         Get-CUClassMethod -ClassName wap
 
         Name          ReturnType Properties
         ----          ---------- ----------

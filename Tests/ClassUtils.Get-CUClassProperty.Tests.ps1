@@ -1,9 +1,9 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
+#Import-module "..\.\PSClassUtils.psm1" -Force
 Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
-
-Describe "Testing Get-ClassConstructors"{
+Describe "Testing Get-CUClassProperty"{
     
     InModuleScope PSClassUtils {
 
@@ -16,12 +16,9 @@ Describe "Testing Get-ClassConstructors"{
             Woop(){
     
             }
-
+    
             Woop([String]$String,[int]$Number){
-                
-            }
-            Woop([String]$String,[int]$Number,[DateTime]$Time){
-            
+        
             }
         
             [String]DoSomething(){
@@ -62,34 +59,24 @@ Describe "Testing Get-ClassConstructors"{
         
         
 
-        it 'Should Return 3 Constructors' {
+        it 'Should Return 2 Properties' {
 
 
-            (Get-ClassConstructors -ClassName "Woop" | measure).Count | should be 3
+            (Get-CUClassProperty -ClassName "Woop" | measure).Count | should be 2
         }
 
         Context 'Validating Properties' {
-            
-            $Properties = @("String","Number","Time")
-            $Constructors = Get-ClassConstructors -ClassName "Woop"
+            $Properties = @("String","Number")
+            $methods = Get-CUClassProperty -ClassName "Wap"
             foreach ($prop in $Properties){
 
                 it "Should have Property: $($Prop)" {
-                    ($Constructors | gm).Name -contains $prop
+                    ($methods | gm).Name -contains $prop
                 }
             }
 
-        
-            foreach($w in $Constructors){
-                    if($w.Properties){
-
-                        it "$($w.Name) should have property of type 'ClassProperty[]'" {
-
-                            $w.Properties.GetType().Name | should be 'ClassProperty[]'
-                        }
-                    }
-            }
         }
+
     }
     
         
