@@ -3,7 +3,7 @@ $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
 Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
 
-Describe "Testing Get-ClassMethod"{
+Describe "Testing Get-CUClassMethod"{
     
     InModuleScope PSClassUtils {
 
@@ -62,12 +62,12 @@ Describe "Testing Get-ClassMethod"{
         it 'Should Return 5 methods' {
 
 
-            (Get-ClassMethods -ClassName "Wap" | measure).Count | should be 5
+            (Get-CUClassMethod -ClassName "Wap" | measure).Count | should be 5
         }
 
         Context 'Validating Properties' {
             $Properties = @("Name","Properties","ReturnType")
-            $methods = Get-ClassMethods -ClassName "Wap"
+            $methods = Get-CUClassMethod -ClassName "Wap"
             foreach ($prop in $Properties){
 
                 it "Should have Property: $($Prop)" {
@@ -86,7 +86,7 @@ Describe "Testing Get-ClassMethod"{
                     }
             }
 
-                $DoChildthing4 = Get-ClassMethods -ClassName "Wap" | ? {$_.Name -eq 'DoChildthing4'}
+                $DoChildthing4 = Get-CUClassMethod -ClassName "Wap" | ? {$_.Name -eq 'DoChildthing4'}
                 it "should have property Name with value: 'DoChildthing4' " {
 
                     $DoChildthing4.Name | should be 'DoChildthing4'
@@ -145,7 +145,7 @@ Describe "Testing Get-ClassMethod"{
 
         Context 'Testing Method types'{
 
-            $methods = Get-ClassMethods -ClassName "Wap"
+            $methods = Get-CUClassMethod -ClassName "Wap"
             foreach($w in $methods){
                     it "Method $($w.Name)(): should be of type 'ClassMethod'" {
         

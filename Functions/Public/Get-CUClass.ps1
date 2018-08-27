@@ -1,4 +1,4 @@
-function Get-PSClass{
+function Get-CUClass{
   [CmdletBinding()]
   Param(
     $Name = '*'
@@ -9,7 +9,7 @@ function Get-PSClass{
     .DESCRIPTION
         
     .EXAMPLE
-        Get-PSClass
+        Get-CUClass
 
         Employee
         ExternalEmployee

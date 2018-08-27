@@ -1,11 +1,11 @@
-Function Get-ClassProperties{
+Function Get-CUClassProperty{
     <#
     .SYNOPSIS
         This function returns all existing properties of a specific powershell class.
     .DESCRIPTION
         The Powershell Class must be loaded in memory for this function to work.
     .EXAMPLE
-        Get-ClassProperties -ClassName wap
+        Get-CUClassProperty -ClassName wap
 
         Name   Type
         ----   ----

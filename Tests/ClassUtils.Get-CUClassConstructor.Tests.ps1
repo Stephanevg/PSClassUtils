@@ -1,9 +1,9 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
-#Import-module "..\.\PSClassUtils.psm1" -Force
 Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
-Describe "Testing Get-ClassProperty"{
+
+Describe "Testing Get-CUClassConstructor"{
     
     InModuleScope PSClassUtils {
 
@@ -16,9 +16,12 @@ Describe "Testing Get-ClassProperty"{
             Woop(){
     
             }
-    
+
             Woop([String]$String,[int]$Number){
-        
+                
+            }
+            Woop([String]$String,[int]$Number,[DateTime]$Time){
+            
             }
         
             [String]DoSomething(){
@@ -59,24 +62,34 @@ Describe "Testing Get-ClassProperty"{
         
         
 
-        it 'Should Return 2 Properties' {
+        it 'Should Return 3 Constructors' {
 
 
-            (Get-ClassProperties -ClassName "Woop" | measure).Count | should be 2
+            (Get-CUClassConstructor -ClassName "Woop" | measure).Count | should be 3
         }
 
         Context 'Validating Properties' {
-            $Properties = @("String","Number")
-            $methods = Get-ClassProperties -ClassName "Wap"
+            
+            $Properties = @("String","Number","Time")
+            $Constructors = Get-CUClassConstructor -ClassName "Woop"
             foreach ($prop in $Properties){
 
                 it "Should have Property: $($Prop)" {
-                    ($methods | gm).Name -contains $prop
+                    ($Constructors | gm).Name -contains $prop
                 }
             }
 
-        }
+        
+            foreach($w in $Constructors){
+                    if($w.Properties){
 
+                        it "$($w.Name) should have property of type 'ClassProperty[]'" {
+
+                            $w.Properties.GetType().Name | should be 'ClassProperty[]'
+                        }
+                    }
+            }
+        }
     }
     
         

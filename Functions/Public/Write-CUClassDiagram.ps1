@@ -1,4 +1,4 @@
-Function Write-ClassDiagram {
+Function Write-CUClassDiagram {
     <#
     .SYNOPSIS
         This script allows to document automatically existing script(s)/module(s) containing classes by generating the corresponding UML Diagram.
@@ -25,7 +25,7 @@ Function Write-ClassDiagram {
     Open's the generated diagram immediatly
 
     .PARAMETER IgnoreCase
-        By default, Class names MUST be case identical to have the Write-ClassDiagram cmdlet generate the correct inheritence tree.
+        By default, Class names MUST be case identical to have the Write-CUClassDiagram cmdlet generate the correct inheritence tree.
         When the switch -IgnoreCase is specified, All class names will be converted to 'Titlecase' to force the case, and ensure the inheritence is correctly drawed in the Class Diagram.
     
     .PARAMETER PassThru
@@ -36,12 +36,12 @@ Function Write-ClassDiagram {
     #Generate a UML diagram of the classes located in MyClass.Ps1
     # The diagram will be automatically created in the same folder as the file that contains the classes (C:\Classes).
 
-    Write-ClassDiagram.ps1 -File C:\Classes\MyClass.ps1
+    Write-CUClassDiagram.ps1 -File C:\Classes\MyClass.ps1
 
     .EXAMPLE
         #Various output formats are available using the parameter "OutPutFormat"
 
-        Write-ClassDiagram.ps1 -File C:\Classes\Logging.psm1 -ExportFolder C:\admin\ -OutputFormat gif
+        Write-CUClassDiagram.ps1 -File C:\Classes\Logging.psm1 -ExportFolder C:\admin\ -OutputFormat gif
 
 
         Directory: C:\admin
@@ -56,7 +56,7 @@ Function Write-ClassDiagram {
         Version: 0.8.2
         www: www.powershellDistrict.com
         Report bugs or ask for feature requests here:
-        https://github.com/Stephanevg/Write-ClassDiagram
+        https://github.com/Stephanevg/Write-CUClassDiagram
     #>
   
     [CmdletBinding()]
