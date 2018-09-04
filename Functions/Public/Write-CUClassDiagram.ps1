@@ -7,7 +7,7 @@ Function Write-CUClassDiagram {
 
     .PARAMETER Path
 
-    The path that contains the classes that need to be documented. 
+    The path that contains the classes that need to be documented.
     The path parameter should point to either a .ps1 and .psm1 file.
 
     .PARAMETER ExportFolder
@@ -27,7 +27,7 @@ Function Write-CUClassDiagram {
     .PARAMETER IgnoreCase
         By default, Class names MUST be case identical to have the Write-CUClassDiagram cmdlet generate the correct inheritence tree.
         When the switch -IgnoreCase is specified, All class names will be converted to 'Titlecase' to force the case, and ensure the inheritence is correctly drawed in the Class Diagram.
-    
+
     .PARAMETER PassThru
         When specified, the raw Graph inn GraphViz format will be returned back in String format.
 
@@ -58,28 +58,28 @@ Function Write-CUClassDiagram {
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-CUClassDiagram
     #>
-  
+
     [CmdletBinding()]
     Param(
-    
-        
-        [Parameter(Mandatory=$true,ParameterSetName='File')]
-        [ValidateScript({
+
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'File')]
+        [ValidateScript( {
                 test-Path $_
-        })]
+            })]
         [System.IO.FileInfo]
         $Path,
 
-        [Parameter(Mandatory=$true,ParameterSetName='Folder')]
-        [ValidateScript({
+        [Parameter(Mandatory = $true, ParameterSetName = 'Folder')]
+        [ValidateScript( {
                 test-Path $_
-        })]
+            })]
 
         [System.IO.DirectoryInfo]
         $FolderPath,
 
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.IO.DirectoryInfo]
         $ExportFolder,
 
@@ -98,47 +98,50 @@ Function Write-CUClassDiagram {
         [Switch]
         $IgnoreCase
     )
-    if(!(Get-Module -Name PSGraph)){
+    if (!(Get-Module -Name PSGraph)) {
         #Module is not loaded
-        if(!(get-module -listavailable -name psgraph )){
+        if (!(get-module -listavailable -name psgraph )) {
             #Module is not present
             throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
-        }else{
+        }
+        else {
             Import-Module psgraph -Force
         }
     }
-    
+
 
     #Methods are called FunctionMemberAst
     #Properties are called PropertyMemberAst
 
     #region preparing paths
 
-    if ($Path){
+    if ($Path) {
         [System.IO.FileInfo]$File = $Path.FullName
         $ExportFileName = $file.BaseName + "." + $OutputFormat
 
-    }elseif($FolderPath){
+    }
+    elseif ($FolderPath) {
         $ExportFileName = "Diagram" + "." + $OutputFormat
-
-        
     }
 
-    if(!($ExportFolder)){
+    if (!($ExportFolder)) {
 
-        if($FolderPath){
+        if ($FolderPath) {
             $SourceFolder = $FolderPath.FullName
-        }else{
+        }
+        else {
 
             $SourceFolder = $file.Directory.FullName
         }
         $FullExportPath = join-Path -Path $SourceFolder -ChildPath $ExportFileName
-        
-    }else{
-        if($ExportFolder.Exists){
+
+    }
+    else {
+        if ($ExportFolder.Exists) {
 
             $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
-        }else{
+        }
+        else {
             throw "$($ExportFolder.FullName) Doesn't exist"
         }
 
@@ -147,41 +150,39 @@ Function Write-CUClassDiagram {
     #endregion
 
 
-    if($Path){
+    if ($Path) {
         #Regular way
         $AllItems = $Path
-    }ElseIf($FolderPath){
-        
+    }
+    ElseIf ($FolderPath) {
+
         $AllItems = Get-ChildItem -path $FolderPath.FullName -Recurse
 
     }
 
-    
-    
-    
-    
-    $Graph = Graph {
-        Foreach($File in $AllItems){
-    
+    Foreach ($File in (Get-ChildItem -path $FolderPath.FullName -Recurse *.ps1)) {
+        $Graph = Graph {
+
             $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.FullName, [ref]$null, [ref]$Null)
-        
+
             $type = $ast.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
             $Enums = $type | ? {$_.IsEnum -eq $true}
             $Classes = $type | ? {$_.IsClass -eq $true}
-        
-            subgraph -Attributes @{label=($File.BaseName)} -ScriptBlock {
 
-            
+            subgraph -Attributes @{label = ($File.BaseName)} -ScriptBlock {
+
+
                 Foreach ($Class in $Classes) {
 
                     $Properties = $Class.members | ? {$_ -is [System.Management.Automation.Language.PropertyMemberAst]}
-                    If($IgnoreCase){
+                    If ($IgnoreCase) {
                         $RecordName = ConvertTo-titleCase -String $Class.Name
-                    }else{
-
-                        $RecordName =  $Class.Name
                     }
-                    
+                    else {
+
+                        $RecordName = $Class.Name
+                    }
+
                     $Constructors = $Class.members | ? {$_.IsConstructor -eq $true}
                     $AllMembers = @()
                     $AllMembers = $Class.members | ? {$_.IsConstructor -eq $false} #| Select Name,@{name="type";expression = {$_.PropertyType.Extent.Text}}
@@ -197,7 +198,7 @@ Function Write-CUClassDiagram {
                                 if ($pro.IsHidden) {
                                     $visibility = "-"
                                 }
-                            
+
                                 $n = "$($visibility) [$($pro.PropertyType.TypeName.Name)] `$$($pro.Name)"
                                 if ($n) {
 
@@ -206,7 +207,7 @@ Function Write-CUClassDiagram {
                                 else {
                                     $pro.name
                                 }
-            
+
                             }
                             Row "-----Constructors-----"  -Name "Row_Separator_Constructors"
                         }
@@ -254,52 +255,62 @@ Function Write-CUClassDiagram {
 
                             }
 
-                        
+
                             if ($mem.IsHidden) {
                                 $visibility = "-"
                             }
                             $RowName = $visibility + $RowName
                             Row $RowName -Name "Row_$($mem.Name)"
                         }
-                    
-                
+
+
                     }#End Record
                 }#end foreach Class
 
 
                 #Inheritence (Creating Edges)
-                Foreach($Class in $Classes){
-                    if($Class.BaseTypes.Count -ge 1){
-                        Foreach($BaseType in $Class.BaseTypes){
-                            if($IgnoreCase){
+                Foreach ($Class in $Classes) {
+                    if ($Class.BaseTypes.Count -ge 1) {
+                        Foreach ($BaseType in $Class.BaseTypes) {
+                            if ($IgnoreCase) {
                                 $Parent = ConvertTo-titleCase -String $Class.Name
                                 $Child = ConvertTo-titleCase -String $BaseType.TypeName.FullName
-                            }Else{
+                            }
+                            Else {
                                 $Parent = $Class.Name
                                 $Child = $BaseType.TypeName.FullName
                             }
-                            
+
                             edge -From $Child -To $Parent
                         }
-                        
+
                     }#End If
-                    
+
                 }#End Inheritence
 
             }#End SubGraph
-        } 
-    }#End Graph
-    
-    $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
+        }
 
-    If($Show){
-        $Graph | Show-PSGraph
+
+        $sourceFolderName = $file.FullName.Split("\")[-2]
+        $fileName = $File.Name.split(".")[0]
+
+        $targetExportPath = "{0}\{1}" -f $ExportFolder.FullName, $sourceFolderName
+        $null = md $targetExportPath -ErrorAction Ignore
+        $FullExportPath = "{0}\{1}.png" -f $targetExportPath, $fileName
+
+        $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath -OutputFormat $OutputFormat
+        # $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath -OutputFormat $OutputFormat
+
+        If ($Show) {
+            $Graph | Show-PSGraph
+        }
+
+        if ($PassThru) {
+            $Graph
+        }
+        else {
+            $Export
+        }
     }
-
-    if($PassThru){
-        $Graph
-    }else{
-        $Export
-    }
-
 }
