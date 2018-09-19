@@ -1,10 +1,24 @@
 Function Get-AST {
+    <#
+    .EXAMPLE
+    
+$Arr = Get-AST -Path "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1","C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\05\BenGelens_CWindowsContainer.ps1"
+
+$r = gc "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\05\BenGelens_CWindowsContainer.ps1"
+
+#Get-AST -InputObject $r
+
+$r | Get-AST
+
+"C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1","C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1" | get-ast
+    #>
     [CmdletBinding()]
     param (
         [parameter(
             Mandatory         = $False,
-            ValueFromPipeline = $true)
+            ValueFromPipeline = $false)
         ]
+        [String[]]
         $InputObject,
 
     [parameter(
@@ -12,7 +26,7 @@ Function Get-AST {
             ValueFromPipeline = $true
     )]
     [Alias('FullName')]
-    [System.IO.FileInfo]$Path
+    [System.IO.FileInfo[]]$Path
     )
     
     begin {
@@ -62,13 +76,3 @@ Function Get-AST {
     end {
     }
 }
-
-$Arr = Get-AST -Path "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1","C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\05\BenGelens_CWindowsContainer.ps1"
-
-$r = gc "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\05\BenGelens_CWindowsContainer.ps1"
-
-#Get-AST -InputObject $r
-
-#$r | Get-AST
-
-"C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1","C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1" | get-ast
