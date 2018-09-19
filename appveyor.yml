@@ -43,7 +43,7 @@ test_script:
 
     
     if($res.FailedCount -eq 0){
-        publish-module -Name PSClassUtils -NuGetApiKey $Env:PSgalleryKey;
+        #publish-module -Name PSClassUtils -NuGetApiKey $Env:PSgalleryKey;
         write-host "Module deployed to the psgallery" -foregroundcolor green;
     }else{
         write-host "Module not deployed to the psgallery" -foregroundcolor Yellow;
