@@ -35,7 +35,8 @@ $r | Get-AST
             [CmdletBinding()]
             PAram(
 
-                $RawAST
+                $RawAST,
+                $Source
             )
 
             $Type = $AST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
@@ -44,7 +45,7 @@ $r | Get-AST
             [System.Management.Automation.Language.StatementAst[]] $Classes = @()
             $Classes = $type | ? {$_.IsClass -eq $true}
             
-            return [ASTDocument]::New($Classes,$Enums)
+            return [ASTDocument]::New($Classes,$Enums,$Source)
 
         }
 
@@ -59,12 +60,12 @@ $r | Get-AST
                 [System.IO.FileInfo]$File = (Resolve-Path -Path $p).Path
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
 
-                sortast -RawAST $AST
+                sortast -RawAST $AST -Source $File.BaseName
             }
         }else{
         
                 $AST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
-                sortast -RawAST $AST
+                sortast -RawAST $AST -Source "Pipeline"
         
         }
 
