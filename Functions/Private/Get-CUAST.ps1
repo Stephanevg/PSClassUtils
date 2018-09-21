@@ -1,10 +1,10 @@
-Function Get-AST {
+Function Get-CUAst {
     <#
     .SYNOPSIS
     Helper function to get AST Class and Enum data from files or strings.
 
     .DESCRIPTION
-    Get-AST returns an object of type [ASTDocument] which contains Classes, Enums, and the source file of the items.
+    Get-CUAst returns an object of type [ASTDocument] which contains Classes, Enums, and the source file of the items.
 
     .PARAMETER Path
     
@@ -21,7 +21,7 @@ Function Get-AST {
 
     .EXAMPLE
     
-    Get-AST -Path "c:\Scripts\JeffHicks_StarShipModule.ps1"
+    Get-CUAst -Path "c:\Scripts\JeffHicks_StarShipModule.ps1"
 
     #Returns
 
@@ -32,7 +32,7 @@ Function Get-AST {
     .EXAMPLE
     #It is possible to pass an array of paths as well.
 
-    $Arr = Get-AST -Path "C:\Scripts\JeffHicks_StarShipModule.ps1","C:\Scripts\BenGelens_CWindowsContainer.ps1"
+    $Arr = Get-CUAst -Path "C:\Scripts\JeffHicks_StarShipModule.ps1","C:\Scripts\BenGelens_CWindowsContainer.ps1"
     $Arr
 
     #Returns
@@ -43,7 +43,7 @@ Function Get-AST {
     
     .EXAMPLE
 
-    "C:\Scripts\JeffHicks_StarShipModule.ps1" | Get-AST
+    "C:\Scripts\JeffHicks_StarShipModule.ps1" | Get-CUAst
 
     Classes                            Enums                               Source
     -------                            -----                               ------
@@ -96,7 +96,7 @@ Function Get-AST {
         if($Path){
             foreach($p in $Path){
 
-                [System.IO.FileInfo]$File = (Resolve-Path -Path $p).Path
+                [System.IO.FileInfo]$File = (Resolve-Path -Path $p.FullName).Path
                 Write-Verbose "AST: $($p.FullName)"
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
 
