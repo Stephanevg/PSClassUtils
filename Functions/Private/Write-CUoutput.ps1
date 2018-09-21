@@ -1,4 +1,54 @@
 Function Write-CUOutput {
+    <#
+    .SYNOPSIS
+        Short description
+    .DESCRIPTION
+        Long description
+    .EXAMPLE
+        $e = Write-CUOutput -Object (get-ast -path "C:\Scripts\JeffHicks_StarShipModule.ps1") -Show
+        Will generate a diagram with the classes and their inheritance relation ships.
+        The parameter -Show will display the generated image immediatly.
+        
+    .INPUTS
+        Path to the ps1 / psm1 file that contains the set of classes / Enums to document in the diagram.
+    .OUTPUTS
+        Output (if any)
+
+
+    .PARAMETER Object
+    This parameter expects an array of ASTDocument. (Can be generated using Get-AST).
+
+    .PARAMETER ExportFolder
+
+    Points to an alternante folder where to export the report.
+
+    .PARAMETER OutPutFormat
+
+    specifiy in which format the document should be created.
+
+    Current accepted values are the following ones:
+
+    'jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot'
+
+    Default is "png"
+
+    .PARAMETER Show
+
+    Will display the diagram right after it has been generated.
+
+    .PARAMETER Passthru
+
+    When specified, it will return the raw PSGraph string that is generated (This can be usefull to troubleshoot PSgraph related errors.)
+
+    .PARAMETER IgnoreCase
+
+    If there is a difference in the case of the a parent class, and it's child class, drawing the inheritence might not work as expected.
+    Foring the case when creating the objects in PSGraph resolves this issue (See issue here -> https://github.com/KevinMarquette/PSGraph/issues/68 )
+    Using -IgnoreCase will force all class names to be set to 'TitleCase'.
+
+    .NOTES
+        General notes
+    #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
@@ -40,7 +90,6 @@ Function Write-CUOutput {
     
     process {
 
-        
 
         $Graph = Graph {
 
@@ -181,5 +230,3 @@ Function Write-CUOutput {
         
     }
 }
-
-$e = Write-CUOutput -Object (get-ast -path "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1") -Show
