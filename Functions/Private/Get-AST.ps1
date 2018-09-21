@@ -1,16 +1,55 @@
 Function Get-AST {
     <#
+    .SYNOPSIS
+    Helper function to get AST Class and Enum data from files or strings.
+
+    .DESCRIPTION
+    Get-AST returns an object of type [ASTDocument] which contains Classes, Enums, and the source file of the items.
+
+    .PARAMETER Path
+    
+    Must point to a file. If it contains powershell Classes or Enums, it will output an object.
+
+    .PARAMETER InputObject
+
+    Accepts a single or array of strings. If it contains powershell Classes or Enums, it will output an object.
+
+    .OUTPUTS
+    An array of ASTDocuments
+
+    [ASTDocument[]]
+
     .EXAMPLE
     
-$Arr = Get-AST -Path "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1","C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\05\BenGelens_CWindowsContainer.ps1"
+    Get-AST -Path "c:\Scripts\JeffHicks_StarShipModule.ps1"
 
-$r = gc "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\05\BenGelens_CWindowsContainer.ps1"
+    #Returns
 
-#Get-AST -InputObject $r
+    Classes                            Enums                         Source
+    -------                            -----                         ------
+    {mystarshIp, Cruiser, Dreadnought} {ShipClass, ShipSpeed, Cloak} JeffHicks_StarShipModule.ps1
 
-$r | Get-AST
+    .EXAMPLE
+    #It is possible to pass an array of paths as well.
 
-"C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1","C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Examples\04\JeffHicks_StarShipModule.ps1" | get-ast
+    $Arr = Get-AST -Path "C:\Scripts\JeffHicks_StarShipModule.ps1","C:\Scripts\BenGelens_CWindowsContainer.ps1"
+    $Arr
+
+    #Returns
+    Classes                            Enums                               Source
+    -------                            -----                               ------
+    {mystarshIp, Cruiser, Dreadnought} {ShipClass, ShipSpeed, Cloak}       JeffHicks_StarShipModule.ps1
+    {cWindowsContainer}                {Ensure, ContainerType, AccessMode} BenGelens_CWindowsContainer.ps1
+    
+    .EXAMPLE
+
+    "C:\Scripts\JeffHicks_StarShipModule.ps1" | Get-AST
+
+    Classes                            Enums                               Source
+    -------                            -----                               ------
+    {mystarshIp, Cruiser, Dreadnought} {ShipClass, ShipSpeed, Cloak}       JeffHicks_StarShipModule.ps1
+
+
     #>
     [CmdletBinding()]
     param (
@@ -39,7 +78,7 @@ $r | Get-AST
                 $Source
             )
 
-            $Type = $AST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
+            $Type = $RawAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
             [System.Management.Automation.Language.StatementAst[]] $Enums = @()
             $Enums = $type | ? {$_.IsEnum -eq $true}
             [System.Management.Automation.Language.StatementAst[]] $Classes = @()
@@ -55,12 +94,13 @@ $r | Get-AST
 
 
         if($Path){
-            foreach($p in $PAth){
+            foreach($p in $Path){
 
                 [System.IO.FileInfo]$File = (Resolve-Path -Path $p).Path
+                Write-Verbose "AST: $($p.FullName)"
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
 
-                sortast -RawAST $AST -Source $File.BaseName
+                sortast -RawAST $AST -Source $File.Name
             }
         }else{
         
