@@ -38,15 +38,18 @@ $TestCaseClass = @'
     Describe "Testing Class: 'ASTDocument'" {
 
         #Mock -CommandName New-Object {ASTDocument} -mockWtih
-
-        it 'Should create an instance without throwing'{
+        it 'Parameterless Constructor: Should throw'{
             
-
-
-        #$ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
-        #$TestCaseClass | Out-File -FilePath $ClassScript -Force
-
-
+            
+            {[ASTDocument]::New()} | should throw
+            #$ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
+            #$TestCaseClass | Out-File -FilePath $ClassScript -Force
+            
+            
         }
+
+        #I would need to mock the ASTDOcument class. I haven't found a way to do so. 
+        #Please share if you know how to do.
+        
     }
 }
