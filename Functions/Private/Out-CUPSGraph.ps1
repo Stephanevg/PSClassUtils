@@ -1,9 +1,9 @@
 Function Out-CUPSGraph {
     <#
     .SYNOPSIS
-        Short description
+        Generates the graph output. It requires input from Get-CUAST (input of type ASTDOcument)
     .DESCRIPTION
-        Long description
+        This function is based on psgraph, which wih is a module to generate diagrams using GraphViz. If psgraph is not present, it will throw.
     .EXAMPLE
         
         
