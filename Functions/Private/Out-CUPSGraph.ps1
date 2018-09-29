@@ -19,9 +19,9 @@ Function Out-CUPSGraph {
 
     .PARAMETER IgnoreCase
 
-    If there is a difference in the case of the a parent class, and it's child class, drawing the inheritence might not work as expected.
-    Foring the case when creating the objects in PSGraph resolves this issue (See issue here -> https://github.com/KevinMarquette/PSGraph/issues/68 )
-    Using -IgnoreCase will force all class names to be set to 'TitleCase'.
+    If there is a difference in the casesensitivity of the a parent class, and it's child class, drawing the inheritence might not work as expected.
+    Forcing the case sensitivy to be everywhere the same when creating the objects in PSGraph resolves this issue (See issue here -> https://github.com/KevinMarquette/PSGraph/issues/68 )
+    Using -IgnoreCase will force all class names to be set to 'TitleCase', reglardless of the case sensitivity they had before.
 
     .NOTES
         General notes
