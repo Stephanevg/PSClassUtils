@@ -51,6 +51,12 @@ Function Write-CUClassDiagram {
     ----                -------------         ------ ----
     -a----       12.06.2018     07:47          58293 Logging.gif
 
+    .EXAMPLE
+
+    Write-CUClassDiagram -FolderPath "C:\Modules\PSClassUtils\Classes\Private\" -Show
+
+    Will generate a diagram of all the private classes available in the FolderPath specified, and immediatley how the diagram.
+
     .NOTES
         Author: Stéphane van Gulick
         Version: 0.8.2
@@ -182,4 +188,3 @@ Function Write-CUClassDiagram {
 
 }
 
-#Write-CUClassDiagram -FolderPath "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\Classes\Private\" -Show
