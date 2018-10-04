@@ -12,7 +12,7 @@
 RootModule = 'PSClassUtils.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.0.0'
+ModuleVersion = '2.1.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -33,7 +33,7 @@ Copyright = '(c) 2018 TAAVAST3. All rights reserved.'
 Description = 'Contains a set of utilities to work with Powershell Classes.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '5.0'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
@@ -69,7 +69,7 @@ Description = 'Contains a set of utilities to work with Powershell Classes.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('*')
+FunctionsToExport = @('Get-CUClass','Get-CUClassConstructor','Get-CUClassMethod','Get-CUClassProperty','Get-CUCommands','Install-CUDiagramPrerequisites','Write-CUClassDiagram')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -95,13 +95,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('Classes','helper','diagram','uml')
 
         # A URL to the license for this module.
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/Stephanevg/PSClassUtils'
 
         # A URL to an icon representing this module.
         # IconUri = ''

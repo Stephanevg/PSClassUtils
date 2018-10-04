@@ -23,8 +23,7 @@ function Get-CUClass{
         Author: Tobias Weltner
         Version: ??
         Source --> http://community.idera.com/powershell/powertips/b/tips/posts/finding-powershell-classes
-        Report bugs or submit feature requests here:
-        https://github.com/Stephanevg/PowerShellClassUtils
+
     #>
 
   [AppDomain]::CurrentDomain.GetAssemblies() |
