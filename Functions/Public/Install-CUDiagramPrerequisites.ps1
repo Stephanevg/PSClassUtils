@@ -1,4 +1,18 @@
 function Install-CUDiagramPrerequisites {
+    <#
+    .SYNOPSIS
+        This function installs the prerequisites for PSClassUtils.
+    .DESCRIPTION   
+        Installation of PSGraph
+    .EXAMPLE
+        Istall-CUDiagramPrerequisites
+    .EXAMPLE
+        Istall-CUDiagramPrerequisites -proxy "10.10.10.10"
+    .NOTES   
+        Author: Stephanevg
+        Version: 2.0
+    #>
+
     [CmdletBinding()]
     param (
         [String]$Proxy        
