@@ -7,7 +7,7 @@ The most usefull feature is probably the one **that it can generate UML-like Cla
 ## How to install PSClassUtils
 
 ```powershell
-Find-module PSClassUtils | install-Module PSClassUtils
+Find-module PSClassUtils | install-Module
 ```
 
 ## Release Notes
