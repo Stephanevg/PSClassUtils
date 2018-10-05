@@ -43,6 +43,7 @@ test_script:
 
     
     if($res.FailedCount -eq 0 -and $env:APPVEYOR_REPO_BRANCH -eq "master" ){
+        import-module psclassutils -force
         $GalleryVersion = (Find-Module psclassutils).version
         $LocalVersion = (get-module psclassutils).version.ToString()
         if($Localversion -le $GalleryVersion){
