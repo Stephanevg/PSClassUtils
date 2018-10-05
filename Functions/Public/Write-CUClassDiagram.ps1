@@ -158,7 +158,8 @@ Function Write-CUClassDiagram {
         $AllItems = $Path
     }ElseIf($FolderPath){
         
-        $AllItems = Get-ChildItem -path $FolderPath.FullName -Recurse
+        $AllItems = Get-ChildItem -Path $FolderPath.FullName -Recurse -Filter *.ps1
+        $AllItems += Get-ChildItem -Path $FolderPath.FullName -Recurse -Filter *.psm1
 
     }
 
