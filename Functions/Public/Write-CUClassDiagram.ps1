@@ -71,6 +71,9 @@ Function Write-CUClassDiagram {
         
         [Parameter(Mandatory=$true,ParameterSetName='File')]
         [ValidateScript({
+                if((Get-Item $_).PsIsContainer){
+                    throw "Folder detected. Please use -FolderPath to target folders."
+                }
                 test-Path $_
         })]
         [String]
@@ -124,6 +127,7 @@ Function Write-CUClassDiagram {
     #region preparing paths
 
     if ($Path){
+        
         [System.IO.FileInfo]$File = (Resolve-Path -Path $path).Path
         $ExportFileName = $file.BaseName + "." + $OutputFormat
 
