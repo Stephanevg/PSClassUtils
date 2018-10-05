@@ -26,6 +26,7 @@ Get-CUClassConstructor
 Get-CUClassMethod
 Get-CUClassProperty
 Get-CUCommands
+Get-CUEnum
 
 ```
 
