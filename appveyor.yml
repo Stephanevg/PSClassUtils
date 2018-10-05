@@ -43,7 +43,7 @@ test_script:
 
     
     if($res.FailedCount -eq 0 -and $env:APPVEYOR_REPO_BRANCH -eq "master"){
-        #publish-module -Name PSClassUtils -NuGetApiKey $Env:PSgalleryKey;
+        publish-module -Name PSClassUtils -NuGetApiKey $Env:PSgalleryKey;
         write-host "Module deployed to the psgallery" -foregroundcolor green;
     }else{
         write-host "[$($env:APPVEYOR_REPO_BRANCH)]Module not deployed to the psgallery" -foregroundcolor Yellow;
