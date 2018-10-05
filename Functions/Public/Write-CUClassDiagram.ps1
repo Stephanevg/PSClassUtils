@@ -158,7 +158,7 @@ Function Write-CUClassDiagram {
         $AllItems = $Path
     }ElseIf($FolderPath){
         
-        $AllItems = Get-ChildItem -path $FolderPath.FullName -Recurse
+        $AllItems = Get-ChildItem -path "$($FolderPath.FullName)\*" -Include "*.ps1", "*.psm1" -Recurse
 
     }
 
@@ -188,3 +188,4 @@ Function Write-CUClassDiagram {
 
 }
 
+#Write-CUClassDiagram -Path .\Class.HostsManagement.psm1

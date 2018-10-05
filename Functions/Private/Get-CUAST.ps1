@@ -49,6 +49,10 @@ Function Get-CUAst {
     -------                            -----                               ------
     {mystarshIp, Cruiser, Dreadnought} {ShipClass, ShipSpeed, Cloak}       JeffHicks_StarShipModule.ps1
 
+    .NOTES:
+    
+    .LINK
+    https://github.com/Stephanevg/PSClassUtils/
 
     #>
     [CmdletBinding()]
@@ -65,7 +69,7 @@ Function Get-CUAst {
             ValueFromPipeline = $true
     )]
     [Alias('FullName')]
-    [System.IO.FileInfo[]]$Path
+    [String[]]$Path
     )
     
     begin {
@@ -96,11 +100,11 @@ Function Get-CUAst {
         if($Path){
             foreach($p in $Path){
 
-                [System.IO.FileInfo]$File = (Resolve-Path -Path $p.FullName).Path
-                Write-Verbose "AST: $($p.FullName)"
-                $AST = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
+                [System.IO.FileInfo]$File = (Resolve-Path -Path $p).Path
+                Write-Verbose "AST: $($File.FullName)"
+                $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.FullName, [ref]$null, [ref]$Null)
 
-                sortast -RawAST $AST -Source $File.Name
+                sortast -RawAST $AST -Source $File.FullName
             }
         }else{
         
@@ -117,3 +121,4 @@ Function Get-CUAst {
     end {
     }
 }
+
