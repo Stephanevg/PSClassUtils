@@ -59,7 +59,8 @@ Function Out-CUPSGraph {
 
             foreach($obj in $inputObject){
 
-                subgraph -Attributes @{label=($Obj.Source)} -ScriptBlock {
+                $SourcefileName = split-Path -leaf $obj.source
+                subgraph -Attributes @{label=($SourcefileName)} -ScriptBlock {
                     Foreach ($Class in $Obj.Classes) {
         
                             $Properties = $Class.members | ? {$_ -is [System.Management.Automation.Language.PropertyMemberAst]}
