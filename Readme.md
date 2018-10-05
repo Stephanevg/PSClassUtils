@@ -148,3 +148,10 @@ Coming soon...
 ### Get-ClassMethods
 
 Coming soon...
+
+## Contributing guide
+
+You feel like contributing to this project? Awesome! We are happy to hear that, and will to help you succeed in that.
+You can start by reading our [Contribution guide](CONTRIBUTING.MD).
+
+Please don't hesitate to open an issue so we can quickly discuss about implementation details  and design of your, perhaps to be, new feature of PSClassutils :)
