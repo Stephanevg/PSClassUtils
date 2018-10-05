@@ -1,3 +1,8 @@
+## version 2.1.2
+
+Fixed minor bug fixes
+
+
 ## version 2.1.1
 
 Added first version of release notes
