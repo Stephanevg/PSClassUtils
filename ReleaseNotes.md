@@ -1,3 +1,7 @@
+## version 2.1.3
+
+Minor bug fixes.
+
 ## version 2.1.2
 
 Fixed minor bug fixes
