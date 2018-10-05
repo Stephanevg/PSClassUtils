@@ -73,7 +73,7 @@ Function Write-CUClassDiagram {
         [ValidateScript({
                 test-Path $_
         })]
-        [System.IO.FileInfo]
+        [String]
         $Path,
 
         [Parameter(Mandatory=$true,ParameterSetName='Folder')]
@@ -81,9 +81,12 @@ Function Write-CUClassDiagram {
                 test-Path $_
         })]
 
-        [System.IO.DirectoryInfo]
+        [String]
         $FolderPath,
 
+        [Parameter(Mandatory=$False,ParameterSetName='Folder')]
+        [Switch]
+        $Recurse,
 
         [Parameter(Mandatory=$false)]
         [System.IO.DirectoryInfo]
@@ -121,7 +124,7 @@ Function Write-CUClassDiagram {
     #region preparing paths
 
     if ($Path){
-        [System.IO.FileInfo]$File = $Path.FullName
+        [System.IO.FileInfo]$File = (Resolve-Path -Path $path).Path
         $ExportFileName = $file.BaseName + "." + $OutputFormat
 
     }elseif($FolderPath){
@@ -133,7 +136,7 @@ Function Write-CUClassDiagram {
     if(!($ExportFolder)){
 
         if($FolderPath){
-            $SourceFolder = $FolderPath.FullName
+            $SourceFolder = (Resolve-Path -Path $FolderPath).Path
         }else{
 
             $SourceFolder = $file.Directory.FullName
@@ -158,7 +161,12 @@ Function Write-CUClassDiagram {
         $AllItems = $Path
     }ElseIf($FolderPath){
         
-        $AllItems = Get-ChildItem -path "$($FolderPath.FullName)\*" -Include "*.ps1", "*.psm1" -Recurse
+        if($Recurse){
+
+            $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1" -Recurse
+        }else{
+            $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1"
+        }
 
     }
 
@@ -188,4 +196,3 @@ Function Write-CUClassDiagram {
 
 }
 
-#Write-CUClassDiagram -Path .\Class.HostsManagement.psm1
