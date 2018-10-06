@@ -41,6 +41,8 @@ Function Write-CUClassDiagram {
         }
     
         $ScriptFactory = {
+            #write-output $Item
+            #return ($item | select *)
             $AST = Get-CUAst -Path $Item
             $GraphParams = @{}
             $GraphParams.InputObject = $AST
@@ -102,7 +104,7 @@ Function Write-CUClassDiagram {
                     If ( $PSBoundParameters['Show']) {$RecurseParam.add("Show",$PSBoundParameters['Show'])}
 
                     ## Do Recurse
-                    Get-ChildItem -Path $Path -Recurse | Write-CUClassDiagram @RecurseParam
+                    Get-ChildItem -Path $Path -file -Recurse | Write-CUClassDiagram @RecurseParam
 
                 } Else {
                     ## Path is a file, so we cannot recurse on that
@@ -111,13 +113,23 @@ Function Write-CUClassDiagram {
             } Else {
             ## Recurse Param is not used
                 $Item = Get-Item $Path
-                ## Make sure current file extension is either .ps1 or .psm1
-                If ( $Item.Extension -in ('.ps1','.psm1')){
-                    $ScriptFactory.Invoke()
-
+                ## If Its a directory we try to find ps1 and psm1 files
+                If ( $Item.GetType().Name -eq "DirectoryInfo") {
+                    Foreach ( $Value in (Get-ChildItem $Path -file) ) {
+                        If ( $value.Extension -in ('.ps1','.psm1')){
+                            $Item = get-item $Value.FullName
+                            $ScriptFactory.Invoke()
+                        }
+                    }
                 } Else {
-                    ## Current file extension is either .ps1 or .psm1
-                    Throw "Not a ps1 nor a psm1 file..."
+                    ## Make sure current file extension is either .ps1 or .psm1
+                    If ( $Item.Extension -in ('.ps1','.psm1')){
+                        $ScriptFactory.Invoke()
+
+                    } Else {
+                        ## Current file extension is either .ps1 or .psm1
+                        Throw "Not a ps1 nor a psm1 file..."
+                    }
                 }
             }
         }
