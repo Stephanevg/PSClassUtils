@@ -1,4 +1,4 @@
-Function Write-CUClassDiagram {
+Function get-test {
     <#
     .SYNOPSIS
         This script allows to document automatically existing script(s)/module(s) containing classes by generating the corresponding UML Diagram.
@@ -64,43 +64,21 @@ Function Write-CUClassDiagram {
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-CUClassDiagram
     #>
-  
-    [CmdletBinding()]
     Param(
-    
-        
-        [Parameter(Mandatory=$true,ParameterSetName='File')]
-        [ValidateScript({
-                if((Get-Item $_).PsIsContainer){
-                    throw "Folder detected. Please use -FolderPath to target folders."
-                }
-                test-Path $_
-        })]
-        [String]
-        $Path,
+        [Alias("Name")]
+        [Parameter(Mandatory=$true,ParameterSetName='File',ValueFromPipeline=$True,ValueFromPipelineByPropertyName=$True)]
+        [String[]]$Path,
 
-        [Parameter(Mandatory=$true,ParameterSetName='Folder')]
-        [ValidateScript({
-                test-Path $_
-        })]
-
-        [String]
-        $FolderPath,
-
-        [Parameter(Mandatory=$False,ParameterSetName='Folder')]
+        [Parameter(Mandatory=$False)]
         [Switch]
         $Recurse,
 
-        [Parameter(Mandatory=$false)]
-        [System.IO.DirectoryInfo]
-        $ExportFolder,
-
-        [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
-        [string]
-        $OutputFormat = 'png',
-
         [Parameter(Mandatory = $False)]
         [Switch]$Show,
+
+        [Parameter(Mandatory=$False)]
+        [System.IO.DirectoryInfo]
+        $ExportFolder,
 
         [Parameter(Mandatory = $False)]
         [Switch]
@@ -108,95 +86,86 @@ Function Write-CUClassDiagram {
 
         [Parameter(Mandatory = $False)]
         [Switch]
-        $IgnoreCase
+        $IgnoreCase,
+
+        [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
+        [string]
+        $OutputFormat = 'png'
     )
-    if(!(Get-Module -Name PSGraph)){
-        #Module is not loaded
-        if(!(get-module -listavailable -name psgraph )){
-            #Module is not present
-            throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
-        }else{
-            Import-Module psgraph -Force
-        }
-    }
+
+    Begin {
     
+        $ScriptFactory = {
+            $AST = Get-CUAst -Path $Item
+            $GraphParams = @{}
+            $GraphParams.InputObject = $AST
+            if( $IgnoreCase ){ $GraphParams.IgnoreCase = $true }
+            $Graph =  Out-CUPSGraph @GraphParams
 
-    #Methods are called FunctionMemberAst
-    #Properties are called PropertyMemberAst
+            If( $PSBoundParameters['Show'] ){
+                    $Graph | Export-PSGraph -DestinationPath ($Item.FullName -replace "$($item.Extension)",".$($PSBoundParameters['OutputFormat'])") -OutputFormat $PSBoundParameters['OutputFormat'] -ShowGraph | Out-Null
+                } Else {
+                    $Graph | Export-PSGraph -DestinationPath ($Item.FullName -replace "$($item.Extension)",".$($PSBoundParameters['OutputFormat'])") -OutputFormat $PSBoundParameters['OutputFormat']  | Out-Null
+                }
 
-    #region preparing paths
-
-    if ($Path){
-        
-        [System.IO.FileInfo]$File = (Resolve-Path -Path $path).Path
-        $ExportFileName = $file.BaseName + "." + $OutputFormat
-
-    }elseif($FolderPath){
-        $ExportFileName = "Diagram" + "." + $OutputFormat
-
-        
-    }
-
-    if(!($ExportFolder)){
-
-        if($FolderPath){
-            $SourceFolder = (Resolve-Path -Path $FolderPath).Path
-        }else{
-
-            $SourceFolder = $file.Directory.FullName
-        }
-        $FullExportPath = join-Path -Path $SourceFolder -ChildPath $ExportFileName
-        
-    }else{
-        if($ExportFolder.Exists){
-
-            $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
-        }else{
-            throw "$($ExportFolder.FullName) Doesn't exist"
+            If ( $PSBoundParameters['PassThru'] ) {
+                $Graph
+            }
         }
 
     }
 
-    #endregion
+    Process{
 
-
-    if($Path){
-        #Regular way
-        $AllItems = $Path
-    }ElseIf($FolderPath){
+        ## Setting default OutPutFormat
+        If ( $null -eq $PSBoundParameters['OutPutFormat'] ) { $PSBoundParameters['OutPutFormat'] = "png" }
         
-        if($Recurse){
+        ## Pipeline incoming
+        If ( $MyInvocation.PipelinePosition -ne 1 ) {
+            ## Recurse Param prohibited: better use -recurse on the left side of the pipeline
+            If ($PSBoundParameters['Recurse']) { Throw "Recruse can not be used when pipeline, use Get-ChildItem -Recurse"}
+            ## Make sure current file extension is either .ps1 or .psm1
+            If ( $PsItem.Extension -in ('.ps1','.psm1')){
+                ## Fetch current item fullname
+                $Item = get-item $PSitem.fullName
+                $ScriptFactory.Invoke()
+            }
 
-            $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1" -Recurse
-        }else{
-            $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1"
+        } ElseIf ( $MyInvocation.PipelinePosition -eq 1) {
+        ## Normal use
+            ## Recurse Param was used
+            If ( $PSBoundParameters['Recurse'] ) {
+                ## Make sure the path specified is a directory
+                If ( (Get-Item -Path $Path).GetType().Name -eq "DirectoryInfo" ){
+                    ## Catching other parameters to pass to the recurse
+                    $RecurseParam = @{}
+                    If ( $PSBoundParameters['ExportFolder'] ) { $RecurseParam.add("ExportFolder",$PSBoundParameters['ExportFolder']) }
+                    If ( $PSBoundParameters['OutputFormat'] ) { $RecurseParam.add("OutputFormat",$PSBoundParameters['OutputFormat']) }
+                    If ( $PSBoundParameters['IgnoreCase'] ) { $RecurseParam.add("IgnoreCase",$PSBoundParameters['IgnoreCase']) }
+                    If ( $PSBoundParameters['PassThru']) {$RecurseParam.add("PassThru",$PSBoundParameters['PassThru']) }
+                    If ( $PSBoundParameters['Show']) {$RecurseParam.add("Show",$PSBoundParameters['Show'])}
+
+                    ## Do Recurse
+                    Get-ChildItem -Path $Path -Recurse | get-test @RecurseParam
+
+                } Else {
+                    ## Path is a file, so we cannot recurse on that
+                    Throw "No recurse on a file..."
+                }
+            } Else {
+            ## Recurse Param is not used
+                $Item = get-item $Path
+                ## Make sure current file extension is either .ps1 or .psm1
+                If ( $Item.Extension -in ('.ps1','.psm1')){
+                    $ScriptFactory.Invoke()
+
+                } Else {
+                    ## Current file extension is either .ps1 or .psm1
+                    Throw "Not a ps1 nor a psm1 file..."
+                }
+            }
         }
-
     }
 
-    
-    
-    $AST = Get-CUAst -Path $AllItems 
-    
-    $GraphParams = @{}
-    $GraphParams.InputObject = $AST
-
-    if($IgnoreCase){
-        $GraphParams.IgnoreCase = $true
-    }
-    $Graph =  Out-CUPSGraph @GraphParams
-
-    $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
-
-    If($Show){
-        $Graph | Show-PSGraph
-    }
-
-    if($PassThru){
-        $Graph
-    }else{
-        $Export
-    }
-
+    End{}
 }
-
