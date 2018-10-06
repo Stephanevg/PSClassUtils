@@ -29,6 +29,16 @@ Function Write-CUClassDiagram {
     )
 
     Begin {
+
+        If ( !(Get-Module -Name PSGraph) ) {
+            #Module is not loaded
+            If( !(Get-Module -listavailable -name psgraph ) ) {
+                #Module is not present
+                throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
+            } Else {
+                Import-Module psgraph -Force
+            }
+        }
     
         $ScriptFactory = {
             $AST = Get-CUAst -Path $Item
