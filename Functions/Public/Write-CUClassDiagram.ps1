@@ -37,11 +37,22 @@ Function Write-CUClassDiagram {
             if( $IgnoreCase ){ $GraphParams.IgnoreCase = $true }
             $Graph =  Out-CUPSGraph @GraphParams
 
+            ## Building FullExportPath
+            If ( $PSBoundParameters['ExportFolder'] ) {
+                ## Export inside the ExportFolder
+                $FullExportPath = "{0}\{1}" -f $($PSBoundParameters['ExportFolder'] -replace '\$',''),($Item.Name -replace "$($item.Extension)",".$($PSBoundParameters['OutputFormat'])")
+            } Else {
+                ## Export inside the directory of the class
+                $FullExportPath = "{0}" -f ($Item.FullName -replace "$($item.Extension)",".$($PSBoundParameters['OutputFormat'])")
+            }
+
             If( $PSBoundParameters['Show'] ){
-                    $Graph | Export-PSGraph -DestinationPath ($Item.FullName -replace "$($item.Extension)",".$($PSBoundParameters['OutputFormat'])") -OutputFormat $PSBoundParameters['OutputFormat'] -ShowGraph | Out-Null
-                } Else {
-                    $Graph | Export-PSGraph -DestinationPath ($Item.FullName -replace "$($item.Extension)",".$($PSBoundParameters['OutputFormat'])") -OutputFormat $PSBoundParameters['OutputFormat']  | Out-Null
-                }
+                ## Export
+                $Graph | Export-PSGraph -DestinationPath $FullExportPath -OutputFormat $PSBoundParameters['OutputFormat'] -ShowGraph | Out-Null
+            } Else {
+                ## Export + Show
+                $Graph | Export-PSGraph -DestinationPath $FullExportPath -OutputFormat $PSBoundParameters['OutputFormat']  | Out-Null
+            }
 
             If ( $PSBoundParameters['PassThru'] ) {
                 $Graph
