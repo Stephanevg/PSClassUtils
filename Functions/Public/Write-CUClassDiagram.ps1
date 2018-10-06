@@ -77,6 +77,9 @@ Function Write-CUClassDiagram {
 
         ## Setting default OutPutFormat
         If ( $null -eq $PSBoundParameters['OutPutFormat'] ) { $PSBoundParameters['OutPutFormat'] = "png" }
+
+        ## Test ExportFolder
+        If ( $null -ne $PSBoundParameters['ExportFolder'] ) { If (!test-path -Path $PSBoundParameters['ExportFolder'] ) { Throw "ExportFolder does not exist..."} }
         
         ## Pipeline incoming
         If ( $MyInvocation.PipelinePosition -ne 1 ) {
