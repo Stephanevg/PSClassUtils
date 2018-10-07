@@ -18,7 +18,7 @@ Function Write-CUClassDiagram {
         [Parameter(Mandatory = $False)]
         [Switch]
         $PassThru,
-
+        
         [Parameter(Mandatory = $False)]
         [Switch]
         $IgnoreCase,
