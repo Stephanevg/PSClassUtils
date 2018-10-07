@@ -2,7 +2,7 @@ Function Write-CUClassDiagram {
     Param(
         [Alias("Name")]
         [Parameter(Mandatory=$true,ParameterSetName='File',ValueFromPipeline=$True,ValueFromPipelineByPropertyName=$True)]
-        [String[]]$Path,
+        [System.IO.DirectoryInfo[]]$Path,
 
         [Parameter(Mandatory=$False)]
         [Switch]
