@@ -17,7 +17,24 @@ or any other method with the owners of this repository before making a change.
    Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
 4. Create the PR to the `dev` branch *only*. 
 
-## When creating a Pull Request (PR) that you have respected the following:
+## Renaming a Parameter in a function
+
+Don't remove it directly, have the funciton have the old + new parameter live side by side for at least '2' minor versions. 
+Implement a Warning message saying the parameter is deprecated, and that it will need to be replaced in the futur by <ParameterName>
+
+## Diagrams and other generated files
+
+
+- just making the Pester tests pass, is not enough if you modifiy a cmdlet that generate exported files. 
+I have create a .\Examples folder which contains a set of examples that could be used to generate diagrams, for example. Although the Pester tests all pass, please be sure that the new diagrams generated, are identical as the original ones.
+
+- Please push the (re)generated examples diagrams to the repo *ONLY* of they have really something new on them.
+
+
+
+Pleas verifiy that the diagram, looks as it 
+
+## When creating a Pull Request (PR) make sure that you have respected the following common sense / best practises:
 
  1) Comment your code (when needed)
  2) If it is a new feautre / cmdlet, please add some help (Comment based help will suffice in most cases).
