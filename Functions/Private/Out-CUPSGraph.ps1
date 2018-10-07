@@ -61,6 +61,7 @@ Function Out-CUPSGraph {
 
                 $SourcefileName = split-Path -leaf $obj.source
                 subgraph -Attributes @{label=($SourcefileName)} -ScriptBlock {
+
                     Foreach ($Class in $Obj.Classes) {
         
                             $Properties = $Class.members | ? {$_ -is [System.Management.Automation.Language.PropertyMemberAst]}
@@ -155,29 +156,29 @@ Function Out-CUPSGraph {
                             }#End Record
                         }#end foreach Class
         
-        
-                        #Inheritence (Creating Edges)
-                        Foreach($Class in $inputObject.Classes){
-                            if($Class.BaseTypes.Count -ge 1){
-                                Foreach($BaseType in $Class.BaseTypes){
-                                    if($IgnoreCase){
-                                        $Parent = ConvertTo-titleCase -String $Class.Name
-                                        $Child = ConvertTo-titleCase -String $BaseType.TypeName.FullName
-                                    }Else{
-                                        $Parent = $Class.Name
-                                        $Child = $BaseType.TypeName.FullName
-                                    }
-                                    
-                                    edge -From $Child -To $Parent
-                                }
-                                
-                            }#End If
-                            
-                        }#End Inheritence
-        
                     }#End SubGraph
-                
             }
+            
+            #Inheritence (Creating Edges)
+            Foreach($Class in $inputObject.Classes){
+                if($Class.BaseTypes.Count -ge 1){
+                    Foreach($BaseType in $Class.BaseTypes){
+                        if($IgnoreCase){
+                            $Parent = ConvertTo-titleCase -String $Class.Name
+                            $Child = ConvertTo-titleCase -String $BaseType.TypeName.FullName
+                        }Else{
+                            $Parent = $Class.Name
+                            $Child = $BaseType.TypeName.FullName
+                        }
+                        
+                        edge -From $Child -To $Parent
+                    }
+                    
+                }#End If
+                
+            }#End Inheritence
+
+        
         }#End Graph
 
         $AlLGraphs += $Graph

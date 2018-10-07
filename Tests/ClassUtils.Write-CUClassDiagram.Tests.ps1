@@ -5,7 +5,7 @@ Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
 
 Describe "Testing Write-CUClassDiagram" {
 
-$TestCaseClass = @'
+    $TestCaseClass = @'
     
     Class Woop {
         [String]$String
@@ -37,24 +37,174 @@ $TestCaseClass = @'
     
 '@
 
-InModuleScope "PSClassUtils" {
-    $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
-    $TestCaseClass | Out-File -FilePath $ClassScript -Force
+    InModuleScope "PSClassUtils" {
+        $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
+        $TestCaseClass | Out-File -FilePath $ClassScript -Force
 
 
-        it 'Parameter: -Path: Should return Object of type [FileInfo]' {
+        it 'Parameter: -Path (file): Should return Object of type [FileInfo]' {
             $ret = Write-CUClassDiagram -Path $ClassScript
             $ret.GetType().Name | should be 'FileInfo'
         }
 
-        it 'Parameter: -Path: Should Create a graph in same folder' {
+        it 'Parameter: -Path (file): Should Create a graph in same folder' {
             $ret = Write-CUClassDiagram -Path $ClassScript
             $Ret.DirectoryName | should be $Testdrive.FullName
         }
+        
+        it "Parameter: Path (folder): Should create graph from classes located in seperate files in a specific folder" {
 
-        it 'Parameter: -Path: Should throw when folder is passed' {
-            {Write-CUClassDiagram -Path $Testdrive} | should throw
+
+
+            $File1 = @'
+    
+            Class Woop {
+                [String]$String
+                [int]$number
             
+                Woop([String]$String,[int]$Number){
+            
+                }
+            
+                [String]DoSomething(){
+                    return $this.String
+                }
+            }
+'@
+            
+            $File2 = @'
+                Class Wap : Woop {
+                    [String]$prop3
+                
+                    DoChildthing(){}
+                
+                }
+'@
+    
+            $File3 = @'
+                Class Wep : Woop {
+                    [String]$prop4
+                
+                    DoOtherChildThing(){
+                
+                    }
+                }
+                
+'@
+             
+    
+            $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
+            $null = mkdir $FolderPathFolder -Force
+            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
+            $File1 | Out-File -FilePath $Path_File1 -Force
+    
+            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
+            $File2 | Out-File -FilePath $Path_File2 -Force
+    
+            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
+            $File3 | Out-File -FilePath $Path_File3 -Force
+    
+            $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
+            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
+            $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
+    
+        }
+    
+        it "Parameter: -ExportPath 'Should throw if file name is added.'" {
+            $Guid = [Guid]::NewGuid().Guid + ".txt"
+            $File = Join-Path -Path $Testdrive -ChildPath $Guid
+                
+            {Write-CUClassDiagram -Path $ClassScript -ExportFolder $File} | should throw
+                
+        }
+    
+        it "Parameter: -ExportPath: 'Should throw if folder does not exist'" {
+            $Guid = [Guid]::NewGuid().Guid
+            $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
+            $null = mkdir $NewFolder
+            $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
+            $Ret.DirectoryName | should be $NewFolder
+        }
+    
+        it "Parameter: -ExportPath: 'Should Create a graph in Other folder'" {
+            $Guid = [Guid]::NewGuid().Guid
+            $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
+            $null = mkdir $NewFolder -force
+            $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
+            $Ret.DirectoryName | should be $NewFolder
+        }
+    
+        it 'Parameter: -OutputFormat: Should Create a graph in Other format' {
+            $ret = Write-CUClassDiagram -Path $ClassScript -OutputFormat gif
+            $ret.extension | should be ".gif"
+        }
+    
+            
+    
+        it 'Parameter: -Passthru: Should return psgraph object' {
+            $ret = Write-CUClassDiagram -Path $ClassScript -PassThru
+            $ret.GetType().Name | should not be "FileInfo"
+            $ret[0] | should be 'digraph g {'
+        }
+    
+  
+        It 'Should create a graph of several .ps1 files located in same folder.' {
+
+        
+            
+            $File1 = @'
+    
+        Class Woop {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+'@
+        
+            $File2 = @'
+            Class Wap : Woop {
+                [String]$prop3
+            
+                DoChildthing(){}
+            
+            }
+'@
+
+            $File3 = @'
+            Class Wep : Woop {
+                [String]$prop4
+            
+                DoOtherChildThing(){
+            
+                }
+            }
+            
+'@
+
+            $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
+            $null = mkdir $FolderPathFolder -Force
+            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
+            $File1 | Out-File -FilePath $Path_File1 -Force
+
+            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
+            $File2 | Out-File -FilePath $Path_File2 -Force
+
+            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
+            $File3 | Out-File -FilePath $Path_File3 -Force
+
+            $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
+            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
+            $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
+
         }
 
         it "Parameter: -ExportPath 'Should throw if file name is added.'" {
@@ -68,7 +218,7 @@ InModuleScope "PSClassUtils" {
         it "Parameter: -ExportPath: 'Should throw if folder does not exist'" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
-            $null = mkdir $NewFolder
+            $null = mkdir $NewFolder -Force
             $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
@@ -97,7 +247,7 @@ InModuleScope "PSClassUtils" {
 
         
 
-    $TestCaseSensitityClass = @'
+        $TestCaseSensitityClass = @'
     
         Class WooP {
             [String]$String
@@ -157,7 +307,7 @@ InModuleScope "PSClassUtils" {
         }
 '@
     
-    $File2 = @'
+        $File2 = @'
         Class Wap : Woop {
             [String]$prop3
         
@@ -165,7 +315,7 @@ InModuleScope "PSClassUtils" {
         
         }
 '@
-    $File3 = @'
+        $File3 = @'
         Class Wep : Woop {
             [String]$prop4
         
@@ -175,28 +325,10 @@ InModuleScope "PSClassUtils" {
         }
         
 '@
-        it "Parameter: -FolderPath: Should create graph from classes located in seperate files in a specific folder"{
-            $FolderPathFolder = join-Path -Path $Testdrive -ChildPath "FolderPath"
-            $null = mkdir $FolderPathFolder
-            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
-            $File1 | Out-File -FilePath $Path_File1 -Force
-
-            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
-            $File2 | Out-File -FilePath $Path_File2 -Force
-
-            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
-            $File3 | Out-File -FilePath $Path_File3 -Force
-
-            $b = Write-CUClassDiagram -FolderPath $FolderPathFolder -PassThru
-            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
-            $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
-            $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
-
-        }
-
+        
         #It is best to keep this test at the end, and it will unload the module PSGraph, and can cause some issues while testing.
         it 'Should throw if psgraph module is not found' {
-            if(get-Module psgraph){
+            if (get-Module psgraph) {
 
                 remove-module psgraph
             }
