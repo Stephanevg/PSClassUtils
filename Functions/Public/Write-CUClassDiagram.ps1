@@ -8,7 +8,7 @@ Function Write-CUClassDiagram {
     .PARAMETER Path
 
     The path that contains the classes that need to be documented. 
-    The path parameter should point to either a .ps1 and .psm1 file.
+    The path parameter should point to either a .ps1 or .psm1 file, or a directory containing either/both of those file types.
 
     .PARAMETER ExportFolder
 
@@ -53,9 +53,9 @@ Function Write-CUClassDiagram {
 
     .EXAMPLE
 
-    Write-CUClassDiagram -FolderPath "C:\Modules\PSClassUtils\Classes\Private\" -Show
+    Write-CUClassDiagram -Path "C:\Modules\PSClassUtils\Classes\Private\" -Show
 
-    Will generate a diagram of all the private classes available in the FolderPath specified, and immediatley how the diagram.
+    Will generate a diagram of all the private classes available in the Path specified, and immediatley show the diagram.
 
     .NOTES
         Author: Stéphane van Gulick
@@ -69,26 +69,15 @@ Function Write-CUClassDiagram {
     Param(
     
         
-        [Parameter(Mandatory=$true,ParameterSetName='File')]
+        [Parameter(Mandatory=$true)]
         [ValidateScript({
-                if((Get-Item $_).PsIsContainer){
-                    throw "Folder detected. Please use -FolderPath to target folders."
-                }
-                test-Path $_
+                Test-Path $_
         })]
-        [String]
+        [string]
         $Path,
 
-        [Parameter(Mandatory=$true,ParameterSetName='Folder')]
-        [ValidateScript({
-                test-Path $_
-        })]
-
-        [String]
-        $FolderPath,
-
-        [Parameter(Mandatory=$False,ParameterSetName='Folder')]
-        [Switch]
+        [Parameter(Mandatory=$false,ParameterSetName='Folder')]
+        [switch]
         $Recurse,
 
         [Parameter(Mandatory=$false)]
@@ -99,24 +88,24 @@ Function Write-CUClassDiagram {
         [string]
         $OutputFormat = 'png',
 
-        [Parameter(Mandatory = $False)]
-        [Switch]$Show,
+        [Parameter(Mandatory = $false)]
+        [switch]$Show,
 
-        [Parameter(Mandatory = $False)]
-        [Switch]
+        [Parameter(Mandatory = $false)]
+        [switch]
         $PassThru,
 
-        [Parameter(Mandatory = $False)]
-        [Switch]
+        [Parameter(Mandatory = $false)]
+        [switch]
         $IgnoreCase
     )
-    if(!(Get-Module -Name PSGraph)){
+    if (-not (Get-Module -Name PSGraph)) {
         #Module is not loaded
-        if(!(get-module -listavailable -name psgraph )){
+        if (-not (Get-Module -ListAvailable -Name PSGraph )) {
             #Module is not present
-            throw "The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph"
-        }else{
-            Import-Module psgraph -Force
+            throw 'The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph'
+        } else {
+            Import-Module PSGraph -Force
         }
     }
     
@@ -125,33 +114,35 @@ Function Write-CUClassDiagram {
     #Properties are called PropertyMemberAst
 
     #region preparing paths
-
-    if ($Path){
-        
-        [System.IO.FileInfo]$File = (Resolve-Path -Path $path).Path
-        $ExportFileName = $file.BaseName + "." + $OutputFormat
-
-    }elseif($FolderPath){
+    $PathObject = Get-Item $Path
+    if ($PathObject -is [System.IO.DirectoryInfo]) {
         $ExportFileName = "Diagram" + "." + $OutputFormat
-
-        
+        $FolderPath = $Path
+        $Path = $null
+    }
+    elseif ($PathObject -is [System.IO.FileInfo]) {
+        [System.IO.FileInfo]$File = (Resolve-Path -Path $Path).Path
+        $ExportFileName = $File.BaseName + "." + $OutputFormat
+    }
+    else {
+        throw 'Path provided was not a file or folder'
     }
 
-    if(!($ExportFolder)){
+    if (-not ($ExportFolder)) {
 
-        if($FolderPath){
+        if ($FolderPath) {
             $SourceFolder = (Resolve-Path -Path $FolderPath).Path
-        }else{
+        } else {
 
-            $SourceFolder = $file.Directory.FullName
+            $SourceFolder = $File.Directory.FullName
         }
-        $FullExportPath = join-Path -Path $SourceFolder -ChildPath $ExportFileName
+        $FullExportPath = Join-Path -Path $SourceFolder -ChildPath $ExportFileName
         
-    }else{
-        if($ExportFolder.Exists){
+    } else {
+        if ($ExportFolder.Exists){
 
             $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
-        }else{
+        } else {
             throw "$($ExportFolder.FullName) Doesn't exist"
         }
 
@@ -160,15 +151,15 @@ Function Write-CUClassDiagram {
     #endregion
 
 
-    if($Path){
+    if ($Path) {
         #Regular way
         $AllItems = $Path
-    }ElseIf($FolderPath){
+    } elseif ($FolderPath) {
         
-        if($Recurse){
+        if ($Recurse) {
 
             $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1" -Recurse
-        }else{
+        } else {
             $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1"
         }
 
@@ -181,20 +172,20 @@ Function Write-CUClassDiagram {
     $GraphParams = @{}
     $GraphParams.InputObject = $AST
 
-    if($IgnoreCase){
+    if ($IgnoreCase) {
         $GraphParams.IgnoreCase = $true
     }
     $Graph =  Out-CUPSGraph @GraphParams
 
     $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
 
-    If($Show){
+    if ($Show) {
         $Graph | Show-PSGraph
     }
 
-    if($PassThru){
+    if ($PassThru) {
         $Graph
-    }else{
+    } else {
         $Export
     }
 
