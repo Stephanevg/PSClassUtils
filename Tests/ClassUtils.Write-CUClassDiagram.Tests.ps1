@@ -42,19 +42,33 @@ InModuleScope "PSClassUtils" {
     $TestCaseClass | Out-File -FilePath $ClassScript -Force
 
 
-        it 'Parameter: -Path: Should return Object of type [FileInfo]' {
+        it 'Parameter: -Path (file): Should return Object of type [FileInfo]' {
             $ret = Write-CUClassDiagram -Path $ClassScript
             $ret.GetType().Name | should be 'FileInfo'
         }
 
-        it 'Parameter: -Path: Should Create a graph in same folder' {
+        it 'Parameter: -Path (file): Should Create a graph in same folder' {
             $ret = Write-CUClassDiagram -Path $ClassScript
             $Ret.DirectoryName | should be $Testdrive.FullName
         }
+        
+        it "Parameter: Path (folder): Should create graph from classes located in seperate files in a specific folder" {
+            $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
+            $null = mkdir $FolderPathFolder
+            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
+            $File1 | Out-File -FilePath $Path_File1 -Force
 
-        it 'Parameter: -Path: Should throw when folder is passed' {
-            {Write-CUClassDiagram -Path $Testdrive} | should throw
-            
+            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
+            $File2 | Out-File -FilePath $Path_File2 -Force
+
+            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
+            $File3 | Out-File -FilePath $Path_File3 -Force
+
+            $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
+            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
+            $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
+
         }
 
         it "Parameter: -ExportPath 'Should throw if file name is added.'" {
@@ -175,25 +189,7 @@ InModuleScope "PSClassUtils" {
         }
         
 '@
-        it "Parameter: -FolderPath: Should create graph from classes located in seperate files in a specific folder"{
-            $FolderPathFolder = join-Path -Path $Testdrive -ChildPath "FolderPath"
-            $null = mkdir $FolderPathFolder
-            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
-            $File1 | Out-File -FilePath $Path_File1 -Force
-
-            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
-            $File2 | Out-File -FilePath $Path_File2 -Force
-
-            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
-            $File3 | Out-File -FilePath $Path_File3 -Force
-
-            $b = Write-CUClassDiagram -FolderPath $FolderPathFolder -PassThru
-            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
-            $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
-            $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
-
-        }
-
+        
         #It is best to keep this test at the end, and it will unload the module PSGraph, and can cause some issues while testing.
         it 'Should throw if psgraph module is not found' {
             if(get-Module psgraph){
