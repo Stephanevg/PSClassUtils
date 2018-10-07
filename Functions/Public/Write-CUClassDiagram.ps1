@@ -8,7 +8,11 @@ Function Write-CUClassDiagram {
     .PARAMETER Path
 
     The path that contains the classes that need to be documented. 
-    The path parameter should point to either a .ps1 or .psm1 file, or a directory containing either/both of those file types.
+    The path parameter should point to either a .ps1, .psm1 file, or a directory containing either/both of those file types.
+
+    .PARAMETER FolderPath
+
+    This parameter is deprecated, and will be removed in a future version. Please use -Path instead
 
     .PARAMETER ExportFolder
 
@@ -69,12 +73,15 @@ Function Write-CUClassDiagram {
     Param(
     
         
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [ValidateScript({
                 Test-Path $_
         })]
         [string]
         $Path,
+
+        [String]
+        $FolderPath,
 
         [Parameter(Mandatory=$false,ParameterSetName='Folder')]
         [switch]
@@ -109,6 +116,10 @@ Function Write-CUClassDiagram {
         }
     }
     
+    if($FolderPath){
+        $Path = $FolderPath
+        write-warning "The parameter -FolderPath is deprecated, and will be removed in a future version. Please use -Path instead."
+    }
 
     #Methods are called FunctionMemberAst
     #Properties are called PropertyMemberAst
@@ -118,11 +129,19 @@ Function Write-CUClassDiagram {
     if ($PathObject -is [System.IO.DirectoryInfo]) {
         $ExportFileName = "Diagram" + "." + $OutputFormat
         $FolderPath = $Path
-        $Path = $null
+
+        if ($Recurse) {
+
+            $AllItems = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" -Recurse
+        } else {
+            $AllItems = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1"
+        }
+        #$Path = $null
     }
     elseif ($PathObject -is [System.IO.FileInfo]) {
         [System.IO.FileInfo]$File = (Resolve-Path -Path $Path).Path
         $ExportFileName = $File.BaseName + "." + $OutputFormat
+        $AllItems = $File
     }
     else {
         throw 'Path provided was not a file or folder'
@@ -150,23 +169,6 @@ Function Write-CUClassDiagram {
 
     #endregion
 
-
-    if ($Path) {
-        #Regular way
-        $AllItems = $Path
-    } elseif ($FolderPath) {
-        
-        if ($Recurse) {
-
-            $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1" -Recurse
-        } else {
-            $AllItems = Get-ChildItem -path "$($SourceFolder)\*" -Include "*.ps1", "*.psm1"
-        }
-
-    }
-
-    
-    
     $AST = Get-CUAst -Path $AllItems 
     
     $GraphParams = @{}
@@ -190,4 +192,3 @@ Function Write-CUClassDiagram {
     }
 
 }
-
