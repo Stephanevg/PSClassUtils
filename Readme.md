@@ -129,7 +129,7 @@ These are all great modules, and I recommend you have a look at them!
 Below is the export of the Class Diagram of a module I wrote that helps to manage HostsFiles accross the network using PowerShell classes. (The project is accessible  [Here](https://github.com/Stephanevg/Class.HostsManagement))
 
 
-![Class.HostsManagement](https://github.com/Stephanevg/Class.HostsManagement/blob/master/Class.HostsManagement.png?raw=true)
+![Class.HostsManagement](https://github.com/Stephanevg/Class.HostsManagement/blob/master/Images//Class.HostsManagement.png?raw=true)
 
 
 ### Poshbot
