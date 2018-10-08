@@ -142,7 +142,7 @@ Write-CUClassDiagram allows to generate diagrams of complex class based modules,
 
 Acl class is used to create a 3 levels folder structure in a standardized way. The acl creates both folders and corresponding groups and set acl.
 
-![AclApp](PSClassUtils/Examples/07/aclapp.class.png)
+![AclApp](https://github.com/LxLeChat/PSClassUtils/blob/master/Examples/07/aclapp.class.png)
 
 ### Get-ClassConstructors
 
