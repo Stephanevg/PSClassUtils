@@ -138,23 +138,6 @@ Write-CUClassDiagram allows to generate diagrams of complex class based modules,
 
 ![PoshBot](https://github.com/Stephanevg/PSClassUtils/blob/master/Examples/06/PoshBot_Diagram.png?raw=true)
 
-### AclApp
-
-Acl class is used to create a 3 levels folder structure in a standardized way. The acl creates both folders and corresponding groups and set acl.
-
-![AclApp](https://github.com/LxLeChat/PSClassUtils/blob/master/Examples/07/aclapp.class.png)
-
-### Get-ClassConstructors
-
-Coming soon...
-
-### Get-ClassProperties
-
-Coming soon...
-
-### Get-ClassMethods
-
-Coming soon...
 
 ## Contributing guide
 
@@ -162,3 +145,18 @@ You feel like contributing to this project? Awesome! We are happy to hear that, 
 You can start by reading our [Contribution guide](CONTRIBUTING.MD).
 
 Please don't hesitate to open an issue so we can quickly discuss about implementation details  and design of your, perhaps to be, new feature of PSClassutils :)
+
+
+## Community contributions
+
+for 'HacktOberFest' I created an issue to push people to use the module on their classes, and PR us their classes + examples.
+
+Here under is the list of community driven contributions:
+
+### AclApp
+
+Thanks to [LxLeChat](https://github.com/LxLeChat) !!
+
+Acl class is used to create a 3 levels folder structure in a standardized way. The acl creates both folders and corresponding groups and set acl.
+
+![AclApp](https://github.com/LxLeChat/PSClassUtils/blob/master/Examples/07/aclapp.class.png)
