@@ -2,7 +2,7 @@
 
 This module contains tools to ease the work with Powershell Classes.
 
-The most usefull feature is probably the one **that it can generate UML-like Class Diagrams in png format of your scripts / modules.** (See Write-CUClassDiagram)
+The most usefull feature is probably the fact  **that it can generate UML-like Class Diagrams in png format of your scripts / modules.** (See Write-CUClassDiagram)
 
 ## How to install PSClassUtils
 
