@@ -1,9 +1,21 @@
 # PSClassUtils
 
-This module contains tools to ease the work with Powershell Classes.
 
-The most usefull feature is probably the fact  **that it can generate UML-like Class Diagrams in png format of your scripts / modules.** (See Write-CUClassDiagram)
+## Summary
 
+PsClassUtils, is a Powershell module which contains tools to ease the work with Powershell Classes.
+
+The most usefull feature is probably the fact  **that it can generate UML-like Class Diagrams in png format of your scripts / modules in a glimps!** (See Write-CUClassDiagram)
+
+-----
+
+## Build Status
+|Branch|Status|
+|---|---|
+|master |[![Build status](https://ci.appveyor.com/api/projects/status/p30qxvifokv5fsjg/branch/master?svg=true)](https://ci.appveyor.com/project/Stephanevg/psclassutils/branch/master) |
+|dev |[![Build status](https://ci.appveyor.com/api/projects/status/p30qxvifokv5fsjg/branch/master?svg=true)](https://ci.appveyor.com/project/Stephanevg/psclassutils/branch/dev) |
+
+-----
 ## How to install PSClassUtils
 
 ```powershell
