@@ -32,7 +32,7 @@ if ($res.FailedCount -eq 0 -and $res.successcount -ne 0) {
         $GalleryVersion = (Find-Module $ModuleName).version
         $LocalVersion = (get-module $ModuleName).version.ToString()
 
-        if($GalleryVersion -ne "" -or $LocalVersion -ne ""){
+        if($GalleryVersion -eq "" -or $LocalVersion -eq ""){
             throw "Could not get version numbers"
         }
 
