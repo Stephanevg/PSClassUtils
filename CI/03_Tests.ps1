@@ -28,9 +28,14 @@ if ($res.FailedCount -gt 0 -or $res.PassedCount -eq 0) {
 if ($res.FailedCount -eq 0 -and $res.successcount -ne 0) {
     If ($env:APPVEYOR_REPO_BRANCH -eq "master") {
         Write-host "[$($env:APPVEYOR_REPO_BRANCH)] All tested Passed, and on Branch 'master'"
-        import-module (Resolve-Path .\$($ModuleName).psd1)
+        import-module (Resolve-Path $($env:APPVEYOR_BUILD_FOLDER)\$($ModuleName).psd1)
         $GalleryVersion = (Find-Module $ModuleName).version
         $LocalVersion = (get-module $ModuleName).version.ToString()
+
+        if($GalleryVersion -ne "" -or $LocalVersion -ne ""){
+            throw "Could not get version numbers"
+        }
+
         if ($Localversion -le $GalleryVersion) {
             Write-host "[$($env:APPVEYOR_REPO_BRANCH)] PsClassUtils version $($localversion)  is identical with the one on the gallery. No upload done."
             write-host "[$($env:APPVEYOR_REPO_BRANCH)] Module not deployed to the psgallery" -foregroundcolor Yellow;
