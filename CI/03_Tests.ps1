@@ -1,6 +1,10 @@
 import-module pester
 start-sleep -seconds 2
 
+write-output "BUILD_FOLDER: $($env:APPVEYOR_BUILD_FOLDER)"
+write-output "PROJECT_NAME: $($env:APPVEYOR_PROJECT_NAME)"
+write-output "BRANCH: $($env:APPVEYOR_REPO_BRANCH)"
+
 $moduleName = "$($env:APPVEYOR_PROJECT_NAME)"
 Get-Module $moduleName
 
@@ -24,7 +28,7 @@ if ($res.FailedCount -gt 0 -or $res.PassedCount -eq 0) {
 if ($res.FailedCount -eq 0 -and $res.successcount -ne 0) {
     If ($env:APPVEYOR_REPO_BRANCH -eq "master") {
         Write-host "[$($env:APPVEYOR_REPO_BRANCH)] All tested Passed, and on Branch 'master'"
-        import-module $($env:APPVEYOR_BUILD_FOLDER)\$($ModuleName).psd1 -force
+        import-module (Resolve-Path .\$($ModuleName).psd1)
         $GalleryVersion = (Find-Module $ModuleName).version
         $LocalVersion = (get-module $ModuleName).version.ToString()
         if ($Localversion -le $GalleryVersion) {
