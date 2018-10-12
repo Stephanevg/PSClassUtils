@@ -1,7 +1,7 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
-Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
+Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 Describe "Testing Get-CUClassMethod"{
     

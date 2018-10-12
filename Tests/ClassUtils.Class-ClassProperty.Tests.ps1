@@ -1,4 +1,4 @@
-Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
+Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 InModuleScope PSClassUtils -ScriptBlock {
 

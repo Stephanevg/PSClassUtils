@@ -1,7 +1,7 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 #. "$here\utilities.Tattoo.psm1"
-Import-Module -Force $PSScriptRoot\..\PSClassUtils.psm1
+Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 Describe "Testing Write-CUClassDiagram" {
 
@@ -94,7 +94,7 @@ Describe "Testing Write-CUClassDiagram" {
              
     
             $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
-            $null = mkdir $FolderPathFolder -Force
+            $null = New-Item -ItemType Directory -Path $FolderPathFolder -Force
             $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
             $File1 | Out-File -FilePath $Path_File1 -Force
     
@@ -122,7 +122,7 @@ Describe "Testing Write-CUClassDiagram" {
         it "Parameter: -ExportPath: 'Should throw if folder does not exist'" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
-            $null = mkdir $NewFolder
+            $null = New-Item -ItemType Directory -Path $NewFolder
             $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
@@ -130,7 +130,7 @@ Describe "Testing Write-CUClassDiagram" {
         it "Parameter: -ExportPath: 'Should Create a graph in Other folder'" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
-            $null = mkdir $NewFolder -force
+            $null = New-Item -ItemType Directory -Path $NewFolder -force
             $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
@@ -190,7 +190,7 @@ Describe "Testing Write-CUClassDiagram" {
 '@
 
             $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
-            $null = mkdir $FolderPathFolder -Force
+            $null = New-Item -ItemType Directory -Path $FolderPathFolder -Force
             $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
             $File1 | Out-File -FilePath $Path_File1 -Force
 
@@ -218,7 +218,7 @@ Describe "Testing Write-CUClassDiagram" {
         it "Parameter: -ExportPath: 'Should throw if folder does not exist'" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
-            $null = mkdir $NewFolder -Force
+            $null = New-Item -ItemType Directory -Path $NewFolder -Force
             $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
@@ -226,7 +226,7 @@ Describe "Testing Write-CUClassDiagram" {
         it "Parameter: -ExportPath: 'Should Create a graph in Other folder'" {
             $Guid = [Guid]::NewGuid().Guid
             $NewFolder = Join-Path -Path $Testdrive -ChildPath $Guid
-            $null = mkdir $NewFolder
+            $null = New-Item -ItemType Directory -Path $NewFolder
             $ret = Write-CUClassDiagram -Path $ClassScript -ExportFolder $NewFolder
             $Ret.DirectoryName | should be $NewFolder
         }
