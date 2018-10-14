@@ -105,7 +105,7 @@ Describe "Testing Write-CUClassDiagram" {
             $File3 | Out-File -FilePath $Path_File3 -Force
     
             $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
-            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop" \[.*label=.*' | should Not beNullOrEmpty
             $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
     
@@ -201,7 +201,7 @@ Describe "Testing Write-CUClassDiagram" {
             $File3 | Out-File -FilePath $Path_File3 -Force
 
             $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
-            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop" \[.*label=.*' | should Not beNullOrEmpty
             $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
 
@@ -283,7 +283,7 @@ Describe "Testing Write-CUClassDiagram" {
             $ClassScriptCaseSensitive = Join-Path -Path $Testdrive -ChildPath "WoopClassCase.ps1"
             $TestCaseSensitityClass | Out-File -FilePath $ClassScriptCaseSensitive -Force
             $a = Write-CUClassDiagram -Path $ClassScriptCaseSensitive -PassThru -IgnoreCase
-            $a -cmatch '"Woop" \[label=.*' | should not benullOrEmpty
+            $a -cmatch '"Woop" \[.*label=.*' | should not benullOrEmpty
             $a -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $a -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
             $a -cmatch 'wOOp' | should beNullOrEmpty
