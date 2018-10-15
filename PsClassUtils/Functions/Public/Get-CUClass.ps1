@@ -58,7 +58,6 @@ function Get-CUClass{
         Modification: LxLeChat
         For the PSClassUtils Module: https://github.com/Stephanevg/PSClassUtils
         Thanks to @NicolasBn for his help with DefaultParameterSetName and the debug off the weird encoded characters returned
-
     #>
     [CmdletBinding(DefaultParameterSetName="Normal")]
     Param(
