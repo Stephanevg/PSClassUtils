@@ -65,7 +65,9 @@ function Get-CUClass{
       $Name = '*',
       [Alias("FullName")]
       [Parameter(ParameterSetName="Path",Mandatory=$False,ValueFromPipeline=$True,ValueFromPipelineByPropertyName=$True)]
-      [System.IO.FileInfo[]]$Path
+      [System.IO.FileInfo[]]$Path,
+      [Parameter(Mandatory=$False)]
+      [Switch]$Raw = $False
     )
     BEGIN{}
 
@@ -83,7 +85,12 @@ function Get-CUClass{
             }
             
             Foreach ( $Class in $LoadedClasses ) {
-                Get-CUAst -Path $Class.Path
+                If ( $Raw ) {
+                    Get-CUAst -Path $Class.Path -Raw
+                } Else {
+                    Get-CUAst -Path $Class.Path
+                }
+                
             }
             
         } Else {
@@ -95,7 +102,11 @@ function Get-CUClass{
                 }
 
                 If ( $P.Extension -in '.ps1','.psm1') {
-                    Get-CUAst -Path $P.FullName
+                    If ( $Raw ) {
+                        Get-CUAst -Path $P.FullName -Raw
+                    } Else {
+                        Get-CUAst -Path $P.FullName
+                    }
                 }
             }
 
