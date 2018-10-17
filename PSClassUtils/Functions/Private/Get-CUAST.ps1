@@ -69,7 +69,9 @@ Function Get-CUAst {
             ValueFromPipeline = $true
     )]
     [Alias('FullName')]
-    [String[]]$Path
+    [String[]]$Path,
+    [Parameter(Mandatory=$False)]
+    [Switch]$Raw = $False
     )
     
     begin {
@@ -79,7 +81,8 @@ Function Get-CUAst {
             PAram(
 
                 $RawAST,
-                $Source
+                $Source,
+                [switch]$Raw = $False
             )
 
             $Type = $RawAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
@@ -88,7 +91,11 @@ Function Get-CUAst {
             [System.Management.Automation.Language.StatementAst[]] $Classes = @()
             $Classes = $type | ? {$_.IsClass -eq $true}
             
-            return [ASTDocument]::New($Classes,$Enums,$Source)
+            If ( $Raw ) {
+                return [ASTDocument]::New($Classes,$Enums,$Source,$RawAST)
+            } Else {
+                return [ASTDocument]::New($Classes,$Enums,$Source)
+            }
 
         }
 
@@ -103,13 +110,20 @@ Function Get-CUAst {
                 [System.IO.FileInfo]$File = (Resolve-Path -Path $p).Path
                 Write-Verbose "AST: $($File.FullName)"
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.FullName, [ref]$null, [ref]$Null)
-
-                sortast -RawAST $AST -Source $File.FullName
+                If ( $Raw ) {
+                    sortast -RawAST $AST -Source $File.FullName -Raw
+                } Else {
+                    sortast -RawAST $AST -Source $File.FullName
+                }
             }
         }else{
         
                 $AST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
-                sortast -RawAST $AST -Source "Pipeline"
+                If ( $Raw ) {
+                    sortast -RawAST $AST -Source "Pipeline" -Raw
+                } Else {
+                    sortast -RawAST $AST -Source "Pipeline"
+                }
         
         }
 
