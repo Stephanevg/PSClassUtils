@@ -154,6 +154,31 @@ Describe "Testing Get-CUClassMethod"{
             }
         }
 
+        Context "[ClassMethod] Parameters"{
+
+            it '[ClassMethod][Parameter][-Path] when given a path, it should not throw'{
+                {Get-CUClassMethod -Path $ClassScript -ClassName "wap"} | should not throw
+            }
+
+            it '[ClassMethod][Parameter][-Path] should return type ClassMethod'{
+                $ret = Get-CUClassMethod -Path $ClassScript -ClassName "wap"
+                foreach($r in $ret){
+                 $r.GetType().fullName | should be "ClassMethod"
+                }
+            }
+
+            it '[ClassMethod][Parameter][-Path][-Raw] It should not throw'{
+                {Get-CUClassMethod -Path $ClassScript -ClassName "Wap" -Raw} | should not throw
+            }
+
+            it '[ClassMethod][Parameter][-raw] It should return the right type'{
+                $raws = Get-CUClassMethod -Path $ClassScript -ClassName "wap" -Raw
+                foreach($r in $raws){
+                 $r.GetType().fullName | should be "System.Management.Automation.Language.FunctionMemberAst"   
+                }
+            }
+        }
+
     }
     
         
