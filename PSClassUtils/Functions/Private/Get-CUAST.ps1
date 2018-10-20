@@ -107,9 +107,9 @@ Function Get-CUAst {
         if($Path){
             foreach($p in $Path){
 
-                [System.IO.FileInfo]$File = (Resolve-Path -Path $p).Path
+                [System.IO.FileInfo]$File = Get-Item -Path $p
                 Write-Verbose "AST: $($File.FullName)"
-                $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.FullName, [ref]$null, [ref]$Null)
+                $AST = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
                 If ( $Raw ) {
                     sortast -RawAST $AST -Source $File.FullName -Raw
                 } Else {
