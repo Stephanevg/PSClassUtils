@@ -46,9 +46,9 @@ Function Get-CUClassMethod {
         Report bugs or submit feature requests here:
         https://github.com/Stephanevg/PowerShellClassUtils
     #>
-    [cmdletBinding()]
+    [cmdletBinding(DefaultParameterSetName="LoadedInMemory")]
     Param(
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False)]
         [String]$ClassName,
 
         [Parameter(ParameterSetName = "file", ValueFromPipelineByPropertyName = $True)]
@@ -61,10 +61,14 @@ Function Get-CUClassMethod {
         [System.IO.FileInfo]
         $Path,
 
+        [Parameter(ParameterSetName = "ast", ValueFromPipelineByPropertyName = $False)]
+        [System.Management.Automation.Language.StatementAst[]]
+        $InputObject,
+
         [Switch]$Raw
     )
     
-    if ($PSCmdlet.ParameterSetName -ne "file") {
+    if ($PSCmdlet.ParameterSetName -ne "file" -and $PSCmdlet.ParameterSetName -ne "ast") {
 
         $Methods = invoke-expression "[$($ClassName)].GetMethods()" | where-object {($_.IsHideBySig) -eq $false}
    
@@ -82,7 +86,13 @@ Function Get-CUClassMethod {
         }
     }Else{
 
-        $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
+        if($InputObject){
+
+            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
+        }else{
+
+            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
+        }
         $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
         
         if($ClassName){
@@ -126,7 +136,7 @@ Function Get-CUClassMethod {
                
                             }
                         }
-                        [ClassMethod]::New($Method.Name, $Method.ReturnType, $Params)
+                        [ClassMethod]::New($Method.Name, $Method.ReturnType, $Params,$Method)
                         if($Found){
                             break
                         }
