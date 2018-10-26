@@ -61,7 +61,7 @@ function Get-CUClass {
     #>
     [CmdletBinding(DefaultParameterSetName = "Normal")]
     Param(
-        [Parameter(ParameterSetName = "Normal", Mandatory = $False, ValueFromPipeline = $False)]
+        [Parameter(Mandatory = $False, ValueFromPipeline = $False)]
         $ClassName,
         
         [Alias("FullName")]

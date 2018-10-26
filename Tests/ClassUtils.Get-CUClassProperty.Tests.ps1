@@ -62,7 +62,7 @@ Describe "Testing Get-CUClassProperty"{
         it 'Should Return 2 Properties' {
 
 
-            (Get-CUClassProperty -ClassName "Woop" | measure).Count | should be 4
+            (Get-CUClassProperty -ClassName "Woop" | measure).Count | should be 2
         }
 
         Context 'Validating Properties' {
