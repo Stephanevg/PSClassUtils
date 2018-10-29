@@ -28,7 +28,6 @@ Class CUClass {
         $this.Name = $RawAST.Name
         $this.Constructor = Get-CUClassConstructor -ClassName $this.Name -InputObject $RawAST
         $this.Method = Get-CUClassMethod -InputObject $RawAST -ClassName $this.Name
-        #$this.Property = Get-CUClassProperty -ClassName $this.Name
-        
+        $this.Property = Get-CUClassProperty -InputObject $RawAST -ClassName $this.Name
     }
 }

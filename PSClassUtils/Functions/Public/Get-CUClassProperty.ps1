@@ -96,8 +96,6 @@ Function Get-CUClassProperty {
             
                 [ClassProperty]::New($pro.Name, $pro.PropertyType.TypeName.Name, $visibility,$pro)
 
-            
-
             }
         }
     }
