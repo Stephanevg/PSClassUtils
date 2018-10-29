@@ -31,7 +31,6 @@ Function Get-CUClassConstructor {
 
         [Parameter(ParameterSetName = "file", ValueFromPipelineByPropertyName = $True)]
         [ValidateScript( {
-
                 test-Path $_
             }
         )]
@@ -68,11 +67,10 @@ Function Get-CUClassConstructor {
     else {
 
         
-        if ($InputObject) {
+       If ($InputObject) {
         
             $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
-        }
-        else {
+        } Else {
         
             $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
         }

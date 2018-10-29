@@ -59,10 +59,10 @@ function Get-CUClass {
         For the PSClassUtils Module: https://github.com/Stephanevg/PSClassUtils
         Thanks to @NicolasBn for his help with DefaultParameterSetName and the debug off the weird encoded characters returned
     #>
-    [CmdletBinding(DefaultParameterSetName = "Normal")]
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $False, ValueFromPipeline = $False)]
-        $ClassName,
+        $ClassName = '*',
         
         [Alias("FullName")]
         [Parameter(ParameterSetName = "Path", Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
@@ -72,84 +72,36 @@ function Get-CUClass {
         [Switch]$Raw = $False
     )
     BEGIN {
-
-        Function GetLoadedClasses {
-            [CmdletBinding()]
-            Param(
-                [String]$ClassName = '*'
-            )
-            $LoadedClasses = [AppDomain]::CurrentDomain.GetAssemblies() |
-                Where-Object { $_.GetCustomAttributes($false) |
-                    Where-Object { $_ -is [System.Management.Automation.DynamicClassImplementationAssemblyAttribute]} } |
-                ForEach-Object { 
-                $_.GetTypes() |
-                    Where-Object IsPublic | Where-Object { $_.Name -like $ClassName } |
-                    Select-Object @{l = 'Path'; e = {($_.Module.ScopeName.Replace([char]0x29F9, '\').replace([char]0x589, ':')) -replace '^\\', ''}}
-            }
-            
-            Foreach ( $Class in $LoadedClasses ) {
-                If ( $Raw ) {
-                    Get-CUAst -Path $Class.Path -Raw
-                }
-                Else {
-                    Get-CUAst -Path $Class.Path
-                }
-                
-            }
-        }
     }
 
     PROCESS {
 
-        If ($Null -eq $PSBoundParameters['Path']) {
+        If ( $Null -eq $PSBoundParameters['Path'] ) {
 
-            if($ClassName){
-                
-                GetLoadedClasses -ClassName $ClassName
-            }else{
-                GetLoadedClasses
+            Foreach ( $RawAST in (Get-CULoadedClass -ClassName $ClassName) ) {
+                $ASTClassDocument = $RawAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
+                [CUClass]::New($ASTClassDocument)
             }
-            
-        }
-        Else {
 
-
+        } Else {
 
             Foreach ( $P in $Path ) {
-
-                $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
-                $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-        
-                if ($ClassName) {
-                    foreach ($ASTClass in $ASTClasses) {
-                        if ($ASTClass.Name -eq $ClassName) {
-                            $ASTClassDocument = $ASTClass
-                            break
-                        }
-                    }
-                }else{
-                    $ASTClassDocument = $ASTClasses
-                }
-
-                Foreach($Class in $ASTClassDocument){
-
-                    
-                    [CUClass]::New($Class)
-                }
                 
-
-
                 If ( $MyInvocation.PipelinePosition -eq 1 ) {
                     $P = Get-Item (resolve-path $P).Path
                 }
 
                 If ( $P.Extension -in '.ps1', '.psm1') {
-                    If ( $Raw ) {
-                        Get-CUAst -Path $P.FullName -Raw
+
+                    $RawGlobalAST = Get-CURaw -Path $P.FullName
+                    $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
+                    
+                    Foreach($Class in $ASTClasses){
+
+                        [CUClass]::New($Class)
+                        
                     }
-                    Else {
-                        Get-CUAst -Path $P.FullName
-                    }
+
                 }
             }
 

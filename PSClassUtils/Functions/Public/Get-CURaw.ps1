@@ -63,7 +63,8 @@ function Get-CURaw {
             }
 
             If ( $P.Extension -in '.ps1','.psm1') {
-                [scriptblock]::Create( $(Get-Content -Path $P.FullName -Raw) ).Ast
+                #[scriptblock]::Create( $(Get-Content -Path $P.FullName -Raw) ).Ast
+                [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
             }
 
         }
