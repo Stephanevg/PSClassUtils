@@ -10,7 +10,7 @@ function Get-CULoadedClass {
     PROCESS {
         
         Foreach ( $Name in $ClassName ) {
-            #write-host $name
+            
             [Array]$LoadedClasses = [AppDomain]::CurrentDomain.GetAssemblies() |
                 Where-Object { $_.GetCustomAttributes($false) |
                 Where-Object { $_ -is [System.Management.Automation.DynamicClassImplementationAssemblyAttribute]} } |
