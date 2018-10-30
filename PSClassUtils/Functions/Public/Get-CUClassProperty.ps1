@@ -1,105 +1,59 @@
 Function Get-CUClassProperty {
     <#
     .SYNOPSIS
-        This function returns all existing properties of a specific powershell class.
+        Short description
     .DESCRIPTION
-        The Powershell Class must be loaded in memory for this function to work.
+        Long description
     .EXAMPLE
-        Get-CUClassProperty -ClassName wap
-
-        Name   Type
-        ----   ----
-        prop3  String
-        String String
-        number Int32
-
+        PS C:\> <example usage>
+        Explanation of what the example does
     .INPUTS
-        String
+        Inputs (if any)
     .OUTPUTS
-        ClassMethod
-    .NOTES   
-        Author: Stéphane van Gulick
-        Version: 0.7.2
-        www.powershellDistrict.com
-        Report bugs or submit feature requests here:
-        https://github.com/Stephanevg/PowerShellClassUtils
+        Output (if any)
+    .NOTES
+        General notes
     #>
-    [cmdletBinding(DefaultParameterSetName = "LoadedInMemory")]
+    [cmdletBinding()]
     Param(
-        [Parameter(Mandatory = $true)]
-        [String]$ClassName,
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+        [String[]]$ClassName,
 
-        [Parameter(ParameterSetName = "file", ValueFromPipelineByPropertyName = $True)]
-        [ValidateScript( {
-
-                test-Path $_
-            }
-        )]
-        [Alias("FullName")]
-        [System.IO.FileInfo]
-        $Path,
-
-        [Parameter(ParameterSetName = "ast", ValueFromPipelineByPropertyName = $False)]
-        [System.Management.Automation.Language.StatementAst[]]
-        $InputObject,
-
-        [Switch]$Raw
-
+        [Parameter(ValueFromPipeline=$True)]
+        [ValidateScript({
+            If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
+        })]
+        [Object[]]$InputObject
     )
 
-    if ($PSCmdlet.ParameterSetName -ne "file" -and $PSCmdlet.ParameterSetName -ne "ast") {
+    BEGIN {}
 
-        $Properties = invoke-expression "[$($ClassName)].GetProperties()"
-        if ($Properties) {
+    PROCESS {
 
-            Foreach ($Property in $Properties) {
-    
-                [ClassProperty]::New($Property.Name, $Property.PropertyType.Name)
-    
+        If ( $MyInvocation.PipelinePosition -eq 1 ) {
+            ## Not from the Pipeline
+            If ( $Null -eq $PSBoundParameters['InputObject'] ) {
+                Throw "Please Specify an InputObject of type CUClass"
+            }
+            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
+                $InputObject.GetCuClassProperty()
+            } Else {
+                Foreach ( $C in $ClassName ){
+                    ($InputObject | where Name -eq $c).GetCuClassProperty()
+                }
+            }
+
+        } Else {
+            ## From the Pipeline
+            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
+                $InputObject.GetCuClassProperty()
+            } Else {
+                Throw "-ClassName parameter must be specified on the left side of the pipeline"
             }
         }
+
     }
-    Else {
 
+    END {}
 
-        if ($InputObject) {
-        
-            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
-        }
-        else {
-        
-            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
-        }
-        $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-           
-        if ($ClassName) {
-            foreach ($ASTClass in $ASTClasses) {
-                if ($ASTClass.Name -eq $ClassName) {
-                    $ASTClassDocument = $ASTClass
-                    break
-                }
-            }
-        }
-        
-        $Properties = $ASTClassDocument.members | ? {$_ -is [System.Management.Automation.Language.PropertyMemberAst]} 
-
-        if ($Properties) {
-        
-            Foreach ($pro in $Properties) {
-                
-                if ($pro.IsHidden) {
-                    $visibility = "Hidden"
-                }
-                else {
-                    $visibility = "public"
-                }
-            
-                [ClassProperty]::New($pro.Name, $pro.PropertyType.TypeName.Name, $visibility,$pro)
-
-            }
-        }
-    }
 }
-
-
-
