@@ -1,146 +1,59 @@
 Function Get-CUClassConstructor {
     <#
     .SYNOPSIS
-        This function returns all existing constructors of a specific powershell class.
+        Short description
     .DESCRIPTION
-        The Powershell Class must be loaded in memory for this function to work.
+        Long description
     .EXAMPLE
-         Get-CUClassConstructor -ClassName woop
-
-        Name ReturnType Properties
-        ---- ---------- ----------
-        woop woop
-        woop woop       {String, Number}
+        PS C:\> <example usage>
+        Explanation of what the example does
     .INPUTS
-        String
+        Inputs (if any)
     .OUTPUTS
-        ClassConstructor
-    .NOTES   
-        Author: Stéphane van Gulick
-        Version: 0.7.2
-        www.powershellDistrict.com
-        Report bugs or submit feature requests here:
-        https://github.com/Stephanevg/PowerShellClassUtils
+        Output (if any)
+    .NOTES
+        General notes
     #>
-    [cmdletBinding(DefaultParameterSetName="LoadedInMemory")]
+    [cmdletBinding()]
     Param(
-        
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+        [String[]]$ClassName,
 
-        [Parameter(Mandatory = $true)]
-        [String]$ClassName,
-
-        [Parameter(ParameterSetName = "file", ValueFromPipelineByPropertyName = $True)]
-        [ValidateScript( {
-                test-Path $_
-            }
-        )]
-        [Alias("FullName")]
-        [System.IO.FileInfo]
-        $Path,
-
-        [Parameter(ParameterSetName = "ast", ValueFromPipelineByPropertyName = $False)]
-        [System.Management.Automation.Language.StatementAst[]]
-        $InputObject,
-
-        [Switch]$Raw
+        [Parameter(ValueFromPipeline=$True)]
+        [ValidateScript({
+            If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
+        })]
+        [Object[]]$InputObject
     )
 
-    if ($PSCmdlet.ParameterSetName -ne "file" -and $PSCmdlet.ParameterSetName -ne "ast") {
+    BEGIN {}
 
-        $Constructors = invoke-expression "[$($ClassName)].GetConstructors()"
-    
-        Foreach ($Constructor in $Constructors) {
-            
-            $Parameters = $Constructor.GetParameters()
-            If ($Parameters) {
-                [ClassProperty[]]$Params = @()
-                foreach ($Parameter in $Parameters) {
-    
-                    $Params += [ClassProperty]::New($Parameter.Name, $Parameter.ParameterType)
-    
+    PROCESS {
+
+        If ( $MyInvocation.PipelinePosition -eq 1 ) {
+            ## Not from the Pipeline
+            If ( $Null -eq $PSBoundParameters['InputObject'] ) {
+                Throw "Please Specify an InputObject of type CUClass"
+            }
+            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
+                $InputObject.GetCuClassConstructor()
+            } Else {
+                Foreach ( $C in $ClassName ){
+                    ($InputObject | where Name -eq $c).GetCuClassConstructor()
                 }
             }
-            [ClassConstructor]::New($ClassName, $ClassName, $Params)
-             
-        }
-    }
-    else {
 
-        
-       If ($InputObject) {
-        
-            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
         } Else {
-        
-            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
-        }
-        $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-            
-        if ($ClassName) {
-            foreach ($ASTClass in $ASTClasses) {
-                if ($ASTClass.Name -eq $ClassName) {
-                    $ASTClassDocument = $ASTClass
-                    break
-                }
+            ## From the Pipeline
+            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
+                $InputObject.GetCuClassConstructor()
+            } Else {
+                Throw "-ClassName parameter must be specified on the left side of the pipeline"
             }
-        }else{
-            $ASTClassDocument = $ASTClasses
         }
-        
-        if ($ASTClassDocument) {
-        
-            $ExecutableCode = $ASTClassDocument.FindAll( {$args[0] -is [System.Management.Automation.Language.FunctionMemberAst]}, $true)
-            $Constructors = $null
-            $Constructors = $ExecutableCode | ? {$_.IsConstructor -eq $true}
-        
-            If ($Constructors) {
-        
-                Foreach ($Constructor in $Constructors) {
-                    if ($Raw) {
-                        $Constructor
-                        
-                    }
-                    else {
-        
-                        if ($ConstructorName) {
-                            if ($ConstructorName -eq $Constructor.Name) {
-                                $Found = $true
-                            }
-                            else {
-                                continue
-                            }
-                        }
-                        $Parameters = $null
-                        $Parameters = $Constructor.Parameters
-                        
-                        [ClassProperty[]]$Paras = @()
-                        If ($Parameters) {
-                            
-                            foreach ($Parameter in $Parameters) {
-                                $Type = $null
-                                # couldn't find another place where the returntype was located. 
-                                # If you know a better place, please update this! I'll pay you beer.
-                                $Type = $Parameter.Extent.Text.Split("$")[0] 
-                                $Paras += [ClassProperty]::New($Parameter.Name.VariablePath.UserPath, $Type)
-                   
-                            }
-                        }
-                        [ClassConstructor]::New($Constructor.Name, $Constructor.ReturnType, $Paras,$Constructor)
-                        if ($Found) {
-                            break
-                        }
-                    }
-                }
-            }
-            Else {
-                Write-verbose "No Constructors found in $($ClassName) in $($Path.FullName)"
-            }
-        
-        }
-        else {
-            write-verbose "Class $($ClassName) not found in $($Path.FullName)"
-        }
+
     }
 
+    END {}
 
 }

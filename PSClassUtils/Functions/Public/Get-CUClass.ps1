@@ -79,8 +79,9 @@ function Get-CUClass {
         If ( $Null -eq $PSBoundParameters['Path'] ) {
 
             Foreach ( $RawAST in (Get-CULoadedClass -ClassName $ClassName) ) {
-                $ASTClassDocument = $RawAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-                [CUClass]::New($ASTClassDocument)
+                
+                [CUClass]::New($RawAST)
+
             }
 
         } Else {
@@ -94,9 +95,8 @@ function Get-CUClass {
                 If ( $P.Extension -in '.ps1', '.psm1') {
 
                     $RawGlobalAST = Get-CURaw -Path $P.FullName
-                    $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
                     
-                    Foreach($Class in $ASTClasses){
+                    Foreach($Class in $RawGlobalAST){
 
                         [CUClass]::New($Class)
                         
