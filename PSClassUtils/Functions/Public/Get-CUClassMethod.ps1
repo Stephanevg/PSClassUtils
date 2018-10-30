@@ -1,156 +1,63 @@
-Function Get-CUClassMethod {
+Function Get-CuClassMethod {
     <#
     .SYNOPSIS
-        This function returns all existing methods of a specific powershell class.
+        Short description
     .DESCRIPTION
-        The Powershell Class must be loaded in memory for this function to work.
-    
-    .PARAMETER Path
-
-    The -Path parameter allows to specifiy a file (only), which will be searched for powershell Class Methods.
-    If none are found, nothing is returned.
-
-    .PARAMETER Raw
-
-    This will reutnr the raw AST object 
-
+        Long description
     .EXAMPLE
-
-    Get-CUClassMethod -ClassName wap
-
-    Name          ReturnType Properties
-    ----          ---------- ----------
-    DoChildthing  void
-    DoChildthing2 void       {Prop1, Prop2}
-    DoChildthing3 string     {Prop1, Prop2, Prop3}
-    DoChildthing4 bool       {Prop1, Prop2, Prop3}
-    DoSomething   string     {Prop1, Prop2, Prop3}
-
-    .EXAMPLE
-
-    Get-CUClassMethod -ClassName "TestStats" -Path "C:\MyClasses\006_TestStats.ps1"
-
-    Name                    ReturnType   Properties
-    ----                    ----------   ----------
-    GetFailedTestCases      [TestCase[]] {TestSuite, time}
-    GetSuccessfullTestCases [TestCase[]] {TestSuite}
-
+        PS C:\> <example usage>
+        Explanation of what the example does
     .INPUTS
-        String
+        Inputs (if any)
     .OUTPUTS
-        ClassMethod
-    .NOTES   
-        Author: Stéphane van Gulick
-        Version: 0.7.1
-        www.powershellDistrict.com
-        Report bugs or submit feature requests here:
-        https://github.com/Stephanevg/PowerShellClassUtils
+        Output (if any)
+    .NOTES
+        General notes
     #>
-    [cmdletBinding(DefaultParameterSetName="LoadedInMemory")]
+    [cmdletBinding()]
     Param(
-        [Parameter(Mandatory = $False)]
-        [String]$ClassName,
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+        [String[]]$ClassName,
 
-        [Parameter(ParameterSetName = "file", ValueFromPipelineByPropertyName = $True)]
+        [Parameter(ValueFromPipeline=$True)]
         [ValidateScript({
-
-            test-Path $_
-        }
-        )]
-        [Alias("FullName")]
-        [System.IO.FileInfo]
-        $Path,
-
-        [Parameter(ParameterSetName = "ast", ValueFromPipelineByPropertyName = $False)]
-        [System.Management.Automation.Language.StatementAst[]]
-        $InputObject,
-
-        [Switch]$Raw
+            If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
+        })]
+        [Object[]]$InputObject
     )
-    
-    if ($PSCmdlet.ParameterSetName -ne "file" -and $PSCmdlet.ParameterSetName -ne "ast") {
 
-        $Methods = invoke-expression "[$($ClassName)].GetMethods()" | where-object {($_.IsHideBySig) -eq $false}
-   
-        Foreach ($Method in $Methods) {
-            $Parameters = $Method.GetParameters()
-            If ($Parameters) {
-                [ClassProperty[]]$Params = @()
-                foreach ($Parameter in $Parameters) {
-   
-                    $Params += [ClassProperty]::New($Parameter.Name, $Parameter.ParameterType)
-   
+    BEGIN {}
+
+    PROCESS {
+
+        If ( $MyInvocation.PipelinePosition -eq 1 ) {
+            ## Not from the Pipeline
+            If ( $Null -eq $PSBoundParameters['InputObject'] ) {
+                Throw "Please Specify an InputObject of type CUClass"
+            }
+            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
+                $InputObject.GetCuClassMethod()
+            } Else {
+                Foreach ( $C in $ClassName ){
+                    ($InputObject | where Name -eq $c).GetCuClassMethod()
                 }
             }
-            [ClassMethod]::New($Method.Name, $Method.ReturnType, $Params)
-        }
-    }Else{
 
-        if($InputObject){
-
-            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseInput($InputObject, [ref]$null, [ref]$Null)
-        }else{
-
-            $RawGlobalAST = [System.Management.Automation.Language.Parser]::ParseFile($Path.FullName, [ref]$null, [ref]$Null)
-        }
-        $ASTClasses = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-        
-        if($ClassName){
-            foreach($ASTClass in $ASTClasses){
-                if($ASTClass.Name -eq $ClassName){
-                    $ASTClassDocument = $ASTClass
-                    break
-                }
+        } Else {
+            ## From the Pipeline
+            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
+                #$InputObject.Name
+                $InputObject.GetCuClassMethod()
+                #"{0} - {1}" -f $InputObject.name,$($null -eq $InputObject.Method)
+                #$InputObject.Method
+                
+            } Else {
+                Throw "-ClassName parameter must be specified on the left side of the pipeline"
             }
         }
 
-        if($ASTClassDocument){
-
-            $ExecutableCode = $ASTClassDocument.FindAll( {$args[0] -is [System.Management.Automation.Language.FunctionMemberAst]}, $true)
-            $Methods = $ExecutableCode | ? {$_.IsConstructor -eq $false}
-
-            If($Methods){
-
-                Foreach ($Method in $Methods) {
-                    if($Raw){
-                        $Method
-                    
-                    }else{
-
-                        if($MethodName){
-                            if($MethodName -eq $Method.Name){
-                                $Found = $true
-                            }else{
-                                continue
-                            }
-                        }
-                        $Parameters = $Method.Parameters
-                        If ($Parameters) {
-                            [ClassProperty[]]$Params = @()
-                            foreach ($Parameter in $Parameters) {
-                                $Type = $null
-                                # couldn't find another place where the returntype was located. 
-                                # If you know a better place, please update this! I'll pay you beer.
-                                $Type = $Parameter.Extent.Text.Split("$")[0] 
-                                $Params += [ClassProperty]::New($Parameter.Name.VariablePath.UserPath, $Type)
-               
-                            }
-                        }
-                        [ClassMethod]::New($Method.Name, $Method.ReturnType, $Params,$Method)
-                        if($Found){
-                            break
-                        }
-                    }
-                }
-            }Else{
-                Write-verbose "No Methods found in $($ClassName) in $($Path.FullName)"
-            }
-
-        }else{
-            write-verbose "Class $($ClassName) not found in $($Path.FullName)"
-        }
-
-        
     }
+
+    END {}
 
 }
