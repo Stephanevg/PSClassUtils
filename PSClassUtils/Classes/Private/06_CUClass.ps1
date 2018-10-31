@@ -71,7 +71,7 @@ Class CUClass {
 
             }
 
-            $This.Constructor += [ClassConstructor]::New($This.name,$Constructor.Name, $Constructor.ReturnType, $Paras,$Constructor)
+            $This.Constructor += [ClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
         }
 
     }
