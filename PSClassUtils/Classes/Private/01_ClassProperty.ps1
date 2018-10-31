@@ -1,30 +1,34 @@
 Class ClassProperty {
+    [String]$ClassName
     [String]$Name
     [String]$Type
     [string]$Visibility = ""
     $Raw
 
-    ClassProperty([String]$Name,[String]$Type){
+    ClassProperty([String]$ClassName,[String]$Name,[String]$Type){
 
+        $this.ClassName = $ClassName
         $this.Name = $Name
-        $This.Type = $Type
+        $this.Type = $Type
 
     }
 
-    ClassProperty([String]$Name,[String]$Type,[String]$Visibility){
+    ClassProperty([String]$ClassName,[String]$Name,[String]$Type,[String]$Visibility){
 
+        $this.ClassName = $ClassName
         $this.Name = $Name
-        $This.Type = $Type
+        $this.Type = $Type
         $this.Visibility = $Visibility
 
     }
 
-    ClassProperty([String]$Name,[String]$Type,[String]$Visibility,$Raw){
+    ClassProperty([String]$ClassName,[String]$Name,[String]$Type,[String]$Visibility,$Raw){
 
+        $this.ClassName = $ClassName
         $this.Name = $Name
-        $This.Type = $Type
+        $this.Type = $Type
         $this.Visibility = $Visibility
-        $This.Raw = $Raw
+        $this.Raw = $Raw
 
     }
 }

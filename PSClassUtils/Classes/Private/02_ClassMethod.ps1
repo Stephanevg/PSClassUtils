@@ -1,19 +1,22 @@
 Class ClassMethod {
+    [String]$ClassName
     [String]$Name
     [String]$ReturnType
-    [ClassProperty[]]$Properties
+    [ClassParameter[]]$Parameter
     hidden $Raw
 
-    ClassMethod([String]$Name,[String]$ReturnType,[ClassProperty[]]$Properties){
+    ClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[ClassParameter[]]$Parameter){
+        $this.ClassName = $ClassName
         $this.Name = $Name
         $This.ReturnType = $ReturnType
-        $This.Properties = $Properties
+        $This.Parameter = $Parameter
     }
 
-    ClassMethod([String]$Name,[String]$ReturnType,[ClassProperty[]]$Properties,$Raw){
+    ClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[ClassParameter[]]$Parameter,$Raw){
+        $this.ClassName = $ClassName
         $this.Name = $Name
         $This.ReturnType = $ReturnType
-        $This.Properties = $Properties
+        $This.Parameter = $Parameter
         $This.Raw
     }
 

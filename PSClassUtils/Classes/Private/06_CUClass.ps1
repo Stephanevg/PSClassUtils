@@ -3,6 +3,7 @@ Class CUClass {
     [ClassProperty[]]$Property
     [ClassConstructor[]]$Constructor
     [ClassMethod[]]$Method
+    [System.IO.FileInfo]$Path
     Hidden $Raw
     Hidden $Ast
 
@@ -37,6 +38,7 @@ Class CUClass {
     [void] SetPropertiesFromRawAST(){
 
         $This.Name = $This.Ast.Name
+        $This.Path = [System.IO.FileInfo]::new($This.Raw.Extent.File)
         $This.SetConstructorFromAST()
         $This.SetPropertyFromAST()
         $This.SetMethodFromAST()
@@ -53,7 +55,7 @@ Class CUClass {
 
             $Parameters = $null
             $Parameters = $Constructor.Parameters
-            [ClassProperty[]]$Paras = @()
+            [ClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -63,13 +65,13 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassProperty]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
             }
 
-            $This.Constructor += [ClassConstructor]::New($Constructor.Name, $Constructor.ReturnType, $Paras,$Constructor)
+            $This.Constructor += [ClassConstructor]::New($This.name,$Constructor.Name, $Constructor.ReturnType, $Paras,$Constructor)
         }
 
     }
@@ -84,7 +86,7 @@ Class CUClass {
 
             $Parameters = $null
             $Parameters = $Method.Parameters
-            [ClassProperty[]]$Paras = @()
+            [ClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -94,13 +96,13 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassProperty]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
             }
 
-            $This.Method += [ClassMethod]::New($Method.Name, $Method.ReturnType, $Paras,$Method)
+            $This.Method += [ClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
         }
 
     }
@@ -120,7 +122,7 @@ Class CUClass {
                     $visibility = "public"
                 }
             
-                $This.Property += [ClassProperty]::New($pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
+                $This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
             }
         }
 
