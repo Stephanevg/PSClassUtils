@@ -80,7 +80,16 @@ function Get-CUClass {
 
             Foreach ( $RawAST in (Get-CULoadedClass -ClassName $ClassName) ) {
                 
-                [CUClass]::New($RawAST)
+                $GlobalClassFromRaw = [CUClass]::New($RawAST)
+
+                ## Test if more than one class in document or if inheritances classes
+                If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
+                    Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
+                        [CUClass]::New($Class)
+                    }
+                } Else {
+                    $GlobalClassFromRaw
+                }
 
             }
 
@@ -95,11 +104,15 @@ function Get-CUClass {
                 If ( $P.Extension -in '.ps1', '.psm1') {
 
                     $RawGlobalAST = Get-CURaw -Path $P.FullName
-                    
-                    Foreach($Class in $RawGlobalAST){
+                    $GlobalClassFromRaw = [CUClass]::New($RawGlobalAST)
 
-                        [CUClass]::New($Class)
-                        
+                    ## Test if more than one class in document or if inheritances classes
+                    If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
+                        Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
+                            [CUClass]::New($Class)    
+                        }
+                    } Else {
+                        $GlobalClassFromRaw
                     }
 
                 }
