@@ -5,16 +5,16 @@ InModuleScope PSClassUtils -ScriptBlock {
     Describe "Testing Class-ClassProperty" {
 
         it '[Instantiation] should create an instance without throwing' {
-            {[ClassProperty]::New("String", "Value")} | should not throw
+            {[ClassProperty]::New("ClassName","String", "Value")} | should not throw
         }
 
         it '[Properties] Should have two Properties' {
-            $Instance = [ClassProperty]::New("String", "Value")
-            ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 2
+            $Instance = [ClassProperty]::New("ClassName","String", "Value")
+            ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 5
         }
 
 
-        $Instance = [ClassProperty]::New("String", "Value")
+        $Instance = [ClassProperty]::New("ClassName","String", "Value")
         $Values = @("Name", "Type")
         Foreach ($prop in $values) {
         

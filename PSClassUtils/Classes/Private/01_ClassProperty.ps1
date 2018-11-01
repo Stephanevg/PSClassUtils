@@ -2,7 +2,7 @@ Class ClassProperty {
     [String]$ClassName
     [String]$Name
     [String]$Type
-    [string]$Visibility = ""
+    [string]$Visibility
     $Raw
 
     ClassProperty([String]$ClassName,[String]$Name,[String]$Type){

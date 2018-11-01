@@ -94,13 +94,13 @@ function Get-CUClass {
             }
 
         } Else {
-
+            
             Foreach ( $P in $Path ) {
                 
                 If ( $MyInvocation.PipelinePosition -eq 1 ) {
                     $P = Get-Item (resolve-path $P).Path
                 }
-
+                
                 If ( $P.Extension -in '.ps1', '.psm1') {
 
                     $RawGlobalAST = Get-CURaw -Path $P.FullName
@@ -109,10 +109,22 @@ function Get-CUClass {
                     ## Test if more than one class in document or if inheritances classes
                     If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
                         Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
-                            [CUClass]::New($Class)    
+                            If ( $PSBoundParameters['ClassName'] ) {
+                                If ( $Class.name -eq $PSBoundParameters['ClassName'] ) {
+                                    [CUClass]::New($Class) 
+                                }
+                            } Else {
+                                [CUClass]::New($Class) 
+                            }    
                         }
                     } Else {
-                        $GlobalClassFromRaw
+                        If ( $PSBoundParameters['ClassName'] ) {
+                            If ( $GlobalClassFromRaw.name -eq $PSBoundParameters['ClassName'] ) {
+                                $GlobalClassFromRaw
+                            }
+                        } Else {
+                            $GlobalClassFromRaw
+                        }
                     }
 
                 }

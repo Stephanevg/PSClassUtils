@@ -59,31 +59,31 @@ InModuleScope PSClassUtils -ScriptBlock {
         $TestCaseClass | Out-File -FilePath $ClassScript -Force
         copy-item -Path $ClassScript -Destination $ClassScript.Replace("WoopClass.ps1","WoopClass2.ps1")
 
-        it '[PARAMETER][Parameterless] Should return an object of type ASTDocument' {
+        it '[PARAMETER][Parameterless] Should return an object of type CUClass' {
             #This one is a bit 'tricky'. the classes that are returned, are the ones already loaded by the PSClassUtils module.
             #This, it is okay to have them there, but we might hide them in the future (which would make sense), so this test might fail, and probably should be 
             #rewriten.
 
-            $a = Get-CUClass
-            $a[0].GetType().FullName | should be ASTDocument
+            $a = Get-CUClass -Path $ClassScript
+            $a[0].GetType().FullName | should be CUClass
         }
 
         It '[PARAMETER][-Path] Single file Should not throw'{
             {Get-CUClass -Path $ClassScript} | should not throw
             
         }
-        it '[PARAMETER][-Path] Single file Should return an object of type ASTDocument' {
+        it '[PARAMETER][-Path] Single file Should return an object of type CUClass' {
             $a = Get-CUClass -Path $ClassScript
-            $a.GetType().FullName | should be ASTDocument
+            $a[0].GetType().Name | should be CUClass
         }
 
 
         It '[PIPELINE] Piping a single fileInfo should not throw'{
-            {(Get-Item $ClassScript) | Get-CUClass} | Should Not Throw
+            { $ClassScript | Get-CUClass} | Should Not Throw
         }
 
-        It '[PIPELINE] Piping a single fileInfo should return an ASTDocument'{
-            ((Get-Item $ClassScript) | Get-CUClass).GetType().FullName | should be "ASTDocument"
+        It '[PIPELINE] Piping a single fileInfo should return an CUClass'{
+            ($ClassScript| Get-CUClass)[0].GetType().FullName | should be "CUClass"
         }
 
         copy-item -Path $ClassScript -Destination $ClassScript.Replace("WoopClass.ps1","WoopClass2.ps1")

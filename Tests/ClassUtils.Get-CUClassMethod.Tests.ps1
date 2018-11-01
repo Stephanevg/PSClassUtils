@@ -62,12 +62,12 @@ Describe "Testing Get-CUClassMethod"{
         it 'Should Return 5 methods' {
 
 
-            (Get-CUClassMethod -ClassName "Wap" | measure).Count | should be 5
+            (Get-CUClass -Path $ClassScript -ClassName Wap | Get-CUClassMethod | measure).Count | should be 4
         }
 
         Context 'Validating Properties' {
             $Properties = @("Name","Properties","ReturnType")
-            $methods = Get-CUClassMethod -ClassName "Wap"
+            $methods = Get-CUClass -Path $ClassScript -ClassName Wap | Get-CUClassMethod
             foreach ($prop in $Properties){
 
                 it "Should have Property: $($Prop)" {
@@ -77,16 +77,16 @@ Describe "Testing Get-CUClassMethod"{
 
         
             foreach($w in $methods){
-                    if($w.Properties){
+                    if($w.Parameter){
 
-                        it "$($w.Name) should have property of type 'ClassProperty[]'" {
+                        it "$($w.Name) should have Parameter of type 'ClassParameter[]'" {
 
-                            $w.Properties.GetType().Name | should be 'ClassProperty[]'
+                            $w.Parameter.GetType().Name | should be 'ClassParameter[]'
                         }
                     }
             }
 
-                $DoChildthing4 = Get-CUClassMethod -ClassName "Wap" | ? {$_.Name -eq 'DoChildthing4'}
+                $DoChildthing4 = Get-CUClass -Path $ClassScript -ClassName Wap | Get-CUClassMethod | ? {$_.Name -eq 'DoChildthing4'}
                 it "should have property Name with value: 'DoChildthing4' " {
 
                     $DoChildthing4.Name | should be 'DoChildthing4'
@@ -95,39 +95,39 @@ Describe "Testing Get-CUClassMethod"{
 
                 it "should have property ReturnType with value: 'Bool' " {
 
-                    $DoChildthing4.ReturnType | should be 'Bool'
+                    $DoChildthing4.ReturnType | should be '[Bool]'
                     
                 }
 
                 it "should have property Properties with 3 properties " {
 
-                    ($DoChildthing4.Properties | Measure).Count | should be 3
+                    ($DoChildthing4.Parameter | Measure).Count | should be 3
                     
                 }
                 
 
-                foreach ($p in $DoChildthing4.Properties){
+                foreach ($p in $DoChildthing4.Parameter){
                     switch ($p.Name){
                         "MyString" {
-                            it "Property : 'MyString' should be of type 'string' " {
+                            it "Property : 'MyString' should be of type '[string'] " {
         
-                                $p.Type | should be 'String'
+                                $p.Type | should be '[String]'
                                 
                             }
                             break
                         }
                         "MyInt" {
-                            it "Property : 'MyInt' should be of type 'int' " {
+                            it "Property : 'MyInt' should be of type '[int]' " {
         
-                                $p.Type | should be 'int'
+                                $p.Type | should be '[int]'
                                 
                             }
                             Break
                         }
                         "MyDate" {
-                            it "Property : 'MyDate' should be of type 'Date' " {
+                            it "Property : 'MyDate' should be of type '[DateTime]' " {
         
-                                $p.Type | should be 'DateTime'
+                                $p.Type | should be '[DateTime]'
                                 
                             }
                             Break
@@ -145,7 +145,7 @@ Describe "Testing Get-CUClassMethod"{
 
         Context 'Testing Method types'{
 
-            $methods = Get-CUClassMethod -ClassName "Wap"
+            $methods = Get-CUClass -Path $ClassScript -ClassName Wap | Get-CUClassMethod
             foreach($w in $methods){
                     it "Method $($w.Name)(): should be of type 'ClassMethod'" {
         
@@ -154,11 +154,15 @@ Describe "Testing Get-CUClassMethod"{
             }
         }
 
+        <#
         Context "[ClassMethod] Parameters"{
 
+            
+            
             it '[ClassMethod][Parameter][-Path] when given a path, it should not throw'{
                 {Get-CUClassMethod -Path $ClassScript -ClassName "wap"} | should not throw
             }
+            
 
             it '[ClassMethod][Parameter][-Path] should return type ClassMethod'{
                 $ret = Get-CUClassMethod -Path $ClassScript -ClassName "wap"
@@ -177,8 +181,9 @@ Describe "Testing Get-CUClassMethod"{
                  $r.GetType().fullName | should be "System.Management.Automation.Language.FunctionMemberAst"   
                 }
             }
+            
         }
-
+        #>
     }
     
         
