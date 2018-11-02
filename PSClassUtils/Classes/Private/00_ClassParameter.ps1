@@ -3,14 +3,14 @@ Class ClassParameter {
     [String]$Type
     hidden $Raw
 
-    ClassProperty([String]$Name,[String]$Type){
+    ClassParameter([String]$Name,[String]$Type){
 
         $this.Name = $Name
         $This.Type = $Type
 
     }
 
-    ClassProperty([String]$Name,[String]$Type,$Raw){
+    ClassParameter([String]$Name,[String]$Type,$Raw){
 
         $this.Name = $Name
         $This.Type = $Type

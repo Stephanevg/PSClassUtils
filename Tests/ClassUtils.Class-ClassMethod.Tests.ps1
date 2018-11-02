@@ -8,23 +8,23 @@ InModuleScope PSClassUtils -ScriptBlock {
 
         
             it '[ClassMethod][Instantiation] (Empty ClassProperty Array) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
-                {[ClassMethod]::New("DoStuffPlease", "String", $Properties)} | should not throw
+                $Properties = [ClassParameter[]]@()
+                {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
 
             it '[ClassMethod][Instantiation] (ClassProperty 1 element) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
-                $Properties += [ClassProperty]::New("PropName", "String")
-                {[ClassMethod]::New("DoStuffPlease", "String", $Properties)} | should not throw
+                $Properties = [ClassParameter[]]@()
+                $Properties += [ClassParameter]::New("PropName", "String")
+                {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
 
             it '[ClassMethod][Instantiation] (ClassProperty 10 elements) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
+                $Properties = [ClassParameter[]]@()
                 for ($i = 0; $i++; $i -eq 10) {
-                    $Properties += [ClassProperty]::New("Prop$1", "String")
+                    $Properties += [ClassParameter]::New("Prop$1", "String")
                 }
             
-                {[ClassMethod]::New("DoStuffPlease", "String", $Properties)} | should not throw
+                {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
         }
         Context "[ClassMethod] Properties" {
@@ -32,20 +32,20 @@ InModuleScope PSClassUtils -ScriptBlock {
         
             it '[ClassMethod][Properties] Instance should have 3 Properties' {
             
-                $Properties = [ClassProperty[]]@()
-                $Instance = [ClassMethod]::New("DoStuffPlease", "String", $Properties)
-                ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 3
+                $Properties = [ClassParameter[]]@()
+                $Instance = [ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)
+                ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 4
             }
 
-            $Properties = [ClassProperty[]]@()
-            $Properties += [ClassProperty]::New("PropName", "String")
-            $Instance = [ClassMethod]::New("DoStuffPlease", "String", $Properties)
-            $Values = @("Name", "ReturnType", "Properties")
+            $Properties = [ClassParameter[]]@()
+            $Properties += [ClassParameter]::New("PropName", "String")
+            $Instance = [ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)
+            $Values = @("Name", "Type")
             Foreach ($prop in $values) {
         
                 it "[ClassMethod][Properties][$($prop)] Should be present on instance" {
                 
-                    ($Instance | gm | ? {$_.MemberType -eq "Property" -and $_.Name -eq $prop}).Name | should be $prop
+                    ($Instance.Parameter | gm | ? {$_.MemberType -eq "Property" -and $_.Name -eq $prop}).Name | should be $prop
             
                 }
             }

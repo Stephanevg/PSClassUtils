@@ -1,19 +1,19 @@
 Class ClassConstructor {
+    [String]$ClassName
     [String]$Name
-    [String]$ReturnType
-    [ClassProperty[]]$Properties
+    [ClassParameter[]]$Parameter
     hidden $Raw
 
-    ClassConstructor([String]$Name,[String]$ReturnType,[ClassProperty[]]$Properties){
+    ClassConstructor([String]$ClassName,[String]$Name,[ClassParameter[]]$Parameter){
+        $this.ClassName = $ClassName
         $this.Name = $Name
-        $This.ReturnType = $ReturnType
-        $This.Properties = $Properties
+        $This.Parameter = $Parameter
     }
 
-    ClassConstructor([String]$Name,[String]$ReturnType,[ClassProperty[]]$Properties,$Raw){
+    ClassConstructor([String]$ClassName,[String]$Name,[ClassParameter[]]$Parameter,$Raw){
+        $this.ClassName = $ClassName
         $this.Name = $Name
-        $This.ReturnType = $ReturnType
-        $This.Properties = $Properties
+        $This.Parameter = $Parameter
         $This.Raw = $Raw
     }
 

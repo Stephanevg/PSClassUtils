@@ -9,45 +9,46 @@ InModuleScope PSClassUtils -ScriptBlock {
         Context "[ClassConstructor] Constructors and Instantiation" {
 
         
-            it '[ClassConstructor][Instantiation] (Empty ClassProperty Array) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
-                {[ClassConstructor]::New("DoStuffPlease", "String", $Properties)} | should not throw
+            it '[ClassConstructor][Instantiation] (Empty ClassParameter Array) should create an instance without throwing' {
+                $Parameter = [ClassParameter[]]@()
+                {[ClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
 
-            it '[ClassConstructor][Instantiation] (ClassProperty 1 element) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
-                $Properties += [ClassProperty]::New("PropName", "String")
-                {[ClassConstructor]::New("DoStuffPlease", "String", $Properties)} | should not throw
+            it '[ClassConstructor][Instantiation] (ClassParameter 1 element) should create an instance without throwing' {
+                $Parameter = [ClassParameter[]]@()
+                $Parameter += [ClassParameter]::New("classname","PropName", "String")
+                {[ClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
 
-            it '[ClassConstructor][Instantiation] (ClassProperty 10 elements) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
+            it '[ClassConstructor][Instantiation] (ClassParameter 10 elements) should create an instance without throwing' {
+                $Parameter = [ClassParameter[]]@()
                 for ($i = 0; $i++; $i -eq 10) {
-                    $Properties += [ClassProperty]::New("Prop$1", "String")
+                    $Parameter += [ClassParameter]::New("ClassName","Prop$1", "String")
                 }
             
-                {[ClassConstructor]::New("DoStuffPlease", "String", $Properties)} | should not throw
+                {[ClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
         }
-        Context "[ClassConstructor] Properties" {
+        Context "[ClassConstructor] Parameter" {
 
         
-            it '[ClassConstructor][Properties] Instance should have 3 Properties' {
+            it '[ClassConstructor][Parameter] Instance should have 3 Parameter' {
             
-                $Properties = [ClassProperty[]]@()
-                $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Properties)
+                $Parameter = [ClassParameter[]]@()
+                $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Parameter)
                 ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 3
             }
 
-            $Properties = [ClassProperty[]]@()
-            $Properties += [ClassProperty]::New("PropName", "String")
-            $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Properties)
-            $Values = @("Name", "ReturnType", "Properties")
+            $Parameter = [ClassParameter[]]@()
+            $Parameter += [ClassParameter]::New("PropName", "String")
+            $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Parameter)
+            $Values = @("Name", "Type")
+            #Write-Host ($Instance | gm | ? {$_.MemberType -eq "Property"})
             Foreach ($prop in $values) {
         
-                it "[ClassConstructor][Properties][$($prop)] Should be present on instance" {
+                it "[ClassConstructor][Parameter][$($prop)] Should be present on instance" {
                 
-                    ($Instance | gm | ? {$_.MemberType -eq "Property" -and $_.Name -eq $prop}).Name | should be $prop
+                    ($Instance.Parameter | gm | ? {$_.MemberType -eq "Property" -and $_.Name -eq $prop}).Name | should be $prop
             
                 }
             }

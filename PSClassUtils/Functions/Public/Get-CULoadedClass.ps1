@@ -20,7 +20,7 @@ function Get-CULoadedClass {
                     Select-Object @{l = 'Path'; e = {($_.Module.ScopeName.Replace([char]0x29F9, '\').replace([char]0x589, ':')) -replace '^\\', ''}}
             }
 
-            Foreach ( $Class in $LoadedClasses ) {
+            Foreach ( $Class in ($LoadedClasses | Select-Object -Property Path -Unique) ) {
                 Get-CURaw -Path $Class.Path
             }
 
