@@ -65,7 +65,7 @@ function Get-CUClass {
         $ClassName = '*',
         
         [Alias("FullName")]
-        [Parameter(ParameterSetName = "Path", Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
+        [Parameter(ParameterSetName = "Path", Position=1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
         [System.IO.FileInfo[]]$Path,
         
         [Parameter(Mandatory = $False)]
@@ -115,7 +115,7 @@ function Get-CUClass {
                                 }
                             } Else {
                                 [CUClass]::New($Class) 
-                            }    
+                            }
                         }
                     } Else {
                         If ( $PSBoundParameters['ClassName'] ) {

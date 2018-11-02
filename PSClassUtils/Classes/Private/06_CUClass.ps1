@@ -3,9 +3,9 @@ Class CUClass {
     [ClassProperty[]]$Property
     [ClassConstructor[]]$Constructor
     [ClassMethod[]]$Method
-    [System.IO.FileInfo]$Path
     [Bool]$IsInherited = $False
     [String]$ParentClassName
+    [System.IO.FileInfo]$Path
     Hidden $Raw
     Hidden $Ast
 
@@ -26,7 +26,6 @@ Class CUClass {
 
     }
 
-    <#
     CUClass ($Name,$Property,$Constructor,$Method,$RawAST){
 
         $This.Name = $Name
@@ -36,7 +35,7 @@ Class CUClass {
         $This.Raw = $RawAST
 
     }
-    #>
+    
 
     ## Set Name, and call Other Set
     [void] SetPropertiesFromRawAST(){
@@ -49,7 +48,7 @@ Class CUClass {
         
         ## Inheritence Check
         If ( !($null -eq $This.Ast.BaseTypes) ) {
-            $This.IsHerited = $True
+            $This.IsInherited = $True
             $This.ParentClassName = $This.Ast.BaseTypes.TypeName.Name
         }
 
@@ -132,7 +131,8 @@ Class CUClass {
                     $visibility = "public"
                 }
             
-                $This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
+                #$This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
+                $This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility)
             }
         }
 
