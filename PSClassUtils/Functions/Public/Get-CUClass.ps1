@@ -81,7 +81,7 @@ function Get-CUClass {
             Foreach ( $RawAST in (Get-CULoadedClass -ClassName $ClassName) ) {
                 
                 $GlobalClassFromRaw = [CUClass]::New($RawAST)
-
+                
                 ## Test if more than one class in document or if inheritances classes
                 If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
                     Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
@@ -105,6 +105,9 @@ function Get-CUClass {
 
                     $RawGlobalAST = Get-CURaw -Path $P.FullName
                     $GlobalClassFromRaw = [CUClass]::New($RawGlobalAST)
+
+                    ## a rechecker
+                    If ( $Null -eq $GlobalClassFromRaw.Ast ) { Continue }
 
                     ## Test if more than one class in document or if inheritances classes
                     If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
