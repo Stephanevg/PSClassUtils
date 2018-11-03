@@ -1,8 +1,8 @@
 Class CUClass {
     [String]$Name
-    [ClassProperty[]]$Property
+    [CUClassProperty[]]$Property
     [ClassConstructor[]]$Constructor
-    [ClassMethod[]]$Method
+    [CUClassMethod[]]$Method
     [Bool]$IsInherited = $False
     [String]$ParentClassName
     [System.IO.FileInfo]$Path
@@ -111,7 +111,7 @@ Class CUClass {
 
             }
 
-            $This.Method += [ClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
+            $This.Method += [CUClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
         }
 
     }
@@ -131,8 +131,8 @@ Class CUClass {
                     $visibility = "public"
                 }
             
-                #$This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
-                $This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility)
+                #$This.Property += [CUClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
+                $This.Property += [CUClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility)
             }
         }
 
@@ -146,14 +146,14 @@ Class CUClass {
     }
 
     ## Return the content of Method
-    [ClassMethod[]]GetCuClassMethod(){
+    [CUClassMethod[]]GetCuCUClassMethod(){
 
         return $This.Method
 
     }
 
     ## Return the content of Property
-    [ClassProperty[]]GetCuClassProperty(){
+    [CUClassProperty[]]GetCuCUClassProperty(){
 
         return $This.Property
 
