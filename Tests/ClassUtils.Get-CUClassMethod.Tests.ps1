@@ -59,7 +59,7 @@ Describe "Testing Get-CUClassMethod"{
         
         
 
-        it 'Should Return 5 methods' {
+        it 'Should Return 4 methods' {
 
 
             (Get-CUClass -Path $ClassScript -ClassName Wap | Get-CUClassMethod | measure).Count | should be 4
@@ -154,7 +154,7 @@ Describe "Testing Get-CUClassMethod"{
             }
         }
 
-        <#
+        
         Context "[ClassMethod] Parameters"{
 
             
@@ -183,6 +183,20 @@ Describe "Testing Get-CUClassMethod"{
             }
             
         }
+        <#
+        Context "[ClassMEthod] Parameters"{
+
+            it "Should work with Path"{
+
+                #$ClassParmPath= Get-Item "File"
+                #Get-CUClassConstructor -ClassName ClassParameter -Path $ClassParmPath
+                #Get-CuClassMethod -Path $ClassParmPath -ClassName "CUClass"
+                Throw "Not implemented. Please write this test"
+            }
+
+
+        }
+        #>
         #>
     }
     
