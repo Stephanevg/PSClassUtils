@@ -8,9 +8,9 @@ InModuleScope PSClassUtils -ScriptBlock {
             {[ClassProperty]::New("ClassName","String", "Value")} | should not throw
         }
 
-        it '[Properties] Should have two Properties' {
+        it '[Properties] Should have right amount of Properties' {
             $Instance = [ClassProperty]::New("ClassName","String", "Value")
-            ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 5
+            ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 4
         }
 
 

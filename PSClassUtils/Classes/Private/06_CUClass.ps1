@@ -64,7 +64,7 @@ Class CUClass {
 
             $Parameters = $null
             $Parameters = $Constructor.Parameters
-            [ClassParameter[]]$Paras = @()
+            [CUClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -74,7 +74,7 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [CUClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
@@ -95,7 +95,7 @@ Class CUClass {
 
             $Parameters = $null
             $Parameters = $Method.Parameters
-            [ClassParameter[]]$Paras = @()
+            [CUClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -105,7 +105,7 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [CUClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 

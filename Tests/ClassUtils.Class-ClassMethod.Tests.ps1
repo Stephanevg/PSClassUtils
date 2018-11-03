@@ -8,20 +8,20 @@ InModuleScope PSClassUtils -ScriptBlock {
 
         
             it '[ClassMethod][Instantiation] (Empty ClassProperty Array) should create an instance without throwing' {
-                $Properties = [ClassParameter[]]@()
+                $Properties = [CUClassParameter[]]@()
                 {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
 
             it '[ClassMethod][Instantiation] (ClassProperty 1 element) should create an instance without throwing' {
-                $Properties = [ClassParameter[]]@()
-                $Properties += [ClassParameter]::New("PropName", "String")
+                $Properties = [CUClassParameter[]]@()
+                $Properties += [CUClassParameter]::New("PropName", "String")
                 {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
 
             it '[ClassMethod][Instantiation] (ClassProperty 10 elements) should create an instance without throwing' {
-                $Properties = [ClassParameter[]]@()
+                $Properties = [CUClassParameter[]]@()
                 for ($i = 0; $i++; $i -eq 10) {
-                    $Properties += [ClassParameter]::New("Prop$1", "String")
+                    $Properties += [CUClassParameter]::New("Prop$1", "String")
                 }
             
                 {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
@@ -32,13 +32,13 @@ InModuleScope PSClassUtils -ScriptBlock {
         
             it '[ClassMethod][Properties] Instance should have 3 Properties' {
             
-                $Properties = [ClassParameter[]]@()
+                $Properties = [CUClassParameter[]]@()
                 $Instance = [ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)
                 ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 4
             }
 
-            $Properties = [ClassParameter[]]@()
-            $Properties += [ClassParameter]::New("PropName", "String")
+            $Properties = [CUClassParameter[]]@()
+            $Properties += [CUClassParameter]::New("PropName", "String")
             $Instance = [ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)
             $Values = @("Name", "Type")
             Foreach ($prop in $values) {

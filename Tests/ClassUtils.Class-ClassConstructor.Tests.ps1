@@ -9,21 +9,21 @@ InModuleScope PSClassUtils -ScriptBlock {
         Context "[ClassConstructor] Constructors and Instantiation" {
 
         
-            it '[ClassConstructor][Instantiation] (Empty ClassParameter Array) should create an instance without throwing' {
-                $Parameter = [ClassParameter[]]@()
+            it '[ClassConstructor][Instantiation] (Empty CUClassParameter Array) should create an instance without throwing' {
+                $Parameter = [CUClassParameter[]]@()
                 {[ClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
 
-            it '[ClassConstructor][Instantiation] (ClassParameter 1 element) should create an instance without throwing' {
-                $Parameter = [ClassParameter[]]@()
-                $Parameter += [ClassParameter]::New("classname","PropName", "String")
+            it '[ClassConstructor][Instantiation] (CUClassParameter 1 element) should create an instance without throwing' {
+                $Parameter = [CUClassParameter[]]@()
+                $Parameter += [CUClassParameter]::New("classname","PropName", "String")
                 {[ClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
 
-            it '[ClassConstructor][Instantiation] (ClassParameter 10 elements) should create an instance without throwing' {
-                $Parameter = [ClassParameter[]]@()
+            it '[ClassConstructor][Instantiation] (CUClassParameter 10 elements) should create an instance without throwing' {
+                $Parameter = [CUClassParameter[]]@()
                 for ($i = 0; $i++; $i -eq 10) {
-                    $Parameter += [ClassParameter]::New("ClassName","Prop$1", "String")
+                    $Parameter += [CUClassParameter]::New("ClassName","Prop$1", "String")
                 }
             
                 {[ClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
@@ -34,13 +34,13 @@ InModuleScope PSClassUtils -ScriptBlock {
         
             it '[ClassConstructor][Parameter] Instance should have 3 Parameter' {
             
-                $Parameter = [ClassParameter[]]@()
+                $Parameter = [CUClassParameter[]]@()
                 $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Parameter)
                 ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 3
             }
 
-            $Parameter = [ClassParameter[]]@()
-            $Parameter += [ClassParameter]::New("PropName", "String")
+            $Parameter = [CUClassParameter[]]@()
+            $Parameter += [CUClassParameter]::New("PropName", "String")
             $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Parameter)
             $Values = @("Name", "Type")
             #Write-Host ($Instance | gm | ? {$_.MemberType -eq "Property"})
