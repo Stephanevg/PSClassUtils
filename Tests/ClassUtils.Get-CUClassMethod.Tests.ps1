@@ -147,35 +147,35 @@ Describe "Testing Get-CUClassMethod"{
 
             $methods = Get-CUClass -Path $ClassScript -ClassName Wap | Get-CUClassMethod
             foreach($w in $methods){
-                    it "Method $($w.Name)(): should be of type 'CUClassProperty'" {
+                    it "Method $($w.Name)(): should be of type 'CUClassMethod'" {
         
-                        $w.GetType().Name | should be 'CUClassProperty'
+                        $w.GetType().Name | should be 'CUClassMethod'
                     }
             }
         }
 
         
-        Context "[CUClassProperty] Parameters"{
+        Context "[CUClassMethod] Parameters"{
 
             
             
-            it '[CUClassProperty][Parameter][-Path] when given a path, it should not throw'{
+            it '[CUClassMethod][Parameter][-Path] when given a path, it should not throw'{
                 {Get-CUClassMethod -Path $ClassScript -ClassName "wap"} | should not throw
             }
             
 
-            it '[CUClassProperty][Parameter][-Path] should return type CUClassProperty'{
+            it '[CUClassMethod][Parameter][-Path] should return type CUClassMethod'{
                 $ret = Get-CUClassMethod -Path $ClassScript -ClassName "wap"
                 foreach($r in $ret){
-                 $r.GetType().fullName | should be "CUClassProperty"
+                 $r.GetType().fullName | should be "CUClassMethod"
                 }
             }
 
-            it '[CUClassProperty][Parameter][-Path][-Raw] It should not throw'{
+            it '[CUClassMethod][Parameter][-Path][-Raw] It should not throw'{
                 {Get-CUClassMethod -Path $ClassScript -ClassName "Wap" -Raw} | should not throw
             }
 
-            it '[CUClassProperty][Parameter][-raw] It should return the right type'{
+            it '[CUClassMethod][Parameter][-raw] It should return the right type'{
                 $raws = Get-CUClassMethod -Path $ClassScript -ClassName "wap" -Raw
                 foreach($r in $raws){
                  $r.GetType().fullName | should be "System.Management.Automation.Language.FunctionMemberAst"   
@@ -184,7 +184,7 @@ Describe "Testing Get-CUClassMethod"{
             
         }
         <#
-        Context "[CUClassProperty] Parameters"{
+        Context "[CUClassMethod] Parameters"{
 
             it "Should work with Path"{
 
