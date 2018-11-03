@@ -1,16 +1,23 @@
 Function Get-CUClassConstructor {
     <#
     .SYNOPSIS
-        Short description
+        Returns all constructors from a specific class
     .DESCRIPTION
         Long description
     .EXAMPLE
-        PS C:\> <example usage>
-        Explanation of what the example does
+        Get-CUClassConstructor -ClassName MYclass  ClassParameter -Path C:\File.ps1
+        
+    .EXAMPLE
+
+        Returns class constructor via the pipeline of type System.IO.FileInfo
+
+        Get-Item C:\Files\FileWithClass.ps1 | Get-CUClassConstructor -ClassName ClassParameter
+        
+
     .INPUTS
-        Inputs (if any)
+        System.IO.FileInfo, CUClass
     .OUTPUTS
-        Output (if any)
+        CuClassConstructor[]
     .NOTES
         General notes
     #>
