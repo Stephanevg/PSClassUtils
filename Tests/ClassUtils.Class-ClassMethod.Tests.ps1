@@ -7,18 +7,18 @@ InModuleScope PSClassUtils -ScriptBlock {
         Context "[ClassMethod] Constructors and Instantiation" {
 
         
-            it '[ClassMethod][Instantiation] (Empty ClassProperty Array) should create an instance without throwing' {
+            it '[ClassMethod][Instantiation] (Empty CUClassProperty Array) should create an instance without throwing' {
                 $Properties = [CUClassParameter[]]@()
                 {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
 
-            it '[ClassMethod][Instantiation] (ClassProperty 1 element) should create an instance without throwing' {
+            it '[ClassMethod][Instantiation] (CUClassProperty 1 element) should create an instance without throwing' {
                 $Properties = [CUClassParameter[]]@()
                 $Properties += [CUClassParameter]::New("PropName", "String")
                 {[ClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)} | should not throw
             }
 
-            it '[ClassMethod][Instantiation] (ClassProperty 10 elements) should create an instance without throwing' {
+            it '[ClassMethod][Instantiation] (CUClassProperty 10 elements) should create an instance without throwing' {
                 $Properties = [CUClassParameter[]]@()
                 for ($i = 0; $i++; $i -eq 10) {
                     $Properties += [CUClassParameter]::New("Prop$1", "String")
