@@ -76,7 +76,9 @@ InModuleScope PSClassUtils -ScriptBlock {
             $a = Get-CUClass -Path $ClassScript
             $a[0].GetType().Name | should be CUClass
         }
-
+        it '[PARAMETER][-Path] When parameter is empty should throw'{
+            {Get-CUClass -Path ""} | should throw
+        }
 
         It '[PIPELINE] Piping a single fileInfo should not throw'{
             { $ClassScript | Get-CUClass} | Should Not Throw

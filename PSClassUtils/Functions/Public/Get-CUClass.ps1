@@ -64,10 +64,15 @@ function Get-CUClass {
         [Parameter(Mandatory = $False, ValueFromPipeline = $False)]
         $ClassName = '*',
         
-        [Alias("FullName")]
-        [Parameter(ParameterSetName = "Path", Position=1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
-        [System.IO.FileInfo[]]$Path,
         
+        [Parameter(ParameterSetName = "Path", Position=1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
+        [ValidateScript({
+            If((Test-Path $_) -and ($_ -ne $null)){
+                return $true
+            }
+        })]
+        [Alias("FullName")]
+        [System.IO.FileInfo[]]$Path,
         [Parameter(Mandatory = $False)]
         [Switch]$Raw = $False
     )
