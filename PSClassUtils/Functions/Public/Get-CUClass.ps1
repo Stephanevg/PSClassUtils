@@ -10,7 +10,7 @@ function Get-CUClass {
         Classes            Enums Source                                                                                 ClassName
         -------            ----- ------                                                                                 ---------
         {ClassProperty}          C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1    ClassProperty
-        {ClassMethod}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_ClassMethod.ps1      ClassMethod
+        {CUClassMethod}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_CUClassMethod.ps1      CUClassMethod
         {ClassConstructor}       C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1 ClassConstructor
         {ASTDocument}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\04_ASTDocument.ps1      ASTDocument
         {ClassEnum}              C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\05_ClassEnum.ps1        ClassEnum
@@ -33,7 +33,7 @@ function Get-CUClass {
         -------            ----- ------                                                                                             ---------
                                 C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\PSClassUtils.psm1
         {ClassProperty}         C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1                ClassProperty
-        {ClassMethod}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_ClassMethod.ps1                  ClassMethod
+        {CUClassMethod}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_CUClassMethod.ps1                  CUClassMethod
         {ClassConstructor}      C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1             ClassConstructor
         {ASTDocument}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\04_ASTDocument.ps1                  ASTDocument
         {ClassEnum}             C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\05_ClassEnum.ps1                    ClassEnum
