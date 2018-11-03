@@ -1,7 +1,7 @@
 Class CUClass {
     [String]$Name
     [CUClassProperty[]]$Property
-    [ClassConstructor[]]$Constructor
+    [CUClassConstructor[]]$Constructor
     [CUClassMethod[]]$Method
     [Bool]$IsInherited = $False
     [String]$ParentClassName
@@ -80,7 +80,7 @@ Class CUClass {
 
             }
 
-            $This.Constructor += [ClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
+            $This.Constructor += [CUClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
         }
 
     }
@@ -139,7 +139,7 @@ Class CUClass {
     }
 
     ## Return the content of Constructor
-    [ClassConstructor[]]GetCuClassConstructor(){
+    [CUClassConstructor[]]GetCuClassConstructor(){
 
         return $This.Constructor
         
