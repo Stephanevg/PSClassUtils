@@ -1,36 +1,58 @@
 Function Get-CUClassConstructor {
     <#
     .SYNOPSIS
-        Short description
+        Returns all constructors from a specific class
     .DESCRIPTION
         Long description
     .EXAMPLE
-        PS C:\> <example usage>
-        Explanation of what the example does
+        Get-CUClassConstructor -ClassName MYclass  ClassParameter -Path C:\File.ps1
+        
+    .EXAMPLE
+
+        Returns class constructor via the pipeline of type System.IO.FileInfo
+
+        Get-Item C:\Files\FileWithClass.ps1 | Get-CUClassConstructor -ClassName ClassParameter
+        
+
     .INPUTS
-        Inputs (if any)
+        System.IO.FileInfo, CUClass
     .OUTPUTS
-        Output (if any)
+        CuClassConstructor[]
     .NOTES
         General notes
     #>
+<<<<<<< HEAD
     [cmdletBinding(DefaultParameterSetName="All")]
+=======
+    [cmdletBinding()]
+    [OutputType('AsCUClassConstructor','CUClassConstructor')]
+>>>>>>> upstream/Feature_Get-CUClassV2
     Param(
-        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+        [Alias("FullName")]
+        [Parameter(ParameterSetName = "Path", Position=1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
+        [System.IO.FileInfo[]]$Path,
+
+        [Parameter(Mandatory=$true, ValueFromPipeline=$False)]
         [String[]]$ClassName,
 
+<<<<<<< HEAD
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set1")]
         [CUClass[]]$InputObject,
 
         [Alias("FullName")]
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
         [System.IO.FileInfo[]]$Path
+=======
+        [Parameter(ValueFromPipeline=$True)]
+        [Object[]]$InputObject
+>>>>>>> upstream/Feature_Get-CUClassV2
     )
 
     BEGIN {}
 
     PROCESS {
 
+<<<<<<< HEAD
         If ( $MyInvocation.PipelinePosition -eq 1 ) {
             
             $ClassParams = @{}
@@ -89,11 +111,33 @@ Function Get-CUClassConstructor {
 
                 }
 
+=======
+
+
+        $ClassParams = @{}
+
+        If($ClassName -or $PSBoundParameters['ClassName'] ){
+            $ClassParams.ClassName = $ClassName
+        }
+
+        If($Path -or $PSBoundParameters['Path'] ){
+            $ClassParams.Path = $Path.FullName
+        }
+
+        If($InputObject){
+            $ClassParams.ClassName = $ClassName
+        }
+
+       
+            $Class = Get-CuClass @ClassParams
+            If($Class){
+
+                $Class.GetCuClassConstructor()
+>>>>>>> upstream/Feature_Get-CUClassV2
             }
 
         }
 
-    }
 
     END {}
 

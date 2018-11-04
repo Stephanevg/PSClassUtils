@@ -1,11 +1,11 @@
-Class ClassProperty {
+Class CUClassProperty {
     [String]$ClassName
     [String]$Name
     [String]$Type
     [string]$Visibility
     Hidden $Raw
 
-    ClassProperty([String]$ClassName,[String]$Name,[String]$Type){
+    CUClassProperty([String]$ClassName,[String]$Name,[String]$Type){
 
         $this.ClassName = $ClassName
         $this.Name = $Name
@@ -13,7 +13,7 @@ Class ClassProperty {
 
     }
 
-    ClassProperty([String]$ClassName,[String]$Name,[String]$Type,[String]$Visibility){
+    CUClassProperty([String]$ClassName,[String]$Name,[String]$Type,[String]$Visibility){
 
         $this.ClassName = $ClassName
         $this.Name = $Name
@@ -22,7 +22,7 @@ Class ClassProperty {
 
     }
 
-    ClassProperty([String]$ClassName,[String]$Name,[String]$Type,[String]$Visibility,$Raw){
+    CUClassProperty([String]$ClassName,[String]$Name,[String]$Type,[String]$Visibility,$Raw){
 
         $this.ClassName = $ClassName
         $this.Name = $Name

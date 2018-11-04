@@ -16,47 +16,64 @@ Function Get-CuClassMethod {
     #>
     [cmdletBinding()]
     Param(
-        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+
+        [Alias("FullName")]
+        [Parameter(ParameterSetName = "Path", Position = 1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
+        [System.IO.FileInfo[]]$Path,
+
+        [Parameter(Mandatory = $True, ValueFromPipeline = $False)]
         [String[]]$ClassName,
 
-        [Parameter(ValueFromPipeline=$True)]
-        [ValidateScript({
-            If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
-        })]
-        [Object[]]$InputObject
+        [Parameter(Mandatory = $false, ValueFromPipeline = $False)]
+        [String]$MethodName,
+
+        [Parameter(ValueFromPipeline = $True)]
+        [ValidateScript( {
+                If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
+            })]
+        [Object[]]$InputObject,
+
+        [Switch]$Raw
     )
 
     BEGIN {}
 
     PROCESS {
 
-        If ( $MyInvocation.PipelinePosition -eq 1 ) {
-            ## Not from the Pipeline
-            If ( $Null -eq $PSBoundParameters['InputObject'] ) {
-                Throw "Please Specify an InputObject of type CUClass"
-            }
-            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
-                $InputObject.GetCuClassMethod()
-            } Else {
-                Foreach ( $C in $ClassName ){
-                    ($InputObject | where Name -eq $c).GetCuClassMethod()
-                }
-            }
+        $ClassParams = @{}
 
-        } Else {
-            ## From the Pipeline
-            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
-                #$InputObject.Name
-                $InputObject.GetCuClassMethod()
-                #"{0} - {1}" -f $InputObject.name,$($null -eq $InputObject.Method)
-                #$InputObject.Method
-                
-            } Else {
-                Throw "-ClassName parameter must be specified on the left side of the pipeline"
-            }
+        If ($ClassName -or $PSBoundParameters['ClassName'] ) {
+            $ClassParams.ClassName = $ClassName
         }
 
+        If ($Path -or $PSBoundParameters['Path'] ) {
+            $ClassParams.Path = $Path.FullName
+        }
+
+        If ($InputObject) {
+            $ClassParams.ClassName = $ClassName
+        }
+
+       
+        $Class = Get-CuClass @ClassParams
+        If ($Class) {
+
+            $Method = $Class.GetCuClassMethod()
+
+            if($MethodName){
+                $Method = $MethodName | ? {$_.Name -eq $MethodName}
+            }
+
+            if($Raw){
+                $Method.raw
+            }Else{
+                $Method
+            }
+        }
     }
+
+
+
 
     END {}
 

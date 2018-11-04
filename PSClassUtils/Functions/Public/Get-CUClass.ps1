@@ -10,8 +10,8 @@ function Get-CUClass {
         Classes            Enums Source                                                                                 ClassName
         -------            ----- ------                                                                                 ---------
         {ClassProperty}          C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1    ClassProperty
-        {ClassMethod}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_ClassMethod.ps1      ClassMethod
-        {ClassConstructor}       C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1 ClassConstructor
+        {CUClassMethod}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_CUClassMethod.ps1      CUClassMethod
+        {CUClassConstructor}       C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1 CUClassConstructor
         {ASTDocument}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\04_ASTDocument.ps1      ASTDocument
         {ClassEnum}              C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\05_ClassEnum.ps1        ClassEnum
         
@@ -33,8 +33,8 @@ function Get-CUClass {
         -------            ----- ------                                                                                             ---------
                                 C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\PSClassUtils.psm1
         {ClassProperty}         C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1                ClassProperty
-        {ClassMethod}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_ClassMethod.ps1                  ClassMethod
-        {ClassConstructor}      C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1             ClassConstructor
+        {CUClassMethod}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_CUClassMethod.ps1                  CUClassMethod
+        {CUClassConstructor}      C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1             CUClassConstructor
         {ASTDocument}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\04_ASTDocument.ps1                  ASTDocument
         {ClassEnum}             C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\05_ClassEnum.ps1                    ClassEnum
                                 C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Functions\Private\ConvertTo-TitleCase.ps1
@@ -64,10 +64,15 @@ function Get-CUClass {
         [Parameter(Mandatory = $False, ValueFromPipeline = $False)]
         $ClassName = '*',
         
-        [Alias("FullName")]
-        [Parameter(ParameterSetName = "Path", Position=1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
-        [System.IO.FileInfo[]]$Path,
         
+        [Parameter(ParameterSetName = "Path", Position=1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
+        [ValidateScript({
+            If((Test-Path $_) -and ($_ -ne $null)){
+                return $true
+            }
+        })]
+        [Alias("FullName")]
+        [System.IO.FileInfo[]]$Path,
         [Parameter(Mandatory = $False)]
         [Switch]$Raw = $False
     )

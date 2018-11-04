@@ -1,8 +1,8 @@
 Class CUClass {
     [String]$Name
-    [ClassProperty[]]$Property
-    [ClassConstructor[]]$Constructor
-    [ClassMethod[]]$Method
+    [CUClassProperty[]]$Property
+    [CUClassConstructor[]]$Constructor
+    [CUClassMethod[]]$Method
     [Bool]$IsInherited = $False
     [String]$ParentClassName
     [System.IO.FileInfo]$Path
@@ -64,7 +64,7 @@ Class CUClass {
 
             $Parameters = $null
             $Parameters = $Constructor.Parameters
-            [ClassParameter[]]$Paras = @()
+            [CUClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -74,13 +74,13 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [CUClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
             }
 
-            $This.Constructor += [ClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
+            $This.Constructor += [CUClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
         }
 
     }
@@ -95,7 +95,7 @@ Class CUClass {
 
             $Parameters = $null
             $Parameters = $Method.Parameters
-            [ClassParameter[]]$Paras = @()
+            [CUClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -105,13 +105,13 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [CUClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
             }
 
-            $This.Method += [ClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
+            $This.Method += [CUClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
         }
 
     }
@@ -131,29 +131,29 @@ Class CUClass {
                     $visibility = "public"
                 }
             
-                #$This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
-                $This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility)
+                #$This.Property += [CUClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
+                $This.Property += [CUClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility)
             }
         }
 
     }
 
     ## Return the content of Constructor
-    [ClassConstructor[]]GetCuClassConstructor(){
+    [CUClassConstructor[]]GetCuClassConstructor(){
 
         return $This.Constructor
         
     }
 
     ## Return the content of Method
-    [ClassMethod[]]GetCuClassMethod(){
+    [CUClassMethod[]]GetCuCUClassMethod(){
 
         return $This.Method
 
     }
 
     ## Return the content of Property
-    [ClassProperty[]]GetCuClassProperty(){
+    [CUClassProperty[]]GetCuCUClassProperty(){
 
         return $This.Property
 

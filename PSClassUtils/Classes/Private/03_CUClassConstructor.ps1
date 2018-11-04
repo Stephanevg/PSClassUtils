@@ -1,16 +1,16 @@
-Class ClassConstructor {
+Class CUClassConstructor {
     [String]$ClassName
     [String]$Name
-    [ClassParameter[]]$Parameter
+    [CUClassParameter[]]$Parameter
     hidden $Raw
 
-    ClassConstructor([String]$ClassName,[String]$Name,[ClassParameter[]]$Parameter){
+    CUClassConstructor([String]$ClassName,[String]$Name,[CUClassParameter[]]$Parameter){
         $this.ClassName = $ClassName
         $this.Name = $Name
         $This.Parameter = $Parameter
     }
 
-    ClassConstructor([String]$ClassName,[String]$Name,[ClassParameter[]]$Parameter,$Raw){
+    CUClassConstructor([String]$ClassName,[String]$Name,[CUClassParameter[]]$Parameter,$Raw){
         $this.ClassName = $ClassName
         $this.Name = $Name
         $This.Parameter = $Parameter
