@@ -1,4 +1,4 @@
-Function Get-CuClassMethod {
+Function Get-CUClassMethod {
     <#
     .SYNOPSIS
         Short description
@@ -14,66 +14,112 @@ Function Get-CuClassMethod {
     .NOTES
         General notes
     #>
-    [cmdletBinding()]
+    [cmdletBinding(DefaultParameterSetName="All")]
+    [OutputType([CUClassMethod[]])]
     Param(
-
-        [Alias("FullName")]
-        [Parameter(ParameterSetName = "Path", Position = 1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
-        [System.IO.FileInfo[]]$Path,
-
-        [Parameter(Mandatory = $True, ValueFromPipeline = $False)]
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
 
-        [Parameter(Mandatory = $false, ValueFromPipeline = $False)]
-        [String]$MethodName,
+        [Parameter(ValueFromPipeline=$True,ParameterSetName="Set1")]
+        [CUClass[]]$InputObject,
 
-        [Parameter(ValueFromPipeline = $True)]
-        [ValidateScript( {
-                If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
-            })]
-        [Object[]]$InputObject,
+        [Alias("FullName")]
+        [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
+        [System.IO.FileInfo[]]$Path,
 
-        [Switch]$Raw
+        [Parameter(Mandatory=$False,DontShow)]
+        [Switch]$Code
     )
 
     BEGIN {}
 
     PROCESS {
 
-        $ClassParams = @{}
+        Switch ( $PSCmdlet.ParameterSetName ) {
 
-        If ($ClassName -or $PSBoundParameters['ClassName'] ) {
-            $ClassParams.ClassName = $ClassName
-        }
+            ## CUClass as input
+            Set1 {
 
-        If ($Path -or $PSBoundParameters['Path'] ) {
-            $ClassParams.Path = $Path.FullName
-        }
+                $ClassParams = @{}
+                
+                ## ClassName was specified
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
 
-        If ($InputObject) {
-            $ClassParams.ClassName = $ClassName
-        }
-
-       
-        $Class = Get-CuClass @ClassParams
-        If ($Class) {
-
-            $Method = $Class.GetCuClassMethod()
-
-            if($MethodName){
-                $Method = $MethodName | ? {$_.Name -eq $MethodName}
+                Foreach ( $Class in $InputObject ) {
+                    If ( $ClassParams.ClassName ) {
+                        If ( $Class.ClassName -eq $ClassParams.ClassName ) {
+                            ## Code switch was used
+                            If ( $Code ) {
+                                $Class.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
+                            } Else {
+                                $Class.GetCUClassMethod()
+                            }
+                        }
+                    } Else {
+                        If ( $null -ne $Class.Method ) {
+                            ## Code switch was used
+                            If ( $Code ) {
+                                $Class.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
+                            } Else {
+                                $Class.GetCUClassMethod()
+                            }
+                        }
+                    }
+                }
             }
 
-            if($Raw){
-                $Method.raw
-            }Else{
-                $Method
+            Set2 {
+
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+
+                Foreach ( $P in $Path ) {
+                    $ClassParams = @{}
+                    If ( $P.extension -in ".ps1",".psm1" ) {
+
+                        If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                            $ClassParams.Path = $P.FullName
+                        } Else {
+                            $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
+                        }
+                        
+                        $x=Get-CuClass @ClassParams
+                        If ( $null -ne $x.Method ) {
+                            If ( $Code ) {
+                                $x.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
+                            } Else {
+                                $x.GetCUClassMethod()
+                            }
+                        }
+                    }
+                }
+            }
+
+            Default {
+                $ClassParams = @{}
+
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+
+                Foreach( $x in (Get-CuClass @ClassParams) ){
+                    If ( $x.Method.count -ne 0 ) {
+                        If ( $Code ) {
+                            $x.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
+                        } Else {
+                            $x.GetCUClassMethod()
+                        }
+                    }
+                }
+                
+                
             }
         }
+
     }
-
-
-
 
     END {}
 

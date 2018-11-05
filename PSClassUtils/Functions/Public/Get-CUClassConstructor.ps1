@@ -15,6 +15,7 @@ Function Get-CUClassConstructor {
         General notes
     #>
     [cmdletBinding(DefaultParameterSetName="All")]
+    [OutputType([CUClassMethod[]])]
     Param(
         [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
@@ -24,73 +25,98 @@ Function Get-CUClassConstructor {
 
         [Alias("FullName")]
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
-        [System.IO.FileInfo[]]$Path
+        [System.IO.FileInfo[]]$Path,
+
+        [Parameter(Mandatory=$False,DontShow)]
+        [Switch]$Code
     )
 
     BEGIN {}
 
     PROCESS {
 
-        If ( $MyInvocation.PipelinePosition -eq 1 ) {
-            
-            $ClassParams = @{}
+        Switch ( $PSCmdlet.ParameterSetName ) {
 
-            If ( $null -ne $PSBoundParameters['Path'] ) {
-                Foreach ( $Path in $PSBoundParameters['Path'] ) {
-                    $Path = Get-Item (resolve-path $Path).Path
-                    $ClassParams.Path = $Path.FullName
-                }
-            }
+            ## CUClass as input
+            Set1 {
 
-            If ( $null -ne $PSBoundParameters['ClassName'] ) {
-                $ClassParams.ClassName = $PSBoundParameters['ClassName']
-            }
-
-            $x = Get-CuClass @ClassParams
-            If ( $Null -ne $x ) {
-                $x.GetCuClassConstructor()
-            }
-
-
-        } Else {
-
-            Switch ($PSCmdlet.ParameterSetName) {
-
-                "Set1" {
-
-                    $ClassFilter = If( $PSBoundParameters['ClassName'] ) { $PSBoundParameters['ClassName'] } Else { "*" }
-                    Foreach ( $Class in $InputObject ) {
-                        If ( $Class.Name -like $ClassFilter ){
-                            $Class.GetCuClassConstructor()
-                        }
-                    }
-                    
+                $ClassParams = @{}
+                
+                ## ClassName was specified
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
 
-                "Set2" {
-
-                    $ClassParams = @{}
-                    If( $PSBoundParameters['ClassName'] ) { 
-                        $ClassParams.ClassName = $PSBoundParameters['ClassName']
-                    }
-
-                    Foreach ( $P in $Path ) {
-                        
-                        If ( $P.Extension -in '.ps1', '.psm1') {
-                            $ClassParams.Path = $P.FullName
-                            ## On recupere la classe, Si c'est un ps1 ou psm1 qui ne contient pas de classes alors x est null
-                            $x = Get-CuClass @ClassParams
-                            If ( $Null -ne $x) {
-                                $x.GetCuClassConstructor()
+                Foreach ( $Class in $InputObject ) {
+                    If ( $ClassParams.ClassName ) {
+                        If ( $Class.ClassName -eq $ClassParams.ClassName ) {
+                            ## Code switch was used
+                            If ( $Code ) {
+                                $Class.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
+                            } Else {
+                                $Class.GetCUClassConstructor()
                             }
                         }
-
+                    } Else {
+                        If ( $null -ne $Class.Constructor ) {
+                            ## Code switch was used
+                            If ( $Code ) {
+                                $Class.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
+                            } Else {
+                                $Class.GetCUClassConstructor()
+                            }
+                        }
                     }
-
                 }
-
             }
 
+            Set2 {
+
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+
+                Foreach ( $P in $Path ) {
+                    $ClassParams = @{}
+                    If ( $P.extension -in ".ps1",".psm1" ) {
+
+                        If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                            $ClassParams.Path = $P.FullName
+                        } Else {
+                            $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
+                        }
+                        
+                        $x=Get-CuClass @ClassParams
+                        If ( $null -ne $x.Constructor ) {
+                            If ( $Code ) {
+                                $x.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
+                            } Else {
+                                $x.GetCUClassConstructor()
+                            }
+                        }
+                    }
+                }
+            }
+
+            Default {
+                $ClassParams = @{}
+
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+
+                Foreach($x in (Get-CuClass @ClassParams)){
+                    If ( $x.Constructor.count -ne 0 ) {
+                        If ( $Code ) {
+                            $x.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
+                        } Else {
+                            $x.GetCUClassConstructor()
+                        }
+                    }
+                }
+                
+                
+            }
         }
 
     }
