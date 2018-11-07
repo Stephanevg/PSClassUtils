@@ -11,6 +11,7 @@ function Get-CUClass {
         [Parameter(Mandatory = $False)]
         [Switch]$Raw = $False
     )
+
     BEGIN {
     }
 
@@ -39,21 +40,38 @@ function Get-CUClass {
                         { $GlobalClassFromRaw.Ast.count -eq 1 } {
                             If ( $PSBoundParameters['ClassName'] ) {
                                 If ( $GlobalClassFromRaw.name -eq $PSBoundParameters['ClassName'] ) {
-                                    $GlobalClassFromRaw
+                                    If ( $PSBoundParameters['Raw'] ) {
+                                        $GlobalClassFromRaw.Raw
+                                    } Else {
+                                        $GlobalClassFromRaw 
+                                    }
                                 }
                             } Else {
-                                $GlobalClassFromRaw
+                                If ( $PSBoundParameters['Raw'] ) {
+                                    $GlobalClassFromRaw.Raw
+                                } Else {
+                                    $GlobalClassFromRaw 
+                                }
                             }
                             break;
-                        } 
+                        }
+
                         { $GlobalClassFromRaw.Ast.count -gt 1 } {
                             Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
                                 If ( $PSBoundParameters['ClassName'] ) {
                                     If ( $Class.name -eq $PSBoundParameters['ClassName'] ) {
-                                        [CUClass]::New($Class) 
+                                        If ( $PSBoundParameters['Raw'] ) {
+                                            ([CUClass]::New($Class)).Raw
+                                        } Else {
+                                            [CUClass]::New($Class) 
+                                        }
                                     }
                                 } Else {
-                                    [CUClass]::New($Class) 
+                                    If ( $PSBoundParameters['Raw'] ) {
+                                        ([CUClass]::New($Class)).Raw
+                                    } Else {
+                                        [CUClass]::New($Class) 
+                                    }
                                 }
                             }
                             break;
@@ -71,10 +89,19 @@ function Get-CUClass {
                 ## Test if more than one class in document or if inheritances classes
                 If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
                     Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
-                        [CUClass]::New($Class)
+                        If ( $PSBoundParameters['Raw'] ) {
+                            ([CUClass]::New($Class)).Raw
+                        } Else {
+                            [CUClass]::New($Class) 
+                        }
                     }
                 } Else {
-                    $GlobalClassFromRaw
+                    If ( $PSBoundParameters['Raw'] ) {
+                        ($GlobalClassFromRaw).Raw
+                    } Else {
+                        $GlobalClassFromRaw 
+                    }
+                     
                 }
 
             } 

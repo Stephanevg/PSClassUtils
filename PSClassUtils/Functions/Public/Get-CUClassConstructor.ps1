@@ -25,10 +25,7 @@ Function Get-CUClassConstructor {
 
         [Alias("FullName")]
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
-        [System.IO.FileInfo[]]$Path,
-
-        [Parameter(Mandatory=$False,DontShow)]
-        [Switch]$Code
+        [System.IO.FileInfo[]]$Path
     )
 
     BEGIN {}
@@ -49,22 +46,12 @@ Function Get-CUClassConstructor {
 
                 Foreach ( $Class in $InputObject ) {
                     If ( $ClassParams.ClassName ) {
-                        If ( $Class.ClassName -eq $ClassParams.ClassName ) {
-                            ## Code switch was used
-                            If ( $Code ) {
-                                $Class.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
-                            } Else {
-                                $Class.GetCUClassConstructor()
-                            }
+                        If ( $Class.Name -eq $ClassParams.ClassName ) {
+                            $Class.GetCUClassConstructor()
                         }
                     } Else {
                         If ( $null -ne $Class.Constructor ) {
-                            ## Code switch was used
-                            If ( $Code ) {
-                                $Class.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
-                            } Else {
-                                $Class.GetCUClassConstructor()
-                            }
+                            $Class.GetCUClassConstructor()
                         }
                     }
                 }
@@ -72,12 +59,14 @@ Function Get-CUClassConstructor {
 
             Set2 {
 
+                $ClassParams = @{}
+
                 If ( $null -ne $PSBoundParameters['ClassName'] ) {
                     $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
 
                 Foreach ( $P in $Path ) {
-                    $ClassParams = @{}
+                   
                     If ( $P.extension -in ".ps1",".psm1" ) {
 
                         If ($PSCmdlet.MyInvocation.ExpectingInput) {
@@ -88,11 +77,7 @@ Function Get-CUClassConstructor {
                         
                         $x=Get-CuClass @ClassParams
                         If ( $null -ne $x.Constructor ) {
-                            If ( $Code ) {
-                                $x.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
-                            } Else {
-                                $x.GetCUClassConstructor()
-                            }
+                            $x.GetCUClassConstructor()
                         }
                     }
                 }
@@ -107,11 +92,7 @@ Function Get-CUClassConstructor {
 
                 Foreach($x in (Get-CuClass @ClassParams)){
                     If ( $x.Constructor.count -ne 0 ) {
-                        If ( $Code ) {
-                            $x.GetCUClassConstructor() | select-object *,@{l="CodeText";e={$_.Extent}}
-                        } Else {
-                            $x.GetCUClassConstructor()
-                        }
+                        $x.GetCUClassConstructor()
                     }
                 }
                 

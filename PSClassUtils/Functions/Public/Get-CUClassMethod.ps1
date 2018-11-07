@@ -25,10 +25,7 @@ Function Get-CUClassMethod {
 
         [Alias("FullName")]
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
-        [System.IO.FileInfo[]]$Path,
-
-        [Parameter(Mandatory=$False,DontShow)]
-        [Switch]$Code
+        [System.IO.FileInfo[]]$Path
     )
 
     BEGIN {}
@@ -49,22 +46,12 @@ Function Get-CUClassMethod {
 
                 Foreach ( $Class in $InputObject ) {
                     If ( $ClassParams.ClassName ) {
-                        If ( $Class.ClassName -eq $ClassParams.ClassName ) {
-                            ## Code switch was used
-                            If ( $Code ) {
-                                $Class.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
-                            } Else {
-                                $Class.GetCUClassMethod()
-                            }
+                        If ( $Class.Name -eq $ClassParams.ClassName ) {
+                            $Class.GetCUClassMethod()
                         }
                     } Else {
                         If ( $null -ne $Class.Method ) {
-                            ## Code switch was used
-                            If ( $Code ) {
-                                $Class.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
-                            } Else {
-                                $Class.GetCUClassMethod()
-                            }
+                            $Class.GetCUClassMethod()
                         }
                     }
                 }
@@ -72,12 +59,13 @@ Function Get-CUClassMethod {
 
             Set2 {
 
+                $ClassParams = @{}
                 If ( $null -ne $PSBoundParameters['ClassName'] ) {
                     $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
 
                 Foreach ( $P in $Path ) {
-                    $ClassParams = @{}
+                    
                     If ( $P.extension -in ".ps1",".psm1" ) {
 
                         If ($PSCmdlet.MyInvocation.ExpectingInput) {
@@ -88,11 +76,7 @@ Function Get-CUClassMethod {
                         
                         $x=Get-CuClass @ClassParams
                         If ( $null -ne $x.Method ) {
-                            If ( $Code ) {
-                                $x.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
-                            } Else {
-                                $x.GetCUClassMethod()
-                            }
+                            $x.GetCUClassMethod()
                         }
                     }
                 }
@@ -107,11 +91,7 @@ Function Get-CUClassMethod {
 
                 Foreach( $x in (Get-CuClass @ClassParams) ){
                     If ( $x.Method.count -ne 0 ) {
-                        If ( $Code ) {
-                            $x.GetCUClassMethod() | select-object *,@{l="CodeText";e={$_.Extent}}
-                        } Else {
-                            $x.GetCUClassMethod()
-                        }
+                        $x.GetCUClassMethod()
                     }
                 }
                 
