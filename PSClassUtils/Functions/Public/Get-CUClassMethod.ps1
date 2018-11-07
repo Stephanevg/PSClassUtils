@@ -20,6 +20,9 @@ Function Get-CUClassMethod {
         [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
 
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+        [String[]]$MethodName='*',
+
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set1")]
         [CUClass[]]$InputObject,
 
@@ -47,16 +50,17 @@ Function Get-CUClassMethod {
                 Foreach ( $Class in $InputObject ) {
                     If ( $ClassParams.ClassName ) {
                         If ( $Class.Name -eq $ClassParams.ClassName ) {
-                            $Class.GetCUClassMethod()
+                            $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
                         }
                     } Else {
                         If ( $null -ne $Class.Method ) {
-                            $Class.GetCUClassMethod()
+                            $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
                         }
                     }
                 }
             }
 
+            ## System.io.FileInfo as Input
             Set2 {
 
                 $ClassParams = @{}
@@ -76,22 +80,23 @@ Function Get-CUClassMethod {
                         
                         $x=Get-CuClass @ClassParams
                         If ( $null -ne $x.Method ) {
-                            $x.GetCUClassMethod()
+                            $x.GetCUClassMethod() | Where-Object Name -like $MethodName
                         }
                     }
                 }
             }
 
+            ## System.io.FileInfo or Path Not Specified
             Default {
                 $ClassParams = @{}
 
                 If ( $null -ne $PSBoundParameters['ClassName'] ) {
                     $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
-
+                
                 Foreach( $x in (Get-CuClass @ClassParams) ){
                     If ( $x.Method.count -ne 0 ) {
-                        $x.GetCUClassMethod()
+                        $x.GetCUClassMethod() | Where-Object Name -like $MethodName
                     }
                 }
                 
