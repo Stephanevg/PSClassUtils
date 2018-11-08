@@ -93,8 +93,8 @@ $Graph = Graph {
                                 }
 
                                 $RowName = $visibility + $RowName
-                                $i++
-                                write-host $i + ' - ' + $RowName
+                                #$i++
+                                #write-host $i + ' - ' + $RowName
                                 Row $RowName -Name "Row_$($mem.Name)"
                             }
                         }
