@@ -141,9 +141,10 @@ Function Write-CUClassDiagram {
         #$Path = $null
     }
     elseif ($PathObject -is [System.IO.FileInfo]) {
-        [System.IO.FileInfo]$File = (Resolve-Path -Path $Path).Path
+        $FolderPath = $PathObject.Parent.FullName
+        [System.IO.FileInfo]$File = $PathObject.FullName
         $ExportFileName = $File.BaseName + "." + $OutputFormat
-        $AllItems = $File
+        $Classes = $File | Get-CUCLass | Group-Object -Property Path
     }
     else {
         throw 'Path provided was not a file or folder'
