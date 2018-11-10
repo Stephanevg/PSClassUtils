@@ -3,6 +3,7 @@ Class CUClassConstructor {
     [String]$Name
     [CUClassParameter[]]$Parameter
     hidden $Raw
+    #hidden $Extent
 
     CUClassConstructor([String]$ClassName,[String]$Name,[CUClassParameter[]]$Parameter){
         $this.ClassName = $ClassName
@@ -15,6 +16,7 @@ Class CUClassConstructor {
         $this.Name = $Name
         $This.Parameter = $Parameter
         $This.Raw = $Raw
+        #$This.Extent = $Raw.Extent.Text
     }
 
 }

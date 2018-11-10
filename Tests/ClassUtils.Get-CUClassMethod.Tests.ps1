@@ -79,9 +79,9 @@ Describe "Testing Get-CUClassMethod"{
             foreach($w in $methods){
                     if($w.Parameter){
 
-                        it "$($w.Name) should have Parameter of type 'ClassParameter[]'" {
+                        it "$($w.Name) should have Parameter of type 'CUClassParameter[]'" {
 
-                            $w.Parameter.GetType().Name | should be 'ClassParameter[]'
+                            $w.Parameter.GetType().Name | should be 'CUClassParameter[]'
                         }
                     }
             }

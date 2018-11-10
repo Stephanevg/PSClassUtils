@@ -1,4 +1,4 @@
-Function Get-CuClassMethod {
+Function Get-CUClassMethod {
     <#
     .SYNOPSIS
         Short description
@@ -14,66 +14,97 @@ Function Get-CuClassMethod {
     .NOTES
         General notes
     #>
-    [cmdletBinding()]
+    [cmdletBinding(DefaultParameterSetName="All")]
+    [OutputType([CUClassMethod[]])]
     Param(
-
-        [Alias("FullName")]
-        [Parameter(ParameterSetName = "Path", Position = 1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
-        [System.IO.FileInfo[]]$Path,
-
-        [Parameter(Mandatory = $True, ValueFromPipeline = $False)]
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
 
-        [Parameter(Mandatory = $false, ValueFromPipeline = $False)]
-        [String]$MethodName,
+        [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
+        [String[]]$MethodName='*',
 
-        [Parameter(ValueFromPipeline = $True)]
-        [ValidateScript( {
-                If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
-            })]
-        [Object[]]$InputObject,
+        [Parameter(ValueFromPipeline=$True,ParameterSetName="Set1")]
+        [CUClass[]]$InputObject,
 
-        [Switch]$Raw
+        [Alias("FullName")]
+        [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
+        [System.IO.FileInfo[]]$Path
     )
 
     BEGIN {}
 
     PROCESS {
 
-        $ClassParams = @{}
+        Switch ( $PSCmdlet.ParameterSetName ) {
 
-        If ($ClassName -or $PSBoundParameters['ClassName'] ) {
-            $ClassParams.ClassName = $ClassName
-        }
+            ## CUClass as input
+            Set1 {
 
-        If ($Path -or $PSBoundParameters['Path'] ) {
-            $ClassParams.Path = $Path.FullName
-        }
+                $ClassParams = @{}
+                
+                ## ClassName was specified
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
 
-        If ($InputObject) {
-            $ClassParams.ClassName = $ClassName
-        }
-
-       
-        $Class = Get-CuClass @ClassParams
-        If ($Class) {
-
-            $Method = $Class.GetCuClassMethod()
-
-            if($MethodName){
-                $Method = $MethodName | ? {$_.Name -eq $MethodName}
+                Foreach ( $Class in $InputObject ) {
+                    If ( $ClassParams.ClassName ) {
+                        If ( $Class.Name -eq $ClassParams.ClassName ) {
+                            $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
+                        }
+                    } Else {
+                        If ( $null -ne $Class.Method ) {
+                            $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
+                        }
+                    }
+                }
             }
 
-            if($Raw){
-                $Method.raw
-            }Else{
-                $Method
+            ## System.io.FileInfo as Input
+            Set2 {
+
+                $ClassParams = @{}
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+
+                Foreach ( $P in $Path ) {
+                    
+                    If ( $P.extension -in ".ps1",".psm1" ) {
+
+                        If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                            $ClassParams.Path = $P.FullName
+                        } Else {
+                            $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
+                        }
+                        
+                        $x=Get-CuClass @ClassParams
+                        If ( $null -ne $x.Method ) {
+                            $x.GetCUClassMethod() | Where-Object Name -like $MethodName
+                        }
+                    }
+                }
+            }
+
+            ## System.io.FileInfo or Path Not Specified
+            Default {
+                $ClassParams = @{}
+
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+                
+                Foreach( $x in (Get-CuClass @ClassParams) ){
+                    If ( $x.Method.count -ne 0 ) {
+                        $x.GetCUClassMethod() | Where-Object Name -like $MethodName
+                    }
+                }
+                
+                
             }
         }
+
     }
-
-
-
 
     END {}
 

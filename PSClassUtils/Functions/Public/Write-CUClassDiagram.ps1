@@ -130,11 +130,13 @@ Function Write-CUClassDiagram {
         $ExportFileName = "Diagram" + "." + $OutputFormat
         $FolderPath = $Path
 
-        if ($Recurse) {
+        If ($Recurse) {
 
-            $AllItems = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" -Recurse
-        } else {
-            $AllItems = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1"
+            $Classes = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
+
+        } Else {
+
+            $Classes = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
         }
         #$Path = $null
     }
@@ -158,10 +160,10 @@ Function Write-CUClassDiagram {
         $FullExportPath = Join-Path -Path $SourceFolder -ChildPath $ExportFileName
         
     } else {
-        if ($ExportFolder.Exists){
+        If ($ExportFolder.Exists){
 
             $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
-        } else {
+        } Else {
             throw "$($ExportFolder.FullName) Doesn't exist"
         }
 
@@ -169,10 +171,10 @@ Function Write-CUClassDiagram {
 
     #endregion
 
-    $AST = Get-CUAst -Path $AllItems 
+    #$Classes = Get-CUClass -Path $AllItems
     
     $GraphParams = @{}
-    $GraphParams.InputObject = $AST
+    $GraphParams.InputObject = $Classes
 
     if ($IgnoreCase) {
         $GraphParams.IgnoreCase = $true

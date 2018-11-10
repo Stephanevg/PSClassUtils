@@ -4,6 +4,7 @@ Class CUClassMethod {
     [String]$ReturnType
     [CUClassParameter[]]$Parameter
     hidden $Raw
+    #hidden $Extent
 
     CUClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[CUClassParameter[]]$Parameter){
         $this.ClassName = $ClassName
@@ -17,7 +18,8 @@ Class CUClassMethod {
         $this.Name = $Name
         $This.ReturnType = $ReturnType
         $This.Parameter = $Parameter
-        $This.Raw
+        $This.Raw = $Raw
+        #$This.Extent = $Raw.Extent.Text
     }
 
 }

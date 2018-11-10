@@ -139,21 +139,21 @@ Class CUClass {
     }
 
     ## Return the content of Constructor
-    [CUClassConstructor[]]GetCuClassConstructor(){
+    [CUClassConstructor[]]GetCUClassConstructor(){
 
         return $This.Constructor
         
     }
 
     ## Return the content of Method
-    [CUClassMethod[]]GetCuCUClassMethod(){
+    [CUClassMethod[]]GetCUClassMethod(){
 
         return $This.Method
 
     }
 
     ## Return the content of Property
-    [CUClassProperty[]]GetCuCUClassProperty(){
+    [CUClassProperty[]]GetCUClassProperty(){
 
         return $This.Property
 
