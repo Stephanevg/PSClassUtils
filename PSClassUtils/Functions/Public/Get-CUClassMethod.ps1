@@ -28,7 +28,9 @@ Function Get-CUClassMethod {
 
         [Alias("FullName")]
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
-        [System.IO.FileInfo[]]$Path
+        [System.IO.FileInfo[]]$Path,
+
+        [Switch]$Raw
     )
 
     BEGIN {}
@@ -50,11 +52,21 @@ Function Get-CUClassMethod {
                 Foreach ( $Class in $InputObject ) {
                     If ( $ClassParams.ClassName ) {
                         If ( $Class.Name -eq $ClassParams.ClassName ) {
-                            $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
+                            If ( $PSBoundParameters['Raw'] ) {
+                                
+                                ($Class.GetCUClassMethod() | Where-Object Name -like $MethodName).Raw
+                            } Else {
+                                $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
+                            }
                         }
                     } Else {
                         If ( $null -ne $Class.Method ) {
-                            $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
+                            If ( $PSBoundParameters['Raw'] ) {
+                                
+                                ($Class.GetCUClassMethod() | Where-Object Name -like $MethodName).Raw
+                            } Else {
+                                $Class.GetCUClassMethod() | Where-Object Name -like $MethodName
+                            }
                         }
                     }
                 }
@@ -80,7 +92,13 @@ Function Get-CUClassMethod {
                         
                         $x=Get-CuClass @ClassParams
                         If ( $null -ne $x.Method ) {
-                            $x.GetCUClassMethod() | Where-Object Name -like $MethodName
+                            If ( $PSBoundParameters['Raw'] ) {
+                                
+                                ($x.GetCUClassMethod() | Where-Object Name -like $MethodName).Raw
+                            } Else {
+                                $x.GetCUClassMethod() | Where-Object Name -like $MethodName
+                            }
+                            
                         }
                     }
                 }
@@ -96,7 +114,12 @@ Function Get-CUClassMethod {
                 
                 Foreach( $x in (Get-CuClass @ClassParams) ){
                     If ( $x.Method.count -ne 0 ) {
-                        $x.GetCUClassMethod() | Where-Object Name -like $MethodName
+                        If ( $PSBoundParameters['Raw'] ) {
+                                
+                            ($x.GetCUClassMethod() | Where-Object Name -like $MethodName).Raw
+                        } Else {
+                            $x.GetCUClassMethod() | Where-Object Name -like $MethodName
+                        }
                     }
                 }
                 
