@@ -5,39 +5,42 @@ Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 Describe "Testing Write-CUClassDiagram" {
 
-    $TestCaseClass = @'
-    
-    Class Woop {
-        [String]$String
-        [int]$number
-    
-        Woop([String]$String,[int]$Number){
-    
-        }
-    
-        [String]DoSomething(){
-            return $this.String
-        }
-    }
-    
-    Class Wap :Woop {
-        [String]$prop3
-    
-        DoChildthing(){}
-    
-    }
-    
-    Class Wep : Woop {
-        [String]$prop4
-    
-        DoOtherChildThing(){
-    
-        }
-    }
-    
-'@
 
     InModuleScope "PSClassUtils" {
+
+        $TestCaseClass = @'
+    
+        Class Woop {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+        
+        Class Wap :Woop {
+            [String]$prop3
+        
+            DoChildthing(){}
+        
+        }
+        
+        Class Wep : Woop {
+            [String]$prop4
+        
+            DoOtherChildThing(){
+        
+            }
+        }
+        
+'@
+    
+
         $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
         $TestCaseClass | Out-File -FilePath $ClassScript -Force
 
