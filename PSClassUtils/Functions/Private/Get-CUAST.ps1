@@ -57,21 +57,16 @@ Function Get-CUAst {
     #>
     [CmdletBinding()]
     param (
-        [parameter(
-            Mandatory         = $False,
-            ValueFromPipeline = $false)
-        ]
+        [parameter(Mandatory=$False,ValueFromPipeline=$false)]
         [String[]]
         $InputObject,
 
-    [parameter(
-            Mandatory         = $False,
-            ValueFromPipeline = $true
-    )]
-    [Alias('FullName')]
-    [String[]]$Path,
-    [Parameter(Mandatory=$False)]
-    [Switch]$Raw = $False
+        [parameter(Mandatory=$False,ValueFromPipeline = $true)]
+        [Alias('FullName')]
+        [String[]]$Path,
+        
+        [Parameter(Mandatory=$False)]
+        [Switch]$Raw = $False
     )
     
     begin {
