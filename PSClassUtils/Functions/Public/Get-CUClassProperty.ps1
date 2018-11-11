@@ -27,7 +27,9 @@ Function Get-CUClassProperty {
         [ValidateScript({
             If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
         })]
-        [Object[]]$InputObject
+        [Object[]]$InputObject,
+
+        [Switch]$Raw
     )
 
     BEGIN {}
@@ -52,7 +54,12 @@ Function Get-CUClassProperty {
         $Class = Get-CuClass @ClassParams
         If ($Class) {
 
-            $Class.GetCuClassProperty()
+            If($Raw){
+                $Class.GetCuClassProperty().Raw
+            }else{
+
+                $Class.GetCuClassProperty()
+            }
         }
 
         <# If ( $MyInvocation.PipelinePosition -eq 1 ) {
