@@ -2,3 +2,4 @@
 PSClassUtils/Functions/Private/Out-CUPSGraph.1.ps1
 Tests/woop.ps1
 Tests/test_graph.ps1
+PSClassUtils/Classes/Private/00_CUClassParameter.psm1
