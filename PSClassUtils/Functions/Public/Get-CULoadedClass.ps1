@@ -1,4 +1,19 @@
 function Get-CULoadedClass {
+    <#
+    .SYNOPSIS
+        Return all loaded classes in the current PSSession
+    .DESCRIPTION
+        Return all loaded classes in the current PSSession
+    .EXAMPLE
+        PS C:\> <example usage>
+        Explanation of what the example does
+    .INPUTS
+        String
+    .OUTPUTS
+        ASTDocument
+    .NOTES
+        General notes
+    #>
     [CmdletBinding()]
     param (
         [String[]]$ClassName = '*'

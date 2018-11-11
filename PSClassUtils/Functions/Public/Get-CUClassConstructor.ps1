@@ -1,18 +1,52 @@
 Function Get-CUClassConstructor {
     <#
     .SYNOPSIS
-        Short description
+        This function returns all existing constructors of a specific powershell class.
     .DESCRIPTION
-        Long description
+        This function returns all existing constructors of a specific powershell class. You can pipe the result of get-cuclass. Or you can specify a file to get all the constructors present in this specified file.
+    .PARAMETER ClassName
+        Specify the name of the class.
+    .PARAMETER Path
+        The path of a file containing PowerShell Classes. Accept values from the pipeline.
+    .PARAMETER Raw
+        The raw switch will display the raw content of the Class.
+    .PARAMETER InputObject
+        An object, or array of object of type CuClass
     .EXAMPLE
-        PS C:\> <example usage>
-        Explanation of what the example does
+        PS C:\> Get-CUClassConstructor
+        Return all the constructors of the classes loaded in the current PSSession.
+
+        PS C:\> Get-CUClassConstructor -ClassName woop
+        ClassName Name    Parameter
+        --------- ----    ---------
+        woop    woop
+        woop    woop       {String, Number}
+        Return constructors for the woop Class.
+
+        PS C:\> Get-CUClassConstructor -Path .\Woop.psm1
+        ClassName Name    Parameter
+        --------- ----    ---------
+        woop    woop
+        woop    woop       {String, Number}
+        Return constructors for the woop Class present in the woop.psm1 file.
+
+        PS C:\PSClassUtils> Gci -recurse | Get-CUClassConstructor -ClassName CuClass
+        ClassName Name    Parameter
+        --------- ----    ---------
+        CUClass   CUClass {RawAST}
+        CUClass   CUClass {Name, Property, Constructor, Method}
+        CUClass   CUClass {Name, Property, Constructor, Method...}
+        Return constructors for the CUclass Class present somewhere in the c:\psclassutils folder.
     .INPUTS
-        Inputs (if any)
+        String
     .OUTPUTS
-        Output (if any)
-    .NOTES
-        General notes
+        ClassConstructor
+    .NOTES   
+        Author: Stéphane van Gulick
+        Version: 0.7.1
+        www.powershellDistrict.com
+        Report bugs or submit feature requests here:
+        https://github.com/Stephanevg/PowerShellClassUtils
     #>
     [cmdletBinding(DefaultParameterSetName="All")]
     [OutputType([CUClassMethod[]])]
