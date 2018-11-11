@@ -42,7 +42,7 @@ InModuleScope PSClassUtils -ScriptBlock {
 
  
         it 'Should output a PSgraph' {
-            Get-CUAST -PAth $ClassScript | Out-CUPSGraph | Select-String "digraph g {" | should not beNullOrEmpty
+            Get-CUClass -PAth $ClassScript | Out-CUPSGraph | Select-String "digraph g {" | should not beNullOrEmpty
         }
     }
 }

@@ -130,18 +130,21 @@ Function Write-CUClassDiagram {
         $ExportFileName = "Diagram" + "." + $OutputFormat
         $FolderPath = $Path
 
-        if ($Recurse) {
+        If ($Recurse) {
 
-            $AllItems = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" -Recurse
-        } else {
-            $AllItems = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1"
+            $Classes = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
+
+        } Else {
+
+            $Classes = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
         }
         #$Path = $null
     }
     elseif ($PathObject -is [System.IO.FileInfo]) {
-        [System.IO.FileInfo]$File = (Resolve-Path -Path $Path).Path
+        $FolderPath = $PathObject.Parent.FullName
+        [System.IO.FileInfo]$File = $PathObject.FullName
         $ExportFileName = $File.BaseName + "." + $OutputFormat
-        $AllItems = $File
+        $Classes = $File | Get-CUCLass | Group-Object -Property Path
     }
     else {
         throw 'Path provided was not a file or folder'
@@ -158,10 +161,10 @@ Function Write-CUClassDiagram {
         $FullExportPath = Join-Path -Path $SourceFolder -ChildPath $ExportFileName
         
     } else {
-        if ($ExportFolder.Exists){
+        If ($ExportFolder.Exists){
 
             $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
-        } else {
+        } Else {
             throw "$($ExportFolder.FullName) Doesn't exist"
         }
 
@@ -169,10 +172,10 @@ Function Write-CUClassDiagram {
 
     #endregion
 
-    $AST = Get-CUAst -Path $AllItems 
+    #$Classes = Get-CUClass -Path $AllItems
     
     $GraphParams = @{}
-    $GraphParams.InputObject = $AST
+    $GraphParams.InputObject = $Classes
 
     if ($IgnoreCase) {
         $GraphParams.IgnoreCase = $true

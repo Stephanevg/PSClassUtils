@@ -29,7 +29,7 @@ Function Out-CUPSGraph {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true,ValueFromPipeline = $true)]
-        [ASTDocument[]]$inputObject,
+        [Object[]]$inputObject,
 
 
         [Parameter(Mandatory = $False)]
@@ -54,43 +54,34 @@ Function Out-CUPSGraph {
     
     process {
 
-
         $Graph = Graph {
-
             foreach($obj in $inputObject){
-
-                $SourcefileName = split-Path -leaf $obj.source
-                subgraph -Attributes @{label=($SourcefileName)} -ScriptBlock {
-
-                    Foreach ($Class in $Obj.Classes) {
-        
-                            $Properties = $Class.members | ? {$_ -is [System.Management.Automation.Language.PropertyMemberAst]}
+                $CurrName = split-Path -leaf $obj.Name
+                subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
+                        Foreach( $Class in $obj.Group ) {
                             If($IgnoreCase){
-                                $RecordName = ConvertTo-titleCase -String $Class.Name
+                                $RecordName = ConvertTo-TitleCase -String $Class.Name
                             }else{
-        
-                                $RecordName =  $Class.Name
+
+                                $RecordName = $Class.Name
                             }
-                            
-                            $Constructors = $Class.members | ? {$_.IsConstructor -eq $true}
-                            $AllMembers = @()
-                            $AllMembers = $Class.members | ? {$_.IsConstructor -eq $false} #| Select Name,@{name="type";expression = {$_.PropertyType.Extent.Text}}
+                            $Constructors = $Class.Constructor
+                            $Methods = $Class.Method
+                            $Properties = $Class.Property
         
                             Record -Name $RecordName {
-        
-                                #Properties
-        
-                                if ($Properties) {
+                                If ($Properties) {
         
                                     Foreach ($pro in $Properties) {
-                                        $visibility = "+"
-                                        if ($pro.IsHidden) {
-                                            $visibility = "-"
-                                        }
-                                    
-                                        $n = "$($visibility) [$($pro.PropertyType.TypeName.Name)] `$$($pro.Name)"
-                                        if ($n) {
         
+                                        if ($pro.Visibility -eq "Hidden") {
+                                            $visibility = "-"
+                                        } Else {
+                                            $visibility = "+"
+                                        }
+                                        
+                                        $n = "$($visibility) [$($pro.Type)] `$$($pro.Name)"
+                                        if ($n) {
                                             Row -label "$($n)"  -Name "Row_$($pro.Name)"
                                         }
                                         else {
@@ -98,88 +89,95 @@ Function Out-CUPSGraph {
                                         }
                     
                                     }
-                                    Row "-----Constructors-----"  -Name "Row_Separator_Constructors"
+        
                                 }
         
+                                Row "-----Constructors-----"  -Name "Row_Separator_Constructors"
                                 #Constructors
+                                If ( $Constructors ) {
+                                    foreach ($con in $Constructors) {
+                                        
+                                        $RowName = "$($con.Name)"
+                                        
+                                        If ( $con.Parameter ) {
+                                            foreach ($c in $con.Parameter) {
+                                                $Parstr = $Parstr + $C.Type + '$' + $c.Name + ","
+                                            }
+                                            
+                                            $Parstr = $Parstr.trim(",")
+                                        }
         
-                                foreach ($con in $Constructors) {
-        
-                                    $Parstr = ""
-                                    foreach ($c in $con.Parameters) {
-                                        $Parstr = $Parstr + $c.Extent.Text + ","
+                                        If ($Parstr) {
+                                            $RowName = $RowName + "(" + $Parstr + ")"
+                                        } Else {
+                                            $RowName = $RowName + "()"
+                                        }
+            
+                                        Row $RowName -Name "Row_$($con.Name)"
+                                        
                                     }
-                                    $Parstr = $Parstr.trim(",")
-                                    $RowName = "$($con.ReturnType.Extent.Text) $($con.Name)"
-                                    if ($Parstr) {
-                                        $RowName = $RowName + "(" + $Parstr + ")"
-                                    }
-                                    else {
-        
-                                        $RowName = $RowName + "()"
-        
-                                    }
-        
-        
-                                    Row $RowName -Name "Row_$($con.Name)"
+                                } Else {
+                                    
                                 }
-        
-        
-                                #Methods
-                                Row "-----Methods-----"  -Name "Row_Separator_Methods"
-                                foreach ($mem in $AllMembers) {
-                                    $visibility = "+"
-                                    $Parstr = ""
-                                    foreach ($p in $mem.Parameters) {
-                                        $Parstr = $Parstr + $p.Extent.Text + ","
-                                    }
-                                    $Parstr = $Parstr.trim(",")
-                                    $RowName = "$($mem.ReturnType.Extent.Text) $($mem.Name)"
-                                    if ($Parstr) {
-                                        $RowName = $RowName + "(" + $Parstr + ")"
-                                    }
-                                    else {
-        
-                                        $RowName = $RowName + "()"
-        
-                                    }
-        
                                 
-                                    if ($mem.IsHidden) {
-                                        $visibility = "-"
+                                #Methods Raw
+                                Row "-----Methods-----"  -Name "Row_Separator_Methods"
+                                
+                                If ( $Methods ) {
+                                    #Write-Host $Methods.Count
+                                    #$i=0
+                                    Foreach ($mem in $Methods) {
+        
+                                        $visibility = "+"
+                                        $Parstr = ""
+        
+                                        If ( $mem.Parameter ) {
+                                            ForEach ( $p in $mem.Parameter ) {
+                                                $Parstr = $Parstr +  $p.Type + '$' + $p.Name + ","
+                                            }
+                                        
+                                            $Parstr = $Parstr.trim(",")
+                                        }
+                                        
+                                        $RowName = "$($mem.Name)"
+                                        
+        
+                                        If ( $Parstr ) {
+                                            $RowName = $RowName + "(" + $Parstr + ")"
+                                        } Else {
+                                            $RowName = $RowName + "()"
+                                        }
+                
+                                        If ( $mem.IsHidden ) {
+                                            $visibility = "-"
+                                        }
+        
+                                        $RowName = $visibility + $RowName
+                                        #$i++
+                                        #write-host $i + ' - ' + $RowName
+                                        Row $RowName -Name "Row_$($mem.Name)"
                                     }
-                                    $RowName = $visibility + $RowName
-                                    Row $RowName -Name "Row_$($mem.Name)"
                                 }
-                            
                         
                             }#End Record
                         }#end foreach Class
         
                     }#End SubGraph
-            }
-            
-            #Inheritence (Creating Edges)
-            Foreach($Class in $inputObject.Classes){
-                if($Class.BaseTypes.Count -ge 1){
-                    Foreach($BaseType in $Class.BaseTypes){
-                        if($IgnoreCase){
-                            $Parent = ConvertTo-titleCase -String $Class.Name
-                            $Child = ConvertTo-titleCase -String $BaseType.TypeName.FullName
-                        }Else{
-                            $Parent = $Class.Name
-                            $Child = $BaseType.TypeName.FullName
-                        }
-                        
-                        edge -From $Child -To $Parent
-                    }
-                    
-                }#End If
                 
-            }#End Inheritence
+                ## InHeritance
+                Foreach ($class in ($Obj.Group | where-Object IsInherited)){
+                    If($IgnoreCase){
+                        $Parent = ConvertTo-TitleCase -String $Class.ParentClassName
+                        $Child = ConvertTo-TitleCase -String $Class.Name
+                    }else{
 
-        
-        }#End Graph
+                        $Parent = $Class.ParentClassName
+                        $Child = $Class.Name
+                    }
+                    edge -From $Parent -To $Child
+                }
+            }
+        }
 
         $AlLGraphs += $Graph
     }

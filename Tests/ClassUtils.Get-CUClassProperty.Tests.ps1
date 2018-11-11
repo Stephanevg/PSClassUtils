@@ -59,15 +59,15 @@ Describe "Testing Get-CUClassProperty"{
         
         
 
-        it 'Should Return 2 Properties' {
+        it 'Should right amount of Properties (4)' {
 
 
-            (Get-CUClassProperty -ClassName "Woop" | measure).Count | should be 2
+            (Get-CUClass -path $ClassScript -ClassName "Woop" | Get-CUClassProperty | measure).Count | should be 4
         }
 
         Context 'Validating Properties' {
             $Properties = @("String","Number")
-            $methods = Get-CUClassProperty -ClassName "Wap"
+            $methods = Get-CUClass -path $ClassScript -ClassName "Woop" | Get-CUClassProperty
             foreach ($prop in $Properties){
 
                 it "Should have Property: $($Prop)" {

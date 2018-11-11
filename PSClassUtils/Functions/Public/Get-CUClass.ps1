@@ -1,118 +1,152 @@
-function Get-CUClass{
+function Get-CUClass {
     <#
     .SYNOPSIS
-        This function returns all currently loaded powershell classes, and can examine classes found in ps1 or psm1 files.
+        This function returns all classes, loaded in memory or present in a ps1 or psm1 file.
     .DESCRIPTION
-        This function returns all currently loaded powershell classes, and can examine classes found in ps1 or psm1 files.
+        By default, the function will return all loaded classes in the current PSSession.
+        You can specify a file path to explore the classes present in a ps1 or psm1 file.
+    .PARAMETER ClassName
+        Specify the name of the class.
+    .PARAMETER Path
+        The path of a file containing PowerShell Classes.
+    .PARAMETER Raw
+        The raw switch will display the raw content of the Class.
     .EXAMPLE
         PS C:\> Get-CUClass
+        Return all classes alreay loaded in current PSSession.
 
-        Classes            Enums Source                                                                                 ClassName
-        -------            ----- ------                                                                                 ---------
-        {ClassProperty}          C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1    ClassProperty
-        {ClassMethod}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_ClassMethod.ps1      ClassMethod
-        {ClassConstructor}       C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1 ClassConstructor
-        {ASTDocument}            C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\04_ASTDocument.ps1      ASTDocument
-        {ClassEnum}              C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\05_ClassEnum.ps1        ClassEnum
-        
-        This wil display all powerhsell classes loaded in memory
+        PS C:\> Get-CUClass -ClassName CUClass
+        Return the particuluar CUCLass.
 
-    .EXAMPLE
-        PS C:\> Get-CUClass -Path .\Classes\Private\01_ClassProperty.ps1
+        PS C:\> Get-CUClass -Path .\test.psm1,.\test2.psm1
+        Return all classes present in the test.psm1 and test2.psm1 file.
 
-        Classes         Enums Source                                                                              ClassName
-        -------         ----- ------                                                                              ---------
-        {ClassProperty}       C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1 ClassProperty
+        PS C:\> Get-CUClass -Path .\test.psm1 -ClassName test
+        Return test class present in the test.psm1 file.
 
-        This will display all the classes present in the 01_ClassProperty.ps1 file
-    
-    .EXAMPLE
-        PS C:\> Get-ChildItem -Recurse | Get-CUClass
-
-        Classes            Enums Source                                                                                             ClassName
-        -------            ----- ------                                                                                             ---------
-                                C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\PSClassUtils.psm1
-        {ClassProperty}         C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\01_ClassProperty.ps1                ClassProperty
-        {ClassMethod}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\02_ClassMethod.ps1                  ClassMethod
-        {ClassConstructor}      C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\03_ClassConstructor.ps1             ClassConstructor
-        {ASTDocument}           C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\04_ASTDocument.ps1                  ASTDocument
-        {ClassEnum}             C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Classes\Private\05_ClassEnum.ps1                    ClassEnum
-                                C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Functions\Private\ConvertTo-TitleCase.ps1
-                                C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Functions\Private\Get-CUAST.ps1
-                                C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Functions\Private\Out-CUPSGraph.ps1
-                                C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils\Functions\Public\Get-CUClass.ps1
-        ...
-
-        This will display all the classes (if present), in all ps1 and psm1 files under c:\
-
+        PS C:\PSClassUtils> Get-ChildItem -recurse | Get-CUClass
+        Return all classes, recursively, present in the C:\PSClassUtils Folder.
     .INPUTS
-        Name parameter accepts a powershell class name (if already loaded in memory).
-        Path parameter accept a path in the form of a relative or absolute path of a ps1 or psm1 file.
+        Accepts type [System.IO.FileInfo]
     .OUTPUTS
-        The function output ASTDocument objects. 
-    .NOTES   
+        Return type [CuClass]
+    .NOTES
         Author: Tobias Weltner
         Version: ??
         Source --> http://community.idera.com/powershell/powertips/b/tips/posts/finding-powershell-classes
-
-        Modification: LxLeChat
-        For the PSClassUtils Module: https://github.com/Stephanevg/PSClassUtils
-        Thanks to @NicolasBn for his help with DefaultParameterSetName and the debug off the weird encoded characters returned
+        Participate & contribute --> https://github.com/Stephanevg/PSClassUtils
     #>
-    [CmdletBinding(DefaultParameterSetName="Normal")]
+
+
+    [CmdletBinding()]
     Param(
-      [Parameter(ParameterSetName="Normal",Mandatory=$False,ValueFromPipeline=$False)]
-      $Name = '*',
-      [Alias("FullName")]
-      [Parameter(ParameterSetName="Path",Mandatory=$False,ValueFromPipeline=$True,ValueFromPipelineByPropertyName=$True)]
-      [System.IO.FileInfo[]]$Path,
-      [Parameter(Mandatory=$False)]
-      [Switch]$Raw = $False
+        [Parameter(Mandatory = $False, ValueFromPipeline = $False)]
+        $ClassName,
+
+        [Alias("FullName")]
+        [Parameter(ValueFromPipeline=$True,Position=1,ValueFromPipelineByPropertyName=$True)]
+        [System.IO.FileInfo[]]$Path,
+        
+        [Parameter(Mandatory = $False)]
+        [Switch]$Raw = $False
     )
-    BEGIN{}
 
-    PROCESS{
+    BEGIN {
+    }
 
-        If ($Null -eq $PSBoundParameters['Path']) {
+    PROCESS {
 
-            $LoadedClasses = [AppDomain]::CurrentDomain.GetAssemblies() |
-            Where-Object { $_.GetCustomAttributes($false) |
-            Where-Object { $_ -is [System.Management.Automation.DynamicClassImplementationAssemblyAttribute]} } |
-            ForEach-Object { 
-                $_.GetTypes() |
-                Where-Object IsPublic | Where-Object { $_.Name -like $Name } |
-                Select-Object @{l='Path';e={($_.Module.ScopeName.Replace([char]0x29F9,'\').replace([char]0x589,':')) -replace '^\\',''}}
-            }
-            
-            Foreach ( $Class in $LoadedClasses ) {
-                If ( $Raw ) {
-                    Get-CUAst -Path $Class.Path -Raw
-                } Else {
-                    Get-CUAst -Path $Class.Path
-                }
-                
-            }
-            
-        } Else {
+        $ClassParams = @{}
 
-            Foreach ( $P in $Path ) {
+        If ( $Null -ne $PSBoundParameters['ClassName'] ) {
+            $ClassParams.ClassName = $PSBoundParameters['ClassName']
+        }
 
-                If ( $MyInvocation.PipelinePosition -eq 1 ) {
-                    $P = Get-Item (resolve-path $P).Path
-                }
+        If ( $Null -ne $PSBoundParameters['Path'] ) {
 
-                If ( $P.Extension -in '.ps1','.psm1') {
-                    If ( $Raw ) {
-                        Get-CUAst -Path $P.FullName -Raw
+            Foreach ( $Path in $PSBoundParameters['Path'] ) {
+                If ( $Path.Extension -in '.ps1', '.psm1') {
+                    If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                        $ClassParams.Path = $Path.FullName
                     } Else {
-                        Get-CUAst -Path $P.FullName
+                        $ClassParams.Path = (Get-Item (Resolve-Path $Path).Path).FullName
+                    }
+            
+                    $RawGlobalAST = Get-CURaw -Path $ClassParams.Path
+                    $GlobalClassFromRaw = [CUClass]::New($RawGlobalAST)
+                    
+                    Switch ( $GlobalClassFromRaw.Ast ) {
+                        { $GlobalClassFromRaw.Ast.count -eq 1 } {
+                            If ( $PSBoundParameters['ClassName'] ) {
+                                If ( $GlobalClassFromRaw.name -eq $PSBoundParameters['ClassName'] ) {
+                                    If ( $PSBoundParameters['Raw'] ) {
+                                        $GlobalClassFromRaw.Raw
+                                    } Else {
+                                        $GlobalClassFromRaw 
+                                    }
+                                }
+                            } Else {
+                                If ( $PSBoundParameters['Raw'] ) {
+                                    $GlobalClassFromRaw.Raw
+                                } Else {
+                                    $GlobalClassFromRaw 
+                                }
+                            }
+                            break;
+                        }
+
+                        { $GlobalClassFromRaw.Ast.count -gt 1 } {
+                            Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
+                                If ( $PSBoundParameters['ClassName'] ) {
+                                    If ( $Class.name -eq $PSBoundParameters['ClassName'] ) {
+                                        If ( $PSBoundParameters['Raw'] ) {
+                                            ([CUClass]::New($Class)).Raw
+                                        } Else {
+                                            [CUClass]::New($Class) 
+                                        }
+                                    }
+                                } Else {
+                                    If ( $PSBoundParameters['Raw'] ) {
+                                        ([CUClass]::New($Class)).Raw
+                                    } Else {
+                                        [CUClass]::New($Class) 
+                                    }
+                                }
+                            }
+                            break;
+                        } 
+
                     }
                 }
             }
 
+        } Else {
+            Foreach ( $RawAST in (Get-CULoadedClass @ClassParams ) ) {
+                
+                $GlobalClassFromRaw = [CUClass]::New($RawAST)
+                
+                ## Test if more than one class in document or if inheritances classes
+                If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
+                    Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
+                        If ( $PSBoundParameters['Raw'] ) {
+                            ([CUClass]::New($Class)).Raw
+                        } Else {
+                            [CUClass]::New($Class) 
+                        }
+                    }
+                } Else {
+                    If ( $PSBoundParameters['Raw'] ) {
+                        ($GlobalClassFromRaw).Raw
+                    } Else {
+                        $GlobalClassFromRaw 
+                    }
+                     
+                }
+
+            } 
         }
     }
 
-    END{}  
-  }
+    END {}  
+}
   
