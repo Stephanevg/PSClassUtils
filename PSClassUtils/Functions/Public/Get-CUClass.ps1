@@ -8,7 +8,7 @@ function Get-CUClass {
     .PARAMETER ClassName
         Specify the name of the class.
     .PARAMETER Path
-        The path of a file containing PowerShell Classes.
+        The path of a file containing PowerShell Classes. Accept values from the pipeline.
     .PARAMETER Raw
         The raw switch will display the raw content of the Class.
     .EXAMPLE
@@ -55,6 +55,10 @@ function Get-CUClass {
     }
 
     PROCESS {
+        
+        If ( ($Null -eq $PSBoundParameters['Path']) -And ($PSVersionTable.PSEdition -eq 'Core' ) ) {
+            Throw 'This feature is not supported on PSCore, due to missing DotNet libraries. Please use -Path instead...'
+        }
 
         $ClassParams = @{}
 
