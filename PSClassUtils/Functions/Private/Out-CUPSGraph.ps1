@@ -59,8 +59,12 @@ Function Out-CUPSGraph {
                 $CurrName = split-Path -leaf $obj.Name
                 subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
                         Foreach( $Class in $obj.Group ) {
-        
-                            $RecordName = $Class.Name
+                            If($IgnoreCase){
+                                $RecordName = ConvertTo-TitleCase -String $Class.Name
+                            }else{
+
+                                $RecordName = $Class.Name
+                            }
                             $Constructors = $Class.Constructor
                             $Methods = $Class.Method
                             $Properties = $Class.Property
@@ -162,8 +166,14 @@ Function Out-CUPSGraph {
                 
                 ## InHeritance
                 Foreach ($class in ($Obj.Group | where-Object IsInherited)){
-                    $Parent = $Class.ParentClassName
-                    $Child = $Class.Name
+                    If($IgnoreCase){
+                        $Parent = ConvertTo-TitleCase -String $Class.ParentClassName
+                        $Child = ConvertTo-TitleCase -String $Class.Name
+                    }else{
+
+                        $Parent = $Class.ParentClassName
+                        $Child = $Class.Name
+                    }
                     edge -From $Parent -To $Child
                 }
             }
