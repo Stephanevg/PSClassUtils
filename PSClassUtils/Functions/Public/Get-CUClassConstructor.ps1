@@ -25,7 +25,10 @@ Function Get-CUClassConstructor {
 
         [Alias("FullName")]
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
-        [System.IO.FileInfo[]]$Path
+        [System.IO.FileInfo[]]$Path,
+
+        [Switch]$Raw
+
     )
 
     BEGIN {}
@@ -47,11 +50,21 @@ Function Get-CUClassConstructor {
                 Foreach ( $Class in $InputObject ) {
                     If ( $ClassParams.ClassName ) {
                         If ( $Class.Name -eq $ClassParams.ClassName ) {
-                            $Class.GetCUClassConstructor()
+                            if($Raw){
+                                $Class.GetCUClassConstructor().Raw
+                            }Else{
+
+                                $Class.GetCUClassConstructor()
+                            }
                         }
                     } Else {
                         If ( $null -ne $Class.Constructor ) {
-                            $Class.GetCUClassConstructor()
+                            if($Raw){
+                                $Class.GetCUClassConstructor().Raw
+                            }Else{
+
+                                $Class.GetCUClassConstructor()
+                            }
                         }
                     }
                 }
@@ -75,9 +88,15 @@ Function Get-CUClassConstructor {
                             $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
                         }
                         
-                        $x=Get-CuClass @ClassParams
-                        If ( $null -ne $x.Constructor ) {
-                            $x.GetCUClassConstructor()
+                        $Class=Get-CuClass @ClassParams
+                        If ( $null -ne $Class.Constructor ) {
+                            if($Raw){
+                                $Class.GetCUClassConstructor().Raw
+                            }Else{
+
+                                $Class.GetCUClassConstructor()
+                            }
+                            
                         }
                     }
                 }
@@ -90,9 +109,15 @@ Function Get-CUClassConstructor {
                     $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
 
-                Foreach($x in (Get-CuClass @ClassParams)){
-                    If ( $x.Constructor.count -ne 0 ) {
-                        $x.GetCUClassConstructor()
+                Foreach($Class in (Get-CuClass @ClassParams)){
+                    If ( $Class.Constructor.count -ne 0 ) {
+                        if($Raw){
+                            $Class.GetCUClassConstructor().Raw
+                        }Else{
+
+                            $Class.GetCUClassConstructor()
+                        }
+                        
                     }
                 }
                 
