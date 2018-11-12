@@ -76,24 +76,30 @@ function Get-CUClass {
                         $ClassParams.Path = (Get-Item (Resolve-Path $Path).Path).FullName
                     }
             
-                    $RawGlobalAST = Get-CURaw -Path $ClassParams.Path
-                    $GlobalClassFromRaw = [CUClass]::New($RawGlobalAST)
-                    
+                    $RawGlobalAST = Get-CURaw -Path $ClassParams.Path ## il passe la
+                    #$GlobalClassFromRaw = [CUClass]::New($RawGlobalAST) #ici t encore vivant ? le psintegrated a planté :)
+                    $GlobalClassFromRaw = @{}
+                    $GlobalClassFromRaw.Ast = $RawGlobalAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
+                    #ouais chuis la, switch de termianl, j'ai un ps normal ouvert
                     Switch ( $GlobalClassFromRaw.Ast ) {
                         { $GlobalClassFromRaw.Ast.count -eq 1 } {
                             If ( $PSBoundParameters['ClassName'] ) {
                                 If ( $GlobalClassFromRaw.name -eq $PSBoundParameters['ClassName'] ) {
                                     If ( $PSBoundParameters['Raw'] ) {
-                                        $GlobalClassFromRaw.Raw
+                                        #$GlobalClassFromRaw.Raw
+                                        $RawGlobalAST
                                     } Else {
-                                        $GlobalClassFromRaw 
+                                        #$GlobalClassFromRaw
+                                        [CUClass]::New($RawGlobalAST)
                                     }
                                 }
                             } Else {
                                 If ( $PSBoundParameters['Raw'] ) {
-                                    $GlobalClassFromRaw.Raw
+                                    #$GlobalClassFromRaw.Raw
+                                    $RawGlobalAST
                                 } Else {
-                                    $GlobalClassFromRaw 
+                                    #$GlobalClassFromRaw
+                                    [CUClass]::New($RawGlobalAST)
                                 }
                             }
                             break;
@@ -106,7 +112,7 @@ function Get-CUClass {
                                         If ( $PSBoundParameters['Raw'] ) {
                                             ([CUClass]::New($Class)).Raw
                                         } Else {
-                                            [CUClass]::New($Class) 
+                                            [CUClass]::New($Class)
                                         }
                                     }
                                 } Else {
@@ -127,22 +133,27 @@ function Get-CUClass {
         } Else {
             Foreach ( $RawAST in (Get-CULoadedClass @ClassParams ) ) {
                 
-                $GlobalClassFromRaw = [CUClass]::New($RawAST)
+                #$GlobalClassFromRaw = [CUClass]::New($RawAST)
+                $GlobalClassFromRaw = @{}
+                $GlobalClassFromRaw.Ast = $RawAST.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
                 
                 ## Test if more than one class in document or if inheritances classes
                 If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
                     Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
                         If ( $PSBoundParameters['Raw'] ) {
-                            ([CUClass]::New($Class)).Raw
+                            #([CUClass]::New($Class)).Raw
+                            $RawAST
                         } Else {
-                            [CUClass]::New($Class) 
+                            [CUClass]::New($Class)
                         }
                     }
                 } Else {
                     If ( $PSBoundParameters['Raw'] ) {
-                        ($GlobalClassFromRaw).Raw
+                        #($GlobalClassFromRaw).Raw
+                        $RawAST
                     } Else {
-                        $GlobalClassFromRaw 
+                        #$GlobalClassFromRaw
+                        [CUClass]::New($RawAST)
                     }
                      
                 }
