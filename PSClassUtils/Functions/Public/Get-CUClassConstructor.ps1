@@ -15,7 +15,6 @@ Function Get-CUClassConstructor {
     .EXAMPLE
         PS C:\> Get-CUClassConstructor
         Return all the constructors of the classes loaded in the current PSSession.
-
     .EXAMPLE
         PS C:\> Get-CUClassConstructor -ClassName woop
         ClassName Name    Parameter
@@ -23,7 +22,6 @@ Function Get-CUClassConstructor {
         woop    woop
         woop    woop       {String, Number}
         Return constructors for the woop Class.
-
     .EXAMPLE
         PS C:\> Get-CUClassConstructor -Path .\Woop.psm1
         ClassName Name    Parameter
@@ -31,7 +29,6 @@ Function Get-CUClassConstructor {
         woop    woop
         woop    woop       {String, Number}
         Return constructors for the woop Class present in the woop.psm1 file.
-
     .EXAMPLE
         PS C:\PSClassUtils> Gci -recurse | Get-CUClassConstructor -ClassName CuClass
         ClassName Name    Parameter

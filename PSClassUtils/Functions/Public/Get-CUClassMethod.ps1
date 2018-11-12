@@ -17,7 +17,6 @@ Function Get-CUClassMethod {
     .EXAMPLE
         PS C:\> Get-CUClassMethod
         Return all the methods of the classes loaded in the current PSSession.
-
     .EXAMPLE
         PS C:\> Get-CUClassMethod -ClassName woop
         ClassName Name    Parameter
@@ -25,7 +24,6 @@ Function Get-CUClassMethod {
         woop    woop
         woop    woop       {String, Number}
         Return methods for the woop Class.
-
     .EXAMPLE
         PS C:\> Get-CUClassMethod -Path .\Woop.psm1
         ClassName Name    Parameter
@@ -33,7 +31,6 @@ Function Get-CUClassMethod {
         woop    woop
         woop    woop       {String, Number}
         Return methods for the woop Class present in the woop.psm1 file.
-
     .EXAMPLE
         PS C:\PSClassUtils> Gci -recurse | Get-CUClassMethod -ClassName CuClass
         ClassName Name    Parameter
