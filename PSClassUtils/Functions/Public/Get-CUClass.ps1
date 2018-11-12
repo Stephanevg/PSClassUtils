@@ -14,16 +14,16 @@ function Get-CUClass {
     .EXAMPLE
         PS C:\> Get-CUClass
         Return all classes alreay loaded in current PSSession.
-
+    .EXAMPLE
         PS C:\> Get-CUClass -ClassName CUClass
         Return the particuluar CUCLass.
-
+    .EXAMPLE
         PS C:\> Get-CUClass -Path .\test.psm1,.\test2.psm1
         Return all classes present in the test.psm1 and test2.psm1 file.
-
+    .EXAMPLE
         PS C:\> Get-CUClass -Path .\test.psm1 -ClassName test
         Return test class present in the test.psm1 file.
-
+    .EXAMPLE
         PS C:\PSClassUtils> Get-ChildItem -recurse | Get-CUClass
         Return all classes, recursively, present in the C:\PSClassUtils Folder.
     .INPUTS
