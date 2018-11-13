@@ -24,7 +24,7 @@ Function Out-CUPSGraph {
     Using -IgnoreCase will force all class names to be set to 'TitleCase', reglardless of the case sensitivity they had before.
 
     .NOTES
-        General notes
+        version: 1.1
     #>
     [CmdletBinding()]
     param (
@@ -34,7 +34,9 @@ Function Out-CUPSGraph {
 
         [Parameter(Mandatory = $False)]
         [Switch]
-        $IgnoreCase
+        $IgnoreCase,
+
+        $ShowComposition
 
 
     )
@@ -53,18 +55,22 @@ Function Out-CUPSGraph {
     }
     
     process {
-
+        [System.Collections.ArrayList]$AllClasses = @()
         $Graph = Graph {
             foreach($obj in $inputObject){
                 $CurrName = split-Path -leaf $obj.Name
                 subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
                         Foreach( $Class in $obj.Group ) {
+
                             If($IgnoreCase){
                                 $RecordName = ConvertTo-TitleCase -String $Class.Name
                             }else{
 
                                 $RecordName = $Class.Name
                             }
+                            #Adding className for futur use to identify composition
+
+                            $null = $AllClasses.Add($RecordName) # It needs to set to null to avoid to have 'numbers' as random points in the graph
                             $Constructors = $Class.Constructor
                             $Methods = $Class.Method
                             $Properties = $Class.Property
@@ -82,10 +88,11 @@ Function Out-CUPSGraph {
                                         
                                         $n = "$($visibility) [$($pro.Type)] `$$($pro.Name)"
                                         if ($n) {
+                                            write-verbose "[Property][Row]Label:$($n) - Name: Row_$($pro.Name)"
                                             Row -label "$($n)"  -Name "Row_$($pro.Name)"
                                         }
                                         else {
-                                            $pro.name
+                                            #$pro.name
                                         }
                     
                                     }
@@ -156,6 +163,7 @@ Function Out-CUPSGraph {
                                         #$i++
                                         #write-host $i + ' - ' + $RowName
                                         Row $RowName -Name "Row_$($mem.Name)"
+
                                     }
                                 }
                         
@@ -174,9 +182,25 @@ Function Out-CUPSGraph {
                         $Parent = $Class.ParentClassName
                         $Child = $Class.Name
                     }
-                    edge -From $Parent -To $Child
+                    edge -From $Child -To $Parent -Attributes @{arrowhead="empty"}
+                }
+
+                ##Composition
+
+                if($ShowComposition){
+
+                    #foreach class.Property.Type if in list of customClasses, then it is composition
+                    Foreach($ClassProperty in $obj.group.property){
+                        if($AllClasses -contains $ClassProperty.type){
+                            write-verbose "Composition relationship found:"
+                            #CompositionFound
+                            Write-Verbose "$($ClassProperty.Name):Row_$($ClassProperty.Name) to $($ClassProperty.Type)"
+                            edge -From "$($ClassProperty.className):Row_$($ClassProperty.Name)" -To $ClassProperty.Type -Attributes @{arrowhead='diamond'}
+                        }
+                    }
                 }
             }
+        
         }
 
         $AlLGraphs += $Graph
