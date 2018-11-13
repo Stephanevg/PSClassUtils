@@ -182,7 +182,7 @@ Function Out-CUPSGraph {
                         $Parent = $Class.ParentClassName
                         $Child = $Class.Name
                     }
-                    edge -From $Child -To $Parent -Attributes @{arrowhead="empty"}
+                    edge -From $Parent -To $Child -Attributes @{arrowhead="empty"}
                 }
 
                 ##Composition
@@ -195,7 +195,7 @@ Function Out-CUPSGraph {
                             write-verbose "Composition relationship found:"
                             #CompositionFound
                             Write-Verbose "$($ClassProperty.Name):Row_$($ClassProperty.Name) to $($ClassProperty.Type)"
-                            edge -From "$($ClassProperty.className):Row_$($ClassProperty.Name)" -To $ClassProperty.Type -Attributes @{arrowhead='diamond'}
+                            edge -From $ClassProperty.Type -To "$($ClassProperty.className):Row_$($ClassProperty.Name)" -Attributes @{arrowhead='diamond'}
                         }
                     }
                 }
