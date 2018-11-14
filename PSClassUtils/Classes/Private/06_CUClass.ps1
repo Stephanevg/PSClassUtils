@@ -47,7 +47,7 @@ Class CUClass {
         $This.SetMethodFromAST()
         
         ## Inheritence Check
-        If ( !($null -eq $This.Raw.BaseTypes) ) {
+        If ( $This.Raw.BaseTypes ) {
             $This.IsInherited = $True
             $This.ParentClassName = $This.Raw.BaseTypes.TypeName.Name
         }
