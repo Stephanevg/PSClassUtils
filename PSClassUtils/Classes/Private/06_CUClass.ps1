@@ -7,12 +7,12 @@ Class CUClass {
     [String]$ParentClassName
     [System.IO.FileInfo]$Path
     Hidden $Raw
-    Hidden $Ast
+    #Hidden $Ast
 
-    CUClass($RawAST){
+    CUClass($AST){
 
-        $this.Raw = $RawAST
-        $this.Ast = $this.Raw.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
+        #$this.Raw = $RawAST
+        $this.Raw = $AST
         $This.SetPropertiesFromRawAST()
 
     }
@@ -38,18 +38,18 @@ Class CUClass {
     
 
     ## Set Name, and call Other Set
-    [void] SetPropertiesFromRawAST(){
+    [void] SetPropertiesFromAST(){
 
-        $This.Name = $This.Ast.Name
+        $This.Name = $This.Raw.Name
         $This.Path = [System.IO.FileInfo]::new($This.Raw.Extent.File)
         $This.SetConstructorFromAST()
         $This.SetPropertyFromAST()
         $This.SetMethodFromAST()
         
         ## Inheritence Check
-        If ( !($null -eq $This.Ast.BaseTypes) ) {
+        If ( !($null -eq $This.Raw.BaseTypes) ) {
             $This.IsInherited = $True
-            $This.ParentClassName = $This.Ast.BaseTypes.TypeName.Name
+            $This.ParentClassName = $This.Raw.BaseTypes.TypeName.Name
         }
 
     }
@@ -58,7 +58,7 @@ Class CUClass {
     [void] SetConstructorFromAST(){
         
         $Constructors = $null
-        $Constructors = $This.Ast.Members | Where-Object {$_.IsConstructor -eq $True}
+        $Constructors = $This.Raw.Members | Where-Object {$_.IsConstructor -eq $True}
 
         Foreach ( $Constructor in $Constructors ) {
 
@@ -89,7 +89,7 @@ Class CUClass {
     [void] SetMethodFromAST(){
 
         $Methods = $null
-        $Methods = $This.Ast.Members | Where-Object {$_.IsConstructor -eq $False}
+        $Methods = $This.Raw.Members | Where-Object {$_.IsConstructor -eq $False}
 
         Foreach ( $Method in $Methods ) {
 
@@ -119,7 +119,7 @@ Class CUClass {
     ## Find Properties for the current Class
     [void] SetPropertyFromAST(){
 
-        $Properties = $This.Ast.Members | Where-Object {$_ -is [System.Management.Automation.Language.PropertyMemberAst]} 
+        $Properties = $This.Raw.Members | Where-Object {$_ -is [System.Management.Automation.Language.PropertyMemberAst]} 
 
         If ($Properties) {
         

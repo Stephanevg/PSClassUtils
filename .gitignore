@@ -6,3 +6,6 @@ PSClassUtils/Classes/Private/00_CUClassParameter.psm1
 Tests/plop.ps1
 Tests/wap.psm1
 .vscode/launch.json
+PSClassUtils/Functions/Private/Out-CUPSGraph.ps1
+Tests/woop.png
+PSClassUtils/Functions/Private/Out-CUPSGraph.ps1
