@@ -116,7 +116,7 @@ Function Get-CUClassConstructor {
                    
                     If ( $P.extension -in ".ps1",".psm1" ) {
 
-                        If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                        If ( $PSCmdlet.MyInvocation.ExpectingInput ) {
                             $ClassParams.Path = $P.FullName
                         } Else {
                             $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
@@ -143,11 +143,11 @@ Function Get-CUClassConstructor {
                     $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
 
-                Foreach($Class in (Get-CuClass @ClassParams)){
+                Foreach($Class in (Get-CuClass @ClassParams)) {
                     If ( $Class.Constructor.count -ne 0 ) {
-                        if($Raw){
+                        If ( $Raw ) {
                             $Class.GetCUClassConstructor().Raw
-                        }Else{
+                        } Else {
 
                             $Class.GetCUClassConstructor()
                         }
