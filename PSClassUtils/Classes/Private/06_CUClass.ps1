@@ -13,7 +13,7 @@ Class CUClass {
 
         #$this.Raw = $RawAST
         $this.Raw = $AST
-        $This.SetPropertiesFromRawAST()
+        $This.SetPropertiesFromAST()
 
     }
 
@@ -26,13 +26,13 @@ Class CUClass {
 
     }
 
-    CUClass ($Name,$Property,$Constructor,$Method,$RawAST){
+    CUClass ($Name,$Property,$Constructor,$Method,$AST){
 
         $This.Name = $Name
         $This.Property = $Property
         $This.Constructor = $Constructor
         $This.Method = $Method
-        $This.Raw = $RawAST
+        $This.Raw = $AST
 
     }
     
