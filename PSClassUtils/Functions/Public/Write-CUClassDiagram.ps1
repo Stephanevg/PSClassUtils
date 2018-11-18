@@ -104,7 +104,9 @@ Function Write-CUClassDiagram {
 
         [Parameter(Mandatory = $false)]
         [switch]
-        $IgnoreCase
+        $IgnoreCase,
+
+        [Switch]$ShowComposition
     )
     if (-not (Get-Module -Name PSGraph)) {
         #Module is not loaded
@@ -180,6 +182,10 @@ Function Write-CUClassDiagram {
     if ($IgnoreCase) {
         $GraphParams.IgnoreCase = $true
     }
+    if($ShowComposition){
+        $GraphParams.ShowComposition = $true
+    }
+
     $Graph =  Out-CUPSGraph @GraphParams
 
     $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
