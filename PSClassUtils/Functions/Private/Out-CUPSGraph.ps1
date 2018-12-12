@@ -56,7 +56,8 @@ Function Out-CUPSGraph {
     
     process {
         [System.Collections.ArrayList]$AllClasses = @()
-        $Graph = Graph {
+        #$Graph = Graph -Attributes @{splines='ortho'} -ScriptBlock {
+        $Graph = Graph -ScriptBlock {
             foreach($obj in $inputObject){
                 $CurrName = split-Path -leaf $obj.Name
                 subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
