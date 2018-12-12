@@ -36,7 +36,8 @@ function Get-CULoadedClass {
             }
 
             Foreach ( $Class in ($LoadedClasses | Select-Object -Property Path -Unique) ) {
-                Get-CURaw -Path $Class.Path
+                #Get-CURaw -Path $Class.Path
+                Get-CUAst -Path $Class.Path
             }
 
         }

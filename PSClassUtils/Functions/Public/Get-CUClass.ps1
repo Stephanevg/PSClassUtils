@@ -14,16 +14,16 @@ function Get-CUClass {
     .EXAMPLE
         PS C:\> Get-CUClass
         Return all classes alreay loaded in current PSSession.
-
+    .EXAMPLE
         PS C:\> Get-CUClass -ClassName CUClass
         Return the particuluar CUCLass.
-
+    .EXAMPLE
         PS C:\> Get-CUClass -Path .\test.psm1,.\test2.psm1
         Return all classes present in the test.psm1 and test2.psm1 file.
-
+    .EXAMPLE
         PS C:\> Get-CUClass -Path .\test.psm1 -ClassName test
         Return test class present in the test.psm1 file.
-
+    .EXAMPLE
         PS C:\PSClassUtils> Get-ChildItem -recurse | Get-CUClass
         Return all classes, recursively, present in the C:\PSClassUtils Folder.
     .INPUTS
@@ -69,6 +69,7 @@ function Get-CUClass {
         If ( $Null -ne $PSBoundParameters['Path'] ) {
 
             Foreach ( $Path in $PSBoundParameters['Path'] ) {
+
                 If ( $Path.Extension -in '.ps1', '.psm1') {
                     If ($PSCmdlet.MyInvocation.ExpectingInput) {
                         $ClassParams.Path = $Path.FullName
@@ -76,77 +77,48 @@ function Get-CUClass {
                         $ClassParams.Path = (Get-Item (Resolve-Path $Path).Path).FullName
                     }
             
-                    $RawGlobalAST = Get-CURaw -Path $ClassParams.Path
-                    $GlobalClassFromRaw = [CUClass]::New($RawGlobalAST)
-                    
-                    Switch ( $GlobalClassFromRaw.Ast ) {
-                        { $GlobalClassFromRaw.Ast.count -eq 1 } {
-                            If ( $PSBoundParameters['ClassName'] ) {
-                                If ( $GlobalClassFromRaw.name -eq $PSBoundParameters['ClassName'] ) {
-                                    If ( $PSBoundParameters['Raw'] ) {
-                                        $GlobalClassFromRaw.Raw
-                                    } Else {
-                                        $GlobalClassFromRaw 
-                                    }
-                                }
-                            } Else {
+                    $Ast = Get-CUAst -Path $ClassParams.Path
+                    Foreach ( $x in $Ast ) {
+                        If ( $PSBoundParameters['ClassName'] ) {
+                            If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
                                 If ( $PSBoundParameters['Raw'] ) {
-                                    $GlobalClassFromRaw.Raw
+                                    ([CUClass]::New($x)).Raw
                                 } Else {
-                                    $GlobalClassFromRaw 
+                                    [CUClass]::New($x)
                                 }
                             }
-                            break;
+                        } Else {
+                            If ( $PSBoundParameters['Raw'] ) {
+                                ([CUClass]::New($x)).Raw
+                            } Else {
+                                [CUClass]::New($x)
+                            }
                         }
-
-                        { $GlobalClassFromRaw.Ast.count -gt 1 } {
-                            Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
-                                If ( $PSBoundParameters['ClassName'] ) {
-                                    If ( $Class.name -eq $PSBoundParameters['ClassName'] ) {
-                                        If ( $PSBoundParameters['Raw'] ) {
-                                            ([CUClass]::New($Class)).Raw
-                                        } Else {
-                                            [CUClass]::New($Class) 
-                                        }
-                                    }
-                                } Else {
-                                    If ( $PSBoundParameters['Raw'] ) {
-                                        ([CUClass]::New($Class)).Raw
-                                    } Else {
-                                        [CUClass]::New($Class) 
-                                    }
-                                }
-                            }
-                            break;
-                        } 
-
                     }
+
                 }
             }
 
         } Else {
-            Foreach ( $RawAST in (Get-CULoadedClass @ClassParams ) ) {
-                
-                $GlobalClassFromRaw = [CUClass]::New($RawAST)
-                
-                ## Test if more than one class in document or if inheritances classes
-                If ( $GlobalClassFromRaw.Ast.count -gt 1 ) {
-                    Foreach ( $Class in $GlobalClassFromRaw.Ast ) {
+            
+            Foreach ( $x in (Get-CULoadedClass @ClassParams ) ) {
+
+                If ( $PSBoundParameters['ClassName'] ) {
+                    If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
                         If ( $PSBoundParameters['Raw'] ) {
-                            ([CUClass]::New($Class)).Raw
+                            ([CUClass]::New($x)).Raw
                         } Else {
-                            [CUClass]::New($Class) 
+                            [CUClass]::New($x)
                         }
                     }
                 } Else {
                     If ( $PSBoundParameters['Raw'] ) {
-                        ($GlobalClassFromRaw).Raw
+                        ([CUClass]::New($x)).Raw
                     } Else {
-                        $GlobalClassFromRaw 
+                        [CUClass]::New($x)
                     }
-                     
                 }
-
+                
             } 
         }
     }

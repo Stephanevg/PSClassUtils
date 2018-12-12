@@ -15,21 +15,21 @@ Function Get-CUClassConstructor {
     .EXAMPLE
         PS C:\> Get-CUClassConstructor
         Return all the constructors of the classes loaded in the current PSSession.
-
+    .EXAMPLE
         PS C:\> Get-CUClassConstructor -ClassName woop
         ClassName Name    Parameter
         --------- ----    ---------
         woop    woop
         woop    woop       {String, Number}
         Return constructors for the woop Class.
-
+    .EXAMPLE
         PS C:\> Get-CUClassConstructor -Path .\Woop.psm1
         ClassName Name    Parameter
         --------- ----    ---------
         woop    woop
         woop    woop       {String, Number}
         Return constructors for the woop Class present in the woop.psm1 file.
-
+    .EXAMPLE
         PS C:\PSClassUtils> Gci -recurse | Get-CUClassConstructor -ClassName CuClass
         ClassName Name    Parameter
         --------- ----    ---------
@@ -116,7 +116,7 @@ Function Get-CUClassConstructor {
                    
                     If ( $P.extension -in ".ps1",".psm1" ) {
 
-                        If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                        If ( $PSCmdlet.MyInvocation.ExpectingInput ) {
                             $ClassParams.Path = $P.FullName
                         } Else {
                             $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
@@ -143,11 +143,11 @@ Function Get-CUClassConstructor {
                     $ClassParams.ClassName = $PSBoundParameters['ClassName']
                 }
 
-                Foreach($Class in (Get-CuClass @ClassParams)){
+                Foreach($Class in (Get-CuClass @ClassParams)) {
                     If ( $Class.Constructor.count -ne 0 ) {
-                        if($Raw){
+                        If ( $Raw ) {
                             $Class.GetCUClassConstructor().Raw
-                        }Else{
+                        } Else {
 
                             $Class.GetCUClassConstructor()
                         }
