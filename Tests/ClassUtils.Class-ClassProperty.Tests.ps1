@@ -10,7 +10,7 @@ InModuleScope PSClassUtils -ScriptBlock {
 
         it '[Properties] Should have right amount of Properties' {
             $Instance = [CUClassProperty]::New("ClassName","String", "Value")
-            ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 4
+            ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 5
         }
 
 
