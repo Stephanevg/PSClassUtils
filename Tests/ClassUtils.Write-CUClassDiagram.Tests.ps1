@@ -329,6 +329,27 @@ Describe "Testing Write-CUClassDiagram" {
         
 '@
         
+        
+            $CompositionClass = @'
+            Class AAA {
+                [int]$MyInt
+            }
+            
+            Class BBB {
+                [string]$prop1
+                [AAA]$prop2
+            }
+'@
+
+            $CompPath = Join-Path -Path $Testdrive -ChildPath "Composition.ps1"
+            $CompositionClass | Out-File -FilePath $CompPath -Force
+            
+            $compositionGraph = Write-CUClassDiagram -Path $CompPath -PassThru -ShowComposition 
+        It '[-ShowComposition] Should return fields with composition' {
+
+            [String]$compositionGraph | should -Match '^.*"AAA"->"BBB":Row_prop2 \[arrowhead="diamond";\].*$' 
+        }
+
         #It is best to keep this test at the end, and it will unload the module PSGraph, and can cause some issues while testing.
         it 'Should throw if psgraph module is not found' {
             if (get-Module psgraph) {
