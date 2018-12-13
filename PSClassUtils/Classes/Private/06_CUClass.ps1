@@ -1,19 +1,19 @@
 Class CUClass {
     [String]$Name
-    [ClassProperty[]]$Property
-    [ClassConstructor[]]$Constructor
-    [ClassMethod[]]$Method
+    [CUClassProperty[]]$Property
+    [CUClassConstructor[]]$Constructor
+    [CUClassMethod[]]$Method
     [Bool]$IsInherited = $False
     [String]$ParentClassName
     [System.IO.FileInfo]$Path
     Hidden $Raw
-    Hidden $Ast
+    #Hidden $Ast
 
-    CUClass($RawAST){
+    CUClass($AST){
 
-        $this.Raw = $RawAST
-        $this.Ast = $this.Raw.FindAll( {$args[0] -is [System.Management.Automation.Language.TypeDefinitionAst]}, $true)
-        $This.SetPropertiesFromRawAST()
+        #$this.Raw = $RawAST
+        $this.Raw = $AST
+        $This.SetPropertiesFromAST()
 
     }
 
@@ -26,30 +26,30 @@ Class CUClass {
 
     }
 
-    CUClass ($Name,$Property,$Constructor,$Method,$RawAST){
+    CUClass ($Name,$Property,$Constructor,$Method,$AST){
 
         $This.Name = $Name
         $This.Property = $Property
         $This.Constructor = $Constructor
         $This.Method = $Method
-        $This.Raw = $RawAST
+        $This.Raw = $AST
 
     }
     
 
     ## Set Name, and call Other Set
-    [void] SetPropertiesFromRawAST(){
+    [void] SetPropertiesFromAST(){
 
-        $This.Name = $This.Ast.Name
+        $This.Name = $This.Raw.Name
         $This.Path = [System.IO.FileInfo]::new($This.Raw.Extent.File)
         $This.SetConstructorFromAST()
         $This.SetPropertyFromAST()
         $This.SetMethodFromAST()
         
         ## Inheritence Check
-        If ( !($null -eq $This.Ast.BaseTypes) ) {
+        If ( $This.Raw.BaseTypes ) {
             $This.IsInherited = $True
-            $This.ParentClassName = $This.Ast.BaseTypes.TypeName.Name
+            $This.ParentClassName = $This.Raw.BaseTypes.TypeName.Name
         }
 
     }
@@ -58,13 +58,13 @@ Class CUClass {
     [void] SetConstructorFromAST(){
         
         $Constructors = $null
-        $Constructors = $This.Ast.Members | Where-Object {$_.IsConstructor -eq $True}
+        $Constructors = $This.Raw.Members | Where-Object {$_.IsConstructor -eq $True}
 
         Foreach ( $Constructor in $Constructors ) {
 
             $Parameters = $null
             $Parameters = $Constructor.Parameters
-            [ClassParameter[]]$Paras = @()
+            [CUClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -74,13 +74,13 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [CUClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
             }
 
-            $This.Constructor += [ClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
+            $This.Constructor += [CUClassConstructor]::New($This.name,$Constructor.Name, $Paras,$Constructor)
         }
 
     }
@@ -89,13 +89,13 @@ Class CUClass {
     [void] SetMethodFromAST(){
 
         $Methods = $null
-        $Methods = $This.Ast.Members | Where-Object {$_.IsConstructor -eq $False}
+        $Methods = $This.Raw.Members | Where-Object {$_.IsConstructor -eq $False}
 
         Foreach ( $Method in $Methods ) {
 
             $Parameters = $null
             $Parameters = $Method.Parameters
-            [ClassParameter[]]$Paras = @()
+            [CUClassParameter[]]$Paras = @()
 
             If ( $Parameters ) {
                 
@@ -105,13 +105,13 @@ Class CUClass {
                     # couldn't find another place where the returntype was located. 
                     # If you know a better place, please update this! I'll pay you beer.
                     $Type = $Parameter.Extent.Text.Split("$")[0] 
-                    $Paras += [ClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
+                    $Paras += [CUClassParameter]::New($Parameter.Name.VariablePath.UserPath, $Type)
         
                 }
 
             }
 
-            $This.Method += [ClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
+            $This.Method += [CUClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
         }
 
     }
@@ -119,7 +119,7 @@ Class CUClass {
     ## Find Properties for the current Class
     [void] SetPropertyFromAST(){
 
-        $Properties = $This.Ast.Members | Where-Object {$_ -is [System.Management.Automation.Language.PropertyMemberAst]} 
+        $Properties = $This.Raw.Members | Where-Object {$_ -is [System.Management.Automation.Language.PropertyMemberAst]} 
 
         If ($Properties) {
         
@@ -131,29 +131,28 @@ Class CUClass {
                     $visibility = "public"
                 }
             
-                #$This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
-                $This.Property += [ClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility)
+                $This.Property += [CUClassProperty]::New($This.Name,$pro.Name, $pro.PropertyType.TypeName.Name, $Visibility,$Pro)
             }
         }
 
     }
 
     ## Return the content of Constructor
-    [ClassConstructor[]]GetCuClassConstructor(){
+    [CUClassConstructor[]]GetCUClassConstructor(){
 
         return $This.Constructor
         
     }
 
     ## Return the content of Method
-    [ClassMethod[]]GetCuClassMethod(){
+    [CUClassMethod[]]GetCUClassMethod(){
 
         return $This.Method
 
     }
 
     ## Return the content of Property
-    [ClassProperty[]]GetCuClassProperty(){
+    [CUClassProperty[]]GetCUClassProperty(){
 
         return $This.Property
 

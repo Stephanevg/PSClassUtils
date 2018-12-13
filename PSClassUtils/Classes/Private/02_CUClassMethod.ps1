@@ -1,23 +1,25 @@
-Class ClassMethod {
+Class CUClassMethod {
     [String]$ClassName
     [String]$Name
     [String]$ReturnType
-    [ClassParameter[]]$Parameter
+    [CUClassParameter[]]$Parameter
     hidden $Raw
+    #hidden $Extent
 
-    ClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[ClassParameter[]]$Parameter){
+    CUClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[CUClassParameter[]]$Parameter){
         $this.ClassName = $ClassName
         $this.Name = $Name
         $This.ReturnType = $ReturnType
         $This.Parameter = $Parameter
     }
 
-    ClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[ClassParameter[]]$Parameter,$Raw){
+    CUClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[CUClassParameter[]]$Parameter,$Raw){
         $this.ClassName = $ClassName
         $this.Name = $Name
         $This.ReturnType = $ReturnType
         $This.Parameter = $Parameter
-        $This.Raw
+        $This.Raw = $Raw
+        #$This.Extent = $Raw.Extent.Text
     }
 
 }

@@ -5,7 +5,7 @@ function Get-CURaw {
     .DESCRIPTION
         Return the raw content of a ps1 or psm1 file as a AST scriptblock type.
     .EXAMPLE
-        PS C:\Users\Lx\GitPerso\PSClassUtils\PsClassUtils> Get-CURaw -Path .\Classes\Private\01_ClassProperty.ps1
+        PS C:\PSClassUtils> Get-CURaw -Path .\Classes\Private\01_ClassProperty.ps1
         Attributes         : {}
         UsingStatements    : {}
         ParamBlock         :

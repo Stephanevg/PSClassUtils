@@ -16,6 +16,10 @@ Function Get-CUClassProperty {
     #>
     [cmdletBinding()]
     Param(
+        [Alias("FullName")]
+        [Parameter(ParameterSetName = "Path", Position = 1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
+        [System.IO.FileInfo[]]$Path,
+        
         [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
 
@@ -23,14 +27,42 @@ Function Get-CUClassProperty {
         [ValidateScript({
             If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
         })]
-        [Object[]]$InputObject
+        [Object[]]$InputObject,
+
+        [Switch]$Raw
     )
 
     BEGIN {}
 
     PROCESS {
 
-        If ( $MyInvocation.PipelinePosition -eq 1 ) {
+        $ClassParams = @{}
+
+        If ($ClassName -or $PSBoundParameters['ClassName'] ) {
+            $ClassParams.ClassName = $ClassName
+        }
+
+        If ($Path -or $PSBoundParameters['Path'] ) {
+            $ClassParams.Path = $Path.FullName
+        }
+
+        If ($InputObject) {
+            $ClassParams.ClassName = $ClassName
+        }
+
+       
+        $Class = Get-CuClass @ClassParams
+        If ($Class) {
+
+            If($Raw){
+                $Class.GetCuClassProperty().Raw
+            }else{
+
+                $Class.GetCuClassProperty()
+            }
+        }
+
+        <# If ( $MyInvocation.PipelinePosition -eq 1 ) {
             ## Not from the Pipeline
             If ( $Null -eq $PSBoundParameters['InputObject'] ) {
                 Throw "Please Specify an InputObject of type CUClass"
@@ -51,7 +83,7 @@ Function Get-CUClassProperty {
                 Throw "-ClassName parameter must be specified on the left side of the pipeline"
             }
         }
-
+ #>
     }
 
     END {}

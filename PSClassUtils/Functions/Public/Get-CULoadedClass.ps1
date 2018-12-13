@@ -1,4 +1,19 @@
 function Get-CULoadedClass {
+    <#
+    .SYNOPSIS
+        Return all loaded classes in the current PSSession
+    .DESCRIPTION
+        Return all loaded classes in the current PSSession
+    .EXAMPLE
+        PS C:\> <example usage>
+        Explanation of what the example does
+    .INPUTS
+        String
+    .OUTPUTS
+        ASTDocument
+    .NOTES
+        General notes
+    #>
     [CmdletBinding()]
     param (
         [String[]]$ClassName = '*'
@@ -21,7 +36,8 @@ function Get-CULoadedClass {
             }
 
             Foreach ( $Class in ($LoadedClasses | Select-Object -Property Path -Unique) ) {
-                Get-CURaw -Path $Class.Path
+                #Get-CURaw -Path $Class.Path
+                Get-CUAst -Path $Class.Path
             }
 
         }

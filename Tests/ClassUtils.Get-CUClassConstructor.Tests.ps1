@@ -65,13 +65,13 @@ Describe "[Loaded] Testing Get-CUClassConstructor"{
         it 'Should Return 3 Constructors' {
 
 
-            (Get-CUClassConstructor -ClassName "Woop" | measure).Count | should be 3
+            (Get-CUClass -Path $ClassScript | Get-CUClassConstructor -ClassName "Woop" | measure).Count | should be 3
         }
 
         Context 'Validating Properties' {
             
             $Properties = @("String","Number","Time")
-            $Constructors = Get-CUClassConstructor -ClassName "Woop"
+            $Constructors = Get-CUClass -Path $ClassScript | Get-CUClassConstructor -ClassName "Woop"
             foreach ($prop in $Properties){
 
                 it "Should have Property: $($Prop)" {
