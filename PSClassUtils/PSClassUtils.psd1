@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('Classes','helper','diagram','uml','psgraph','graphviz')
+        Tags = @('Classes','helper','diagram','uml','psgraph','graphviz','class')
 
         # A URL to the license for this module.
         # LicenseUri = ''
@@ -107,7 +107,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = '
+         2.2.5 - 20181213
+            Added support for -ShowComposition on Wirte-CuClassDiagram
+            Rewrote base AST parsing and base classes.
+        '
 
     } # End of PSData hashtable
 
