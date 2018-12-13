@@ -1,5 +1,40 @@
 
-$ASTDocument = Get-CUAst -Path D:\Repository\Modules\Class.Helper.ConfigMgr\Class.Helper.ConfigMgr.psm1
+Function Write-CUPesterTests {
+    <#
+    .SYNOPSIS
+        Generates automatically Pester tests 
+    .DESCRIPTION
+        Pester tests generation from ps1 or psm1 files.
+    .EXAMPLE
+        Write-CUPesterTests -Path C:\plop.ps1
+
+        #Generates a C:\plop.Tests.Ps1 file with pester tests in it.
+    .INPUTS
+        Inputs (if any)
+    .OUTPUTS
+        Output (if any)
+    .NOTES
+        General notes
+    #>
+Param(
+
+
+    $Path = "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\woop.psm1"
+    $AddParameterLessConstructor = $true
+)
+
+$PathObject = Get-Item $Path
+if ($PathObject -is [System.IO.DirectoryInfo]) {
+    $Classes = gci $PathObject | Get-CUClass
+}
+elseif ($PathObject -is [System.IO.FileInfo]) {
+    $Classes = Get-CUClass -Path $PathObject.FullName
+}
+
+
+
+
+$AllFiles = $Classes | Group-Object -Property Path
 $PesterTest = $null
 Function Get-MethodSignature {
     [CmdletBinding()]
@@ -10,144 +45,216 @@ Function Get-MethodSignature {
     $Method.Parameters.Extent.Text
 }
 
-Foreach ($Class in $ASTDocument.Classes){
+$sb = [System.Text.StringBuilder]::new()
 
-
-    $Constructors = $Class.members | ? {$_.IsConstructor -eq $true}
-    #$AllMembers = @()
-    $Methods = $Class.members | ? {$_.IsConstructor -eq $false}
+Foreach ($File in $AllFiles) {
+    $Header = ""
+    if ($File.Name.EndsWith(".psm1")) {
+        $Header = "using module $($File.Name)"
+    }
+    else {
+        $Header = ". $($File.Name)"
+    }
+    
 
     #Optional Context blocks
 
     #Creating Describe Block
-
-    $PesterTest +=@"
-    using module D:\Repository\Scripts\CM0-OPR-PackageManagement\Class.PackageManagement\Class.PackageManagement.psd1
-    Import-Module "$($ENV:SMS_ADMIN_UI_PATH)\..\ConfigurationManager.psd1"
-
-    Describe "Testing: [$($Class.Name)]"{
     
-"@ 
+    [void]$sb.AppendLine($Header)
+    
 
-    #Creating itBlocks
-
-    Foreach($Constructor in $Constructors){
-
-        #Constructors
+    Foreach ($Class in $File.Group) {
 
 
-        #$Constructor
-        $Parstr = ""
-        $SignatureRaw = ""
-        foreach ($p in $Constructor.Parameters) {
-            $Parstr = $Parstr + $p.Name + ","
-            $SignatureRaw = $SignatureRaw + $p.Extent.Text + ","
+        $StartDescribeBlock = "Describe '[$($Class.Name)]-[Constructors]'{"  
+
+        [void]$sb.AppendLine($StartDescribeBlock)    
+
+        Write-verbose "Generating IT blocks"
+
+        #Creating itBlocks
+
+        If($AddParameterLessConstructor){
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("It '[$($Class.Name)]-[Constructor] - Parameterless - should Not Throw' {")
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("{[$($Class.Name)]::New()} | Should not throw")
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("} #End of it block")
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("")
         }
 
-    }
+        Write-verbose " Constructors"
+        Foreach ($Constructor in $Class.Constructor) {
 
-
-    Foreach ($Method in $Methods){
-
-
-        
+            #Constructors
+            Write-verbose " Constructors"
+            #$Constructor
             $Parstr = ""
             $SignatureRaw = ""
-            foreach ($p in $Method.Parameters) {
-                $Parstr = $Parstr + $p.Name + ","
-                $SignatureRaw = $SignatureRaw + $p.Extent.Text + ","
+            foreach ($p in $Constructor.Parameter) {
+                $Parstr = $Parstr + '$' + $p.Name + ","
+                $SignatureRaw = $SignatureRaw + $p.Type + $p.Name + ","
             }
+            $Signature = "(" + $SignatureRaw.Trim(",") + ")"
             $Parstr = $Parstr.trim(",")
-            $SignatureRaw = $SignatureRaw.trim(",")
 
-            
-            $MethodCall =""
-            $MethodCallBody = "[$($Class.Name)]$($Method.Name)"
-            $MethodCallEnd = ""
             if ($Parstr) {
-                 $MethodCallEnd = "(" + $Parstr + ")"
+                $CallEnd = "(" + $Parstr + ")"
             }
             else {
 
-                $MethodCallEnd += "()"
+                $CallEnd = "()"
 
             }
-            $REturnType = $Method.ReturnType.Extent.Text
-            $Signature = "($SignatureRaw)"
-            if($Method.IsStatic){
+            $ItBlock = "It '[$($Class.Name)]-[Constructor]$($Signature) should Not Throw' {"
+            [void]$sb.AppendLine($ItBlock)
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("#Instanciation:")
 
-                $MethodCall = $MethodCallBody.Replace("]","]::") + $MethodCallEnd
-            }else{
-                $MethodCall = '$Instance.' + $($Method.Name) + $MethodCallEnd
+            foreach ($p in $Constructor.Parameter) {
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine('$' + $p.Name + "=" + "''")
+                [void]$sb.AppendLine("") 
+                
             }
+
+            [void]$sb.AppendLine("#Constructor Call:")
+            [void]$sb.AppendLine("")
+            $ConstructorCallBody = "{[$($Class.Name)]::New" + "$($CallEnd)}"
+            [void]$sb.Append($ConstructorCallBody)
+            $TestToExecute = " | Should Not Throw "
+            [void]$sb.AppendLine($TestToExecute)
+            [void]$sb.AppendLine("}# end of it block") 
+            [void]$sb.AppendLine("")
+        }
+
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("}# end of Describe block")
+        #$sb.ToString() > "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\$($ExportFilename)" 
+    }
+
+
+
+    [void]$sb.AppendLine("Describe '[$($Class.Name)]-[Methods]'{")
+    [void]$sb.AppendLine("")
+    Foreach ($Method in $class.Method) {
+
+
         
-            if ($Method.IsHidden) {
-              
-                $visibility = "#Hidden Method"
-                
-            }else{
+        $Parstr = ""
+        $SignatureRaw = ""
+        foreach ($p in $Method.Parameters) {
+            $Parstr = $Parstr + $p.Name + ","
+            $SignatureRaw = $SignatureRaw + $p.Extent.Text + ","
+        }
+        $Parstr = $Parstr.trim(",")
+        $SignatureRaw = $SignatureRaw.trim(",")
 
-                $visibility = "#Public Method"
-            }
-
-            $ItBlockHeader ="#Set Parameter values here:"
-            foreach ($parameter in $Method.Parameters.Name) {
-
-                $ItBlockHeader += @"
-    
-                $parameter = ""
-"@
-            }
-
-
-
-            $PesterTest += @"
-
-
-            $($visibility)
-            It '[$($Class.Name)] -->$($ReturnType) $($Method.Name) $($Signature) should Not Throw' {
-                
-                $ItBlockHeader
-
-                #Instanciation
-
-
-
-                #Test Values
-                
-                {$MethodCall} | Should Not Throw
-                
-            }
-
-            $($visibility)
-            It '[$($Class.Name)] -->$($ReturnType) $($Method.Name) $($Signature) should return type $($ReturnType)' {
-                
-                $ItBlockHeader
-
-                #Instanciation
-
-
-
-                #Test Values
-                
-                ($MethodCall).GEtType().FullName | should be $ReturnType
-            }
-    
-"@
             
+        $MethodCall = ""
+        $MethodCallBody = "[$($Class.Name)]$($Method.Name)"
+        $MethodCallEnd = ""
+        if ($Parstr) {
+            $MethodCallEnd = "(" + $Parstr + ")"
+        }
+        else {
+
+            $MethodCallEnd += "()"
+
+        }
+        $REturnType = $Method.ReturnType.Extent.Text
+        $Signature = "($SignatureRaw)"
+        if ($Method.IsStatic) {
+
+            $MethodCall = $MethodCallBody.Replace("]", "]::") + $MethodCallEnd
+        }
+        else {
+            $MethodCall = '$Instance.' + $($Method.Name) + $MethodCallEnd
+        }
+        
+        if ($Method.IsHidden) {
+              
+            $visibility = "#Hidden Method"
+                
+        }
+        else {
+
+            $visibility = "#Public Method"
+        }
+
+        
+        [void]$sb.AppendLine("")
+        foreach ($parameter in $Method.Parameters.Name) {
+            [void]$sb.AppendLine($parameter)
+            [void]$sb.AppendLine("")
+           
+        }
 
 
+        [void]$sb.AppendLine($visibility)
+        [void]$sb.AppendLine("It '[$($Class.Name)] -->$($ReturnType) $($Method.Name) $($Signature) should Not Throw' {")
+        [void]$sb.AppendLine("")
+        
+        [void]$sb.AppendLine("#Arrange")
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("#Act")
+        if(!($Method.IsStatic)){
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("#Instantiate your class here")
+            [void]$sb.AppendLine('$' + "Instance = [$($Class.Name)]::New()")
+        }
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("#Assert")
+        [void]$sb.AppendLine("{$MethodCall} | Should Not Throw")
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("} #End It Block")
+        [void]$sb.AppendLine("")
+
+
+        [void]$sb.AppendLine($visibility)
+        [void]$sb.AppendLine("It '[$($Class.Name)] -->$($ReturnType) $($Method.Name) $($Signature) should return type $($ReturnType)' {")
+        [void]$sb.AppendLine("")
+        
+        [void]$sb.AppendLine("#Arrange")
+        [void]$sb.AppendLine("# Add parameter values here")
+
+        [void]$sb.AppendLine("")
+        
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("#Act")
+
+        [void]$sb.AppendLine("#Instantiate your class here")
+        
+        if(!($Method.IsStatic)){
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("#Instantiate your class here")
+            [void]$sb.AppendLine('$' + "Instance = [$($Class.Name)]::New()")
+        }
+        [void]$sb.AppendLine("#Test Values")
+        [void]$sb.AppendLine("($MethodCall).GetType().FullName | should be $ReturnType")
+        [void]$sb.AppendLine("")
+        [void]$sb.AppendLine("} #End It Block")
+        [void]$sb.AppendLine("")
 
     }
 
     #Closing Describe Block
-        $PesterTest += @"
-    
-    }#EndDescribeBlock
+    [void]$sb.AppendLine("}#EndDescribeBlock")
 
-"@
-$PesterTest > "$Home\ConfigMgr.Tests\$($Class.Name).Tests.ps1" 
-$PesterTest = ""
+    $Item = Get-Item $File.Name
+    $ExportFilename = $Item.Name.Replace($Item.Extension,".Tests.Ps1")
+
+    $TestfileName = $File
+    $sb.ToString() > "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\$($ExportFilename)" 
+
+
+
 }#End Foreach Class
 
 
+}
