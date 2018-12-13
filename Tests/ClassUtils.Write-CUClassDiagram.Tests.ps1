@@ -5,39 +5,42 @@ Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 Describe "Testing Write-CUClassDiagram" {
 
-    $TestCaseClass = @'
-    
-    Class Woop {
-        [String]$String
-        [int]$number
-    
-        Woop([String]$String,[int]$Number){
-    
-        }
-    
-        [String]DoSomething(){
-            return $this.String
-        }
-    }
-    
-    Class Wap :Woop {
-        [String]$prop3
-    
-        DoChildthing(){}
-    
-    }
-    
-    Class Wep : Woop {
-        [String]$prop4
-    
-        DoOtherChildThing(){
-    
-        }
-    }
-    
-'@
 
     InModuleScope "PSClassUtils" {
+
+        $TestCaseClass = @'
+    
+        Class Woop {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+        
+        Class Wap :Woop {
+            [String]$prop3
+        
+            DoChildthing(){}
+        
+        }
+        
+        Class Wep : Woop {
+            [String]$prop4
+        
+            DoOtherChildThing(){
+        
+            }
+        }
+        
+'@
+    
+
         $ClassScript = Join-Path -Path $Testdrive -ChildPath "WoopClass.ps1"
         $TestCaseClass | Out-File -FilePath $ClassScript -Force
 
@@ -105,7 +108,7 @@ Describe "Testing Write-CUClassDiagram" {
             $File3 | Out-File -FilePath $Path_File3 -Force
     
             $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
-            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop" \[.*label=.*' | should Not beNullOrEmpty
             $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
     
@@ -201,7 +204,7 @@ Describe "Testing Write-CUClassDiagram" {
             $File3 | Out-File -FilePath $Path_File3 -Force
 
             $b = Write-CUClassDiagram -Path $FolderPathFolder -PassThru
-            $b -cmatch '"Woop" \[label=.*' | should Not beNullOrEmpty
+            $b -cmatch '"Woop" \[.*label=.*' | should Not beNullOrEmpty
             $b -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $b -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
 
@@ -283,7 +286,7 @@ Describe "Testing Write-CUClassDiagram" {
             $ClassScriptCaseSensitive = Join-Path -Path $Testdrive -ChildPath "WoopClassCase.ps1"
             $TestCaseSensitityClass | Out-File -FilePath $ClassScriptCaseSensitive -Force
             $a = Write-CUClassDiagram -Path $ClassScriptCaseSensitive -PassThru -IgnoreCase
-            $a -cmatch '"Woop" \[label=.*' | should not benullOrEmpty
+            $a -cmatch '"Woop" \[.*label=.*' | should not benullOrEmpty
             $a -cmatch '"Woop"->"Wap"' | should match '"Woop"->"Wap"'
             $a -cmatch '"Woop"->"Wep"' | should match '"Woop"->"Wep"'
             $a -cmatch 'wOOp' | should beNullOrEmpty
@@ -326,6 +329,27 @@ Describe "Testing Write-CUClassDiagram" {
         
 '@
         
+        
+            $CompositionClass = @'
+            Class AAA {
+                [int]$MyInt
+            }
+            
+            Class BBB {
+                [string]$prop1
+                [AAA]$prop2
+            }
+'@
+
+            $CompPath = Join-Path -Path $Testdrive -ChildPath "Composition.ps1"
+            $CompositionClass | Out-File -FilePath $CompPath -Force
+            
+            $compositionGraph = Write-CUClassDiagram -Path $CompPath -PassThru -ShowComposition 
+        It '[-ShowComposition] Should return fields with composition' {
+
+            [String]$compositionGraph | should -Match '^.*"AAA"->"BBB":Row_prop2 \[arrowhead="diamond";\].*$' 
+        }
+
         #It is best to keep this test at the end, and it will unload the module PSGraph, and can cause some issues while testing.
         it 'Should throw if psgraph module is not found' {
             if (get-Module psgraph) {

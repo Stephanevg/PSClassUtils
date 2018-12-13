@@ -4,50 +4,51 @@ Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 InModuleScope PSClassUtils -ScriptBlock {
 
-    Describe "Testing Class: 'ClassConstructor'" {
+    Describe "Testing Class: 'CUClassConstructor'" {
 
-        Context "[ClassConstructor] Constructors and Instantiation" {
+        Context "[CUClassConstructor] Constructors and Instantiation" {
 
         
-            it '[ClassConstructor][Instantiation] (Empty ClassProperty Array) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
-                {[ClassConstructor]::New("DoStuffPlease", "String", $Properties)} | should not throw
+            it '[CUClassConstructor][Instantiation] (Empty CUClassParameter Array) should create an instance without throwing' {
+                $Parameter = [CUClassParameter[]]@()
+                {[CUClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
 
-            it '[ClassConstructor][Instantiation] (ClassProperty 1 element) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
-                $Properties += [ClassProperty]::New("PropName", "String")
-                {[ClassConstructor]::New("DoStuffPlease", "String", $Properties)} | should not throw
+            it '[CUClassConstructor][Instantiation] (CUClassParameter 1 element) should create an instance without throwing' {
+                $Parameter = [CUClassParameter[]]@()
+                $Parameter += [CUClassParameter]::New("classname","PropName", "String")
+                {[CUClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
 
-            it '[ClassConstructor][Instantiation] (ClassProperty 10 elements) should create an instance without throwing' {
-                $Properties = [ClassProperty[]]@()
+            it '[CUClassConstructor][Instantiation] (CUClassParameter 10 elements) should create an instance without throwing' {
+                $Parameter = [CUClassParameter[]]@()
                 for ($i = 0; $i++; $i -eq 10) {
-                    $Properties += [ClassProperty]::New("Prop$1", "String")
+                    $Parameter += [CUClassParameter]::New("ClassName","Prop$1", "String")
                 }
             
-                {[ClassConstructor]::New("DoStuffPlease", "String", $Properties)} | should not throw
+                {[CUClassConstructor]::New("DoStuffPlease", "String", $Parameter)} | should not throw
             }
         }
-        Context "[ClassConstructor] Properties" {
+        Context "[CUClassConstructor] Parameter" {
 
         
-            it '[ClassConstructor][Properties] Instance should have 3 Properties' {
+            it '[CUClassConstructor][Parameter] Instance should have 3 Parameter' {
             
-                $Properties = [ClassProperty[]]@()
-                $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Properties)
+                $Parameter = [CUClassParameter[]]@()
+                $Instance = [CUClassConstructor]::New("DoStuffPlease", "String", $Parameter)
                 ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 3
             }
 
-            $Properties = [ClassProperty[]]@()
-            $Properties += [ClassProperty]::New("PropName", "String")
-            $Instance = [ClassConstructor]::New("DoStuffPlease", "String", $Properties)
-            $Values = @("Name", "ReturnType", "Properties")
+            $Parameter = [CUClassParameter[]]@()
+            $Parameter += [CUClassParameter]::New("PropName", "String")
+            $Instance = [CUClassConstructor]::New("DoStuffPlease", "String", $Parameter)
+            $Values = @("Name", "Type")
+            #Write-Host ($Instance | gm | ? {$_.MemberType -eq "Property"})
             Foreach ($prop in $values) {
         
-                it "[ClassConstructor][Properties][$($prop)] Should be present on instance" {
+                it "[CUClassConstructor][Parameter][$($prop)] Should be present on instance" {
                 
-                    ($Instance | gm | ? {$_.MemberType -eq "Property" -and $_.Name -eq $prop}).Name | should be $prop
+                    ($Instance.Parameter | gm | ? {$_.MemberType -eq "Property" -and $_.Name -eq $prop}).Name | should be $prop
             
                 }
             }
