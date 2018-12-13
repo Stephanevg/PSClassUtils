@@ -1,4 +1,4 @@
-
+S
 Function Write-CUPesterTests {
     <#
     .SYNOPSIS
@@ -9,6 +9,8 @@ Function Write-CUPesterTests {
         Write-CUPesterTests -Path C:\plop.ps1
 
         #Generates a C:\plop.Tests.Ps1 file with pester tests in it.
+    .EXAMPLE
+        Write-CUPesterTests -Path C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\CompositionTest.ps1
     .INPUTS
         Inputs (if any)
     .OUTPUTS
@@ -19,7 +21,8 @@ Function Write-CUPesterTests {
 Param(
 
 
-    $Path = "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\woop.psm1"
+    $Path = "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\woop.psm1",
+    $ExportFolderPath,
     $AddParameterLessConstructor = $true
 )
 
@@ -248,9 +251,15 @@ Foreach ($File in $AllFiles) {
 
     $Item = Get-Item $File.Name
     $ExportFilename = $Item.Name.Replace($Item.Extension,".Tests.Ps1")
+    if($ExportFolderPath){
+
+        $ExportFullPath = Join-Path $ExportFolder -ChildPath $ExportFilename
+    }else{
+        $ExportFullPath = Join-Path $Item.PSParentPath -ChildPath $ExportFilename 
+    }
 
     $TestfileName = $File
-    $sb.ToString() > "C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\$($ExportFilename)" 
+    $sb.ToString() > $ExportFullPath
 
 
 
@@ -258,3 +267,4 @@ Foreach ($File in $AllFiles) {
 
 
 }
+
