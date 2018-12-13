@@ -69,7 +69,7 @@ PowerShellVersion = '5.0'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Get-CUClass','Get-CUClassConstructor','Get-CUClassMethod','Get-CUClassProperty','Get-CUCommands','Install-CUDiagramPrerequisites','Write-CUClassDiagram','Test-IsCustomType')
+FunctionsToExport = @('Get-CUClass','Get-CUClassConstructor','Get-CUClassMethod','Get-CUClassProperty','Get-CUCommands','Install-CUDiagramPrerequisites','Write-CUClassDiagram','Test-IsCustomType','Get-CUEnum')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
