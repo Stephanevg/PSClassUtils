@@ -1,4 +1,4 @@
-Function Write-CUClassDiagram {
+function Write-CUClassDiagram {
     <#
     .SYNOPSIS
         This script allows to document automatically existing script(s)/module(s) containing classes by generating the corresponding UML Diagram.
@@ -62,142 +62,173 @@ Function Write-CUClassDiagram {
     Will generate a diagram of all the private classes available in the Path specified, and immediatley show the diagram.
 
     .NOTES
-        Author: Stéphane van Gulick
-        Version: 0.8.2
-        www: www.powershellDistrict.com
+        Author: lxLeChat
+        Version: 
+        www: https://github.com/LxLeChat
         Report bugs or ask for feature requests here:
         https://github.com/Stephanevg/Write-CUClassDiagram
     #>
   
     [CmdletBinding()]
-    Param(
-    
-        
-        [Parameter(Mandatory=$false)]
-        [ValidateScript({
-                Test-Path $_
-        })]
-        [string]
-        $Path,
+    param (
+        [Alias("FullName")]
+        [Parameter(Mandatory=$True)]
+        [String]$Path,
 
-        [String]
-        $FolderPath,
+        [Parameter(Mandatory=$False)]
+        [Switch]$Recurse,
 
-        [Parameter(Mandatory=$false,ParameterSetName='Folder')]
-        [switch]
-        $Recurse,
+        [Parameter(Mandatory=$False)]
+        [ValidateSet("PerFile","PerDirectory")]
+        $OutPutDiagram,
 
-        [Parameter(Mandatory=$false)]
-        [System.IO.DirectoryInfo]
-        $ExportFolder,
-
+        [Parameter(Mandatory=$False)]
         [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
         [string]
         $OutputFormat = 'png',
 
-        [Parameter(Mandatory = $false)]
-        [switch]$Show,
+        [Parameter(Mandatory=$False)]
+        [ValidateScript({ Test-Path $_ })]
+        [String]
+        $ExportFolder,
 
-        [Parameter(Mandatory = $false)]
-        [switch]
-        $PassThru,
+        [Parameter(Mandatory=$False)]
+        [Switch]$IgnoreCase,
 
-        [Parameter(Mandatory = $false)]
-        [switch]
-        $IgnoreCase,
+        [Parameter(Mandatory=$False)]
+        [Switch]$ShowComposition,
 
-        [Switch]$ShowComposition
+        [Parameter(Mandatory=$False)]
+        [Switch]$Show
+
     )
-    if (-not (Get-Module -Name PSGraph)) {
-        #Module is not loaded
-        if (-not (Get-Module -ListAvailable -Name PSGraph )) {
-            #Module is not present
-            throw 'The module PSGraph is a prerequisite for this script to work. Please Install PSGraph first using Install-Module PSGraph'
-        } else {
-            Import-Module PSGraph -Force
-        }
-    }
     
-    if($FolderPath){
-        $Path = $FolderPath
-        write-warning "The parameter -FolderPath is deprecated, and will be removed in a future version. Please use -Path instead."
-    }
+    Begin {}
+    
+    Process {
 
-    #Methods are called FunctionMemberAst
-    #Properties are called PropertyMemberAst
+        ## Create GraphParameters
+        $Global:GraphParams = @{}
+        If ( $PSBoundParameters['IgnoreCase'] ) { $GraphParams.IgnoreCase = $True }
+        If ( $PSBoundParameters['ShowComposition'] ) { $GraphParams.ShowComposition = $True }
 
-    #region preparing paths
-    $PathObject = Get-Item $Path
-    if ($PathObject -is [System.IO.DirectoryInfo]) {
-        $ExportFileName = "Diagram" + "." + $OutputFormat
-        $FolderPath = $Path
+        ## Create ExportParams
+        $ExportParams = @{}
+        $ExportParams.OutputFormat = If( $Null -ne $PSBoundParameters['OutPutFormat'] ){ $PSBoundParameters['OutPutFormat'] }Else{ $OutputFormat }
+    
+    
+        ## Depending on the Type of the Path Parameter... File or Directory, other (default)
+        $PathItem = Get-Item $PSBoundParameters['Path']
+        Switch ( $PathItem ) {
 
-        If ($Recurse) {
+            { $PSItem -is [System.Io.FileInfo] } {
+                
+                $Class = Get-CUCLass -path $PSItem | Group-Object -Property Path
+                If ( $Null -ne $Class ) {
+                    $GraphParams.InputObject = $Class
+                    $Graph =  Out-CUPSGraph @GraphParams
+                    If ( $PSBoundParameters['ExportFolder'] ) {
+                        $ExportParams.DestinationPath = Join-Path $PSBoundParameters['ExportFolder'] -ChildPath ($([System.io.FileInfo]$GraphParams['inputobject'].name).BaseName+'.'+$ExportParams.OutPutFormat)
+                    } Else {
+                        $ExportParams.DestinationPath = Join-Path $([System.io.FileInfo]$GraphParams['inputobject'].name).DirectoryName -ChildPath ($([System.io.FileInfo]$GraphParams['inputobject'].name).BaseName+'.'+$ExportParams.OutPutFormat)
+                    }
+                    $Graph | Export-PSGraph @ExportParams
+                } ## Empty class, not a class file
 
-            $Classes = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
+            } ## Not a file
 
-        } Else {
+            { $PSItem -is [System.Io.DirectoryInfo] } {
+                
+                If ( $PSBoundParameters['Recurse'] ) {
 
-            $Classes = Get-ChildItem -path "$($Path)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
+                    If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory' ) {
+                        
+                        Foreach ( $Directory in $(Get-ChildItem -path $PSItem -Directory -Recurse) ) {
+
+                            $Classes = Get-ChildItem -path $($Directory.FullName+'\*') -Include '*.ps1', '*.psm1' | Get-CUCLass  | Group-Object -Property Path
+
+                            If ( $Null -ne $Classes ) {
+
+                                $GraphParams.InputObject = $Classes
+                                $Graph =  Out-CUPSGraph @GraphParams
+
+                                If ( $PSBoundParameters['ExportFolder'] ) {
+                                    $ExportParams.DestinationPath = Join-Path $PSBoundParameters['ExportFolder'] -ChildPath ($Directory.Name+'.'+$ExportParams.OutPutFormat)
+                                } Else { 
+                                    $ExportParams.DestinationPath = Join-Path $Directory.PSParentPath -ChildPath ($PSItem.Name+'.'+$ExportParams.OutPutFormat)
+                                }
+
+                                $Graph | Export-PSGraph @ExportParams
+
+                            } ## No Classes found, Next directory please ..
+                            
+                        } ## No more directories to parse
+
+                    } ## Option PerDirectory for OutPutDiagram was not specified
+
+                    If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerFile' ) {
+                        $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
+                        Foreach ( $Group in $Classes ) {
+                            
+                            $GraphParams.InputObject = $Group
+                            $Graph =  Out-CUPSGraph @GraphParams
+
+                            If ( $PSBoundParameters['ExportFolder'] ) {
+                                $ExportParams.DestinationPath = Join-Path $PSBoundParameters['ExportFolder'] -ChildPath ($([System.io.FileInfo]$GraphParams['inputobject'].name).BaseName+'.'+$ExportParams.OutPutFormat)
+                            } Else {
+                                $ExportParams.DestinationPath = Join-Path $([System.io.FileInfo]$GraphParams['inputobject'].name).DirectoryName -ChildPath ($([System.io.FileInfo]$GraphParams['inputobject'].name).BaseName+'.'+$ExportParams.OutPutFormat)
+                            }
+                            $Graph | Export-PSGraph @ExportParams
+                        }
+                    } ## Option PerFile for OutPutDiagram was not specified
+                    
+                } Else {
+
+                    $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
+                    
+                    If ( $Null -ne $Classes ) {
+                        If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory' ) {
+                        
+                            $GraphParams.InputObject = $Classes
+                            $Graph =  Out-CUPSGraph @GraphParams
+    
+                            If ( $PSBoundParameters['ExportFolder'] ) {
+                                $ExportParams.DestinationPath = Join-Path $PSBoundParameters['ExportFolder'] -ChildPath ($PSItem.Name+'.'+$ExportParams.OutPutFormat)
+                            } Else {
+                                $ExportParams.DestinationPath = Join-Path $PSItem.FullName -ChildPath ($PSItem.Name+'.'+$ExportParams.OutPutFormat)
+                            }
+                            #$Graph | Export-PSGraph @ExportParams
+                        }
+    
+                        If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerFile' ) {
+                            ##loop 
+                            Foreach ( $Group in $Classes ) {
+                                $GraphParams.InputObject = $Group
+                                $Graph =  Out-CUPSGraph @GraphParams
+    
+                                If ( $PSBoundParameters['ExportFolder'] ) {
+                                    $ExportParams.DestinationPath = Join-Path $PSBoundParameters['ExportFolder'] -ChildPath ($(get-item $Group.Name).BaseName +'.'+ $ExportParams.OutPutFormat)
+                                } Else {
+                                    $ExportParams.DestinationPath = Join-Path $PSItem.FullName -ChildPath ($(get-item $Group.Name).BaseName +'.'+ $ExportParams.OutPutFormat)
+                                }
+                                #$Graph | Export-PSGraph @ExportParams
+                            }
+                        }
+
+                        $Graph | Export-PSGraph @ExportParams
+                    } ## No Classes found
+
+                } ## Not a directory nor a file
+            } ## Not a directory .. it's something else ... !
+
+            Default {
+                Throw 'Path Parameter must be a file or a directory...'
+            }
+
+            ## Bye bye
         }
-        #$Path = $null
-    }
-    elseif ($PathObject -is [System.IO.FileInfo]) {
-        $FolderPath = $PathObject.Parent.FullName
-        [System.IO.FileInfo]$File = $PathObject.FullName
-        $ExportFileName = $File.BaseName + "." + $OutputFormat
-        $Classes = $File | Get-CUCLass | Group-Object -Property Path
-    }
-    else {
-        throw 'Path provided was not a file or folder'
-    }
-
-    if (-not ($ExportFolder)) {
-
-        if ($FolderPath) {
-            $SourceFolder = (Resolve-Path -Path $FolderPath).Path
-        } else {
-
-            $SourceFolder = $File.Directory.FullName
-        }
-        $FullExportPath = Join-Path -Path $SourceFolder -ChildPath $ExportFileName
         
-    } else {
-        If ($ExportFolder.Exists){
-
-            $FullExportPath = Join-Path $ExportFolder.FullName -ChildPath $ExportFileName
-        } Else {
-            throw "$($ExportFolder.FullName) Doesn't exist"
-        }
-
     }
-
-    #endregion
-
-    #$Classes = Get-CUClass -Path $AllItems
     
-    $GraphParams = @{}
-    $GraphParams.InputObject = $Classes
-
-    if ($IgnoreCase) {
-        $GraphParams.IgnoreCase = $true
-    }
-    if($ShowComposition){
-        $GraphParams.ShowComposition = $true
-    }
-
-    $Graph =  Out-CUPSGraph @GraphParams
-
-    $Export = $Graph | Export-PSGraph -DestinationPath $FullExportPath  -OutputFormat $OutputFormat
-
-    if ($Show) {
-        $Graph | Show-PSGraph
-    }
-
-    if ($PassThru) {
-        $Graph
-    } else {
-        $Export
-    }
-
+    End { <# The end #>}
 }
