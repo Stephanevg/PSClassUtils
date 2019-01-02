@@ -79,8 +79,8 @@ function Write-CUClassDiagram {
         [Switch]$Recurse,
 
         [Parameter(Mandatory=$False)]
-        [ValidateSet("PerFile","PerDirectory")]
-        $OutPutDiagram,
+        [ValidateSet('PerFile','PerDirectory')]
+        $OutPutDiagram = 'PerDirectory',
 
         [Parameter(Mandatory=$False)]
         [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
@@ -99,7 +99,11 @@ function Write-CUClassDiagram {
         [Switch]$ShowComposition,
 
         [Parameter(Mandatory=$False)]
-        [Switch]$Show
+        [Switch]$Show,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]
+        $PassThru
 
     )
     
@@ -108,7 +112,7 @@ function Write-CUClassDiagram {
     Process {
 
         ## Create GraphParameters
-        $Global:GraphParams = @{}
+        $GraphParams = @{}
         If ( $PSBoundParameters['IgnoreCase'] ) { $GraphParams.IgnoreCase = $True }
         If ( $PSBoundParameters['ShowComposition'] ) { $GraphParams.ShowComposition = $True }
 
@@ -123,6 +127,8 @@ function Write-CUClassDiagram {
 
             { $PSItem -is [System.Io.FileInfo] } {
                 
+                Write-Verbose "Write-CuClassDiagram -> Dealing with a File..."
+
                 $Class = Get-CUCLass -path $PSItem | Group-Object -Property Path
                 If ( $Null -ne $Class ) {
                     $GraphParams.InputObject = $Class
@@ -132,16 +138,33 @@ function Write-CUClassDiagram {
                     } Else {
                         $ExportParams.DestinationPath = Join-Path $([System.io.FileInfo]$GraphParams['inputobject'].name).DirectoryName -ChildPath ($([System.io.FileInfo]$GraphParams['inputobject'].name).BaseName+'.'+$ExportParams.OutPutFormat)
                     }
-                    $Graph | Export-PSGraph @ExportParams
-                } ## Empty class, not a class file
+                    
+                    ## PassThru Specified
+                    If ( $PSBoundParameters['PassThru'] ) {
+                        Write-Verbose "Write-CuClassDiagram -> PassThru Parameter Specified... Export Graph(s)..."
+                        $Graph
+                        $null = $Graph | Export-PSGraph @ExportParams
+                    } Else {
+                        Write-Verbose "Write-CuClassDiagram -> PassThru Parameter NOT Specified... Export Graph(s)..."
+                        $Graph | Export-PSGraph @ExportParams
+                    }
+
+                } ## Empty class variable, not a class file
 
             } ## Not a file
 
             { $PSItem -is [System.Io.DirectoryInfo] } {
+
+                Write-Verbose "Write-CuClassDiagram -> Dealing with a Directory..."
                 
                 If ( $PSBoundParameters['Recurse'] ) {
 
-                    If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory' ) {
+                    Write-Verbose "Write-CuClassDiagram -> Recurse parameter used..."
+
+                    ## If OutPutDiagram is not specified, we must use the default value, wich is PerDirectory
+                    If ( ($PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory') -or ( $null -eq $PSBoundParameters['OutPutDiagram'] ) ) {
+
+                        Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per Directory..."
                         
                         Foreach ( $Directory in $(Get-ChildItem -path $PSItem -Directory -Recurse) ) {
 
@@ -158,7 +181,15 @@ function Write-CUClassDiagram {
                                     $ExportParams.DestinationPath = Join-Path $Directory.PSParentPath -ChildPath ($PSItem.Name+'.'+$ExportParams.OutPutFormat)
                                 }
 
-                                $Graph | Export-PSGraph @ExportParams
+                                ## PassThru Specified
+                                If ( $PSBoundParameters['PassThru'] ) {
+                                    Write-Verbose "Write-CuClassDiagram -> PassThru Parameter Specified... Export Graph(s)..."
+                                    $Graph
+                                    $null = $Graph | Export-PSGraph @ExportParams
+                                } Else {
+                                    Write-Verbose "Write-CuClassDiagram -> PassThru Parameter NOT Specified... Export Graph(s)..."
+                                    $Graph | Export-PSGraph @ExportParams
+                                }
 
                             } ## No Classes found, Next directory please ..
                             
@@ -167,6 +198,9 @@ function Write-CUClassDiagram {
                     } ## Option PerDirectory for OutPutDiagram was not specified
 
                     If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerFile' ) {
+
+                        Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per File..."
+
                         $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
                         Foreach ( $Group in $Classes ) {
                             
@@ -178,17 +212,34 @@ function Write-CUClassDiagram {
                             } Else {
                                 $ExportParams.DestinationPath = Join-Path $([System.io.FileInfo]$GraphParams['inputobject'].name).DirectoryName -ChildPath ($([System.io.FileInfo]$GraphParams['inputobject'].name).BaseName+'.'+$ExportParams.OutPutFormat)
                             }
-                            $Graph | Export-PSGraph @ExportParams
+
+                            ## PassThru Specified
+                            If ( $PSBoundParameters['PassThru'] ) {
+                                Write-Verbose "Write-CuClassDiagram -> PassThru Parameter Specified... Export Graph(s)..."
+                                $Graph
+                                $null = $Graph | Export-PSGraph @ExportParams
+                            } Else {
+                                Write-Verbose "Write-CuClassDiagram -> PassThru Parameter NOT Specified... Export Graph(s)..."
+                                $Graph | Export-PSGraph @ExportParams
+                            }
                         }
                     } ## Option PerFile for OutPutDiagram was not specified
                     
                 } Else {
 
+                    Write-Verbose "Write-CuClassDiagram -> Recurse Parameter was not specified..."
+
                     $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
                     
                     If ( $Null -ne $Classes ) {
-                        If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory' ) {
-                        
+
+                        Write-Verbose "Write-CuClassDiagram -> $($Classes.Count) Class(es) were found..."
+
+                        ## If OutPutDiagram is not specified, we must use the default value, wich is PerDirectory
+                        If ( ($PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory') -or ( $null -eq $PSBoundParameters['OutPutDiagram'] ) ) {
+
+                            Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per Directory..."
+
                             $GraphParams.InputObject = $Classes
                             $Graph =  Out-CUPSGraph @GraphParams
     
@@ -197,11 +248,23 @@ function Write-CUClassDiagram {
                             } Else {
                                 $ExportParams.DestinationPath = Join-Path $PSItem.FullName -ChildPath ($PSItem.Name+'.'+$ExportParams.OutPutFormat)
                             }
-                            #$Graph | Export-PSGraph @ExportParams
+                            
+                            ## PassThru Specified
+                            If ( $PSBoundParameters['PassThru'] ) {
+                                Write-Verbose "Write-CuClassDiagram -> PassThru Parameter Specified... Returning Graph Variable Content..."
+                                $Graph
+                                $null = $Graph | Export-PSGraph @ExportParams
+                            } Else {
+                                Write-Verbose "Write-CuClassDiagram -> PassThru Parameter NOT Specified... Export Graph(s)..."
+                                $Graph | Export-PSGraph @ExportParams
+                            }
                         }
     
                         If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerFile' ) {
-                            ##loop 
+
+                            Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per File..."
+
+                            ##loop
                             Foreach ( $Group in $Classes ) {
                                 $GraphParams.InputObject = $Group
                                 $Graph =  Out-CUPSGraph @GraphParams
@@ -211,11 +274,19 @@ function Write-CUClassDiagram {
                                 } Else {
                                     $ExportParams.DestinationPath = Join-Path $PSItem.FullName -ChildPath ($(get-item $Group.Name).BaseName +'.'+ $ExportParams.OutPutFormat)
                                 }
-                                #$Graph | Export-PSGraph @ExportParams
+
+                                ## PassThru Specified
+                                If ( $PSBoundParameters['PassThru'] ) {
+                                    Write-Verbose "Write-CuClassDiagram -> PassThru Parameter Specified... Returning Graph Variable Content..."
+                                    $Graph
+                                    $null = $Graph | Export-PSGraph @ExportParams
+                                } Else {
+                                    Write-Verbose "Write-CuClassDiagram -> PassThru Parameter NOT Specified... Export Graph(s)..."
+                                    $Graph | Export-PSGraph @ExportParams
+                                }
                             }
                         }
 
-                        $Graph | Export-PSGraph @ExportParams
                     } ## No Classes found
 
                 } ## Not a directory nor a file
@@ -230,5 +301,5 @@ function Write-CUClassDiagram {
         
     }
     
-    End { <# The end #>}
+    End { <# The end #> }
 }
