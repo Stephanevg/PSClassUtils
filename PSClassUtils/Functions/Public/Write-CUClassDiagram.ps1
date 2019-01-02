@@ -79,8 +79,8 @@ function Write-CUClassDiagram {
         [Switch]$Recurse,
 
         [Parameter(Mandatory=$False)]
-        [ValidateSet('PerFile','PerDirectory')]
-        $OutPutDiagram = 'PerDirectory',
+        [ValidateSet('Unique','Combined')]
+        $OutPutType = 'Combined',
 
         [Parameter(Mandatory=$False)]
         [ValidateSet('jpg', 'png', 'gif', 'imap', 'cmapx', 'jp2', 'json', 'pdf', 'plain', 'dot')]
@@ -103,7 +103,10 @@ function Write-CUClassDiagram {
 
         [Parameter(Mandatory = $false)]
         [Switch]
-        $PassThru
+        $PassThru,
+
+        [Parameter(Mandatory = $False)]
+        [String[]]$Exclude
 
     )
     
@@ -129,7 +132,14 @@ function Write-CUClassDiagram {
                 
                 Write-Verbose "Write-CuClassDiagram -> Dealing with a File..."
 
-                $Class = Get-CUCLass -path $PSItem | Group-Object -Property Path
+                If ( $PSBoundParameters['Exclude'] ) {
+                    Write-Verbose "Write-CuClassDiagram -> Exclude Parameter Specified..."
+                    $Class = Get-CUCLass -path $PSItem | Where-Object Name -NotIn $PSBoundParameters['Exclude'] |Group-Object -Property Path    
+                } Else {
+                    Write-Verbose "Write-CuClassDiagram -> Exclude Parameter NOT Specified..."
+                    $Class = Get-CUCLass -path $PSItem | Group-Object -Property Path
+                }
+                
                 If ( $Null -ne $Class ) {
                     $GraphParams.InputObject = $Class
                     $Graph =  Out-CUPSGraph @GraphParams
@@ -161,14 +171,20 @@ function Write-CUClassDiagram {
 
                     Write-Verbose "Write-CuClassDiagram -> Recurse parameter used..."
 
-                    ## If OutPutDiagram is not specified, we must use the default value, wich is PerDirectory
-                    If ( ($PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory') -or ( $null -eq $PSBoundParameters['OutPutDiagram'] ) ) {
+                    ## If OutPutType is not specified, we must use the default value, wich is Combined
+                    If ( ($PSBoundParameters['OutPutType'] -eq 'Combined') -or ( $null -eq $PSBoundParameters['OutPutType'] ) ) {
 
-                        Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per Directory..."
+                        Write-Verbose "Write-CuClassDiagram -> OutPutType Per Directory..."
                         
                         Foreach ( $Directory in $(Get-ChildItem -path $PSItem -Directory -Recurse) ) {
 
-                            $Classes = Get-ChildItem -path $($Directory.FullName+'\*') -Include '*.ps1', '*.psm1' | Get-CUCLass  | Group-Object -Property Path
+                            If ( $PSBoundParameters['Exclude'] ) {
+                                Write-Verbose "Write-CuClassDiagram -> Exclude Parameter Specified..."
+                                $Classes = Get-ChildItem -path $($Directory.FullName+'\*') -Include '*.ps1', '*.psm1' | Get-CUCLass | Where-Object Name -NotIn $PSBoundParameters['Exclude'] |  Group-Object -Property Path
+                            } Else {
+                                Write-Verbose "Write-CuClassDiagram -> Exclude Parameter NOT Specified..."
+                                $Classes = Get-ChildItem -path $($Directory.FullName+'\*') -Include '*.ps1', '*.psm1' | Get-CUCLass  | Group-Object -Property Path    
+                            }
 
                             If ( $Null -ne $Classes ) {
 
@@ -195,13 +211,20 @@ function Write-CUClassDiagram {
                             
                         } ## No more directories to parse
 
-                    } ## Option PerDirectory for OutPutDiagram was not specified
+                    } ## Option Combined for OutPutType was not specified
 
-                    If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerFile' ) {
+                    If ( $PSBoundParameters['OutPutType'] -eq 'Unique' ) {
 
-                        Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per File..."
+                        Write-Verbose "Write-CuClassDiagram -> OutPutType Per File..."
 
-                        $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
+                        If ( $PSBoundParameters['Exclude'] ) {
+                            Write-Verbose "Write-CuClassDiagram -> Exclude Parameter Specified..."
+                            $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass | Where-Object Name -NotIn $PSBoundParameters['Exclude'] | Group-Object -Property Path
+                        } Else {
+                            Write-Verbose "Write-CuClassDiagram -> Exclude Parameter NOT Specified..."
+                            $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" -Recurse | Get-CUCLass  | Group-Object -Property Path
+                        }
+                        
                         Foreach ( $Group in $Classes ) {
                             
                             $GraphParams.InputObject = $Group
@@ -223,22 +246,28 @@ function Write-CUClassDiagram {
                                 $Graph | Export-PSGraph @ExportParams
                             }
                         }
-                    } ## Option PerFile for OutPutDiagram was not specified
+                    } ## Option Unique for OutPutType was not specified
                     
                 } Else {
 
-                    Write-Verbose "Write-CuClassDiagram -> Recurse Parameter was not specified..."
+                    Write-Verbose "Write-CuClassDiagram -> Recurse Parameter NOT specified..."
 
-                    $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
+                    If ( $PSBoundParameters['Exclude'] ) {
+                        Write-Verbose "Write-CuClassDiagram -> Exclude Parameter Specified..."
+                        $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Where-Object Name -NotIn $PSBoundParameters['Exclude'] | Group-Object -Property Path
+                    } Else {
+                        Write-Verbose "Write-CuClassDiagram -> Exclude Parameter NOT Specified..."
+                        $Classes = Get-ChildItem -path "$($PSItem)\*" -Include "*.ps1", "*.psm1" | Get-CUCLass | Group-Object -Property Path
+                    }
                     
                     If ( $Null -ne $Classes ) {
 
                         Write-Verbose "Write-CuClassDiagram -> $($Classes.Count) Class(es) were found..."
 
-                        ## If OutPutDiagram is not specified, we must use the default value, wich is PerDirectory
-                        If ( ($PSBoundParameters['OutPutDiagram'] -eq 'PerDirectory') -or ( $null -eq $PSBoundParameters['OutPutDiagram'] ) ) {
+                        ## If OutPutType is not specified, we must use the default value, wich is Combined
+                        If ( ($PSBoundParameters['OutPutType'] -eq 'Combined') -or ( $null -eq $PSBoundParameters['OutPutType'] ) ) {
 
-                            Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per Directory..."
+                            Write-Verbose "Write-CuClassDiagram -> OutPutType Per Directory..."
 
                             $GraphParams.InputObject = $Classes
                             $Graph =  Out-CUPSGraph @GraphParams
@@ -260,9 +289,9 @@ function Write-CUClassDiagram {
                             }
                         }
     
-                        If ( $PSBoundParameters['OutPutDiagram'] -eq 'PerFile' ) {
+                        If ( $PSBoundParameters['OutPutType'] -eq 'Unique' ) {
 
-                            Write-Verbose "Write-CuClassDiagram -> OutPutDiagram Per File..."
+                            Write-Verbose "Write-CuClassDiagram -> OutPutType Per File..."
 
                             ##loop
                             Foreach ( $Group in $Classes ) {
