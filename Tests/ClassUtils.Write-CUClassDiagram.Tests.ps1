@@ -345,9 +345,119 @@ Describe "Testing Write-CUClassDiagram" {
             $CompositionClass | Out-File -FilePath $CompPath -Force
             
             $compositionGraph = Write-CUClassDiagram -Path $CompPath -PassThru -ShowComposition 
-        It '[-ShowComposition] Should return fields with composition' {
+        It 'Parameter: -ShowComposition Should return fields with composition' {
 
             [String]$compositionGraph | should -Match '^.*"AAA"->"BBB":Row_prop2 \[arrowhead="diamond";\].*$' 
+        }
+
+        It 'Parameter: -OutPutType "Unique" Should create a graph per .ps1 files located in same folder.' {
+
+            $File1 = @'
+    
+        Class Woop {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+'@
+        
+            $File2 = @'
+            Class Wap : Woop {
+                [String]$prop3
+            
+                DoChildthing(){}
+            
+            }
+'@
+
+            $File3 = @'
+            Class Wep : Woop {
+                [String]$prop4
+            
+                DoOtherChildThing(){
+            
+                }
+            }
+            
+'@
+
+            $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
+            $null = New-Item -ItemType Directory -Path $FolderPathFolder -Force
+            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
+            $File1 | Out-File -FilePath $Path_File1 -Force
+
+            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
+            $File2 | Out-File -FilePath $Path_File2 -Force
+
+            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
+            $File3 | Out-File -FilePath $Path_File3 -Force
+
+            $ret = Write-CUClassDiagram -Path $FolderPathFolder -OutPutType Unique
+            $ret.count -eq 3 | Should be $True
+
+            
+            
+        }
+
+        It 'Parameter: -OutPutType "Combined" Should create unique graph for .ps1 files located in same folder.' {
+
+            $File1 = @'
+    
+        Class Woop {
+            [String]$String
+            [int]$number
+        
+            Woop([String]$String,[int]$Number){
+        
+            }
+        
+            [String]DoSomething(){
+                return $this.String
+            }
+        }
+'@
+        
+            $File2 = @'
+            Class Wap : Woop {
+                [String]$prop3
+            
+                DoChildthing(){}
+            
+            }
+'@
+
+            $File3 = @'
+            Class Wep : Woop {
+                [String]$prop4
+            
+                DoOtherChildThing(){
+            
+                }
+            }
+            
+'@
+
+            $FolderPathFolder = Join-Path -Path $Testdrive -ChildPath "FolderPath"
+            $null = New-Item -ItemType Directory -Path $FolderPathFolder -Force
+            $Path_File1 = Join-Path -Path $FolderPathFolder -ChildPath "woop.ps1"
+            $File1 | Out-File -FilePath $Path_File1 -Force
+
+            $Path_File2 = Join-Path -Path $FolderPathFolder -ChildPath "wap.ps1"
+            $File2 | Out-File -FilePath $Path_File2 -Force
+
+            $Path_File3 = Join-Path -Path $FolderPathFolder -ChildPath "wep.ps1"
+            $File3 | Out-File -FilePath $Path_File3 -Force
+
+            $ret = Write-CUClassDiagram -Path $FolderPathFolder -OutPutType Combined
+            $ret.count -eq 1 | Should be $True
+
         }
 
         #It is best to keep this test at the end, and it will unload the module PSGraph, and can cause some issues while testing.
@@ -364,6 +474,8 @@ Describe "Testing Write-CUClassDiagram" {
             {Write-CUClassDiagram -Path $ClassScript } | should throw
             Assert-MockCalled get-module
         }
+
+
 
     }
 
