@@ -105,7 +105,7 @@ function Write-CUClassDiagram {
         {
             If ( $MyInvocation.BoundParameters.Exclude.count -eq 1 )
             {
-                 If ( $MyInvocation.BoundParameters.Exclude -notmatch '^\w+\*?$' )
+                 If ( $MyInvocation.BoundParameters.Exclude -notmatch '^*?\w+\*?$' )
                 {
                     Throw "Wildcard must be positionned at the end of your item..."
                 }
