@@ -13,10 +13,12 @@ function New-CUGraphExport {
         $PassThru,
         $Path,
         $ChildPath,
-        $OutPutFormat
+        $OutPutFormat,
+        [Switch]$Show
     )
     
     $ExportParams = @{
+        ShowGraph = $Show
         OutPutFormat = $OutPutFormat
         DestinationPath = Join-Path -Path $Path -ChildPath ($ChildPath+'.'+$OutPutFormat)
     }

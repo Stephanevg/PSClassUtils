@@ -400,7 +400,7 @@ Describe "Testing Write-CUClassDiagram" {
             $File3 | Out-File -FilePath $Path_File3 -Force
 
             $ret = Write-CUClassDiagram -Path $FolderPathFolder -OutPutType Unique
-            $ret.count -eq 3 | Should be $True
+            $ret.count  | Should be 3
 
             
             
@@ -456,7 +456,7 @@ Describe "Testing Write-CUClassDiagram" {
             $File3 | Out-File -FilePath $Path_File3 -Force
 
             $ret = Write-CUClassDiagram -Path $FolderPathFolder -OutPutType Combined
-            $ret.count -eq 1 | Should be $True
+            $ret.count  | Should be 1
 
         }
 

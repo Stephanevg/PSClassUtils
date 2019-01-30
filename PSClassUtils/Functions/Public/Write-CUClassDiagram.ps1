@@ -89,7 +89,7 @@ function Write-CUClassDiagram {
         $DynamicParams=New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
         $PathItem = get-item $PSBoundParameters['Path']
 
-        If ( ($PathItem -is [System.Io.DirectoryInfo]) -and ((gci $PathItem -Directory).Count -gt 0) ) {
+        If ( ($PathItem -is [System.Io.DirectoryInfo]) -and ((Get-ChildItem -Path $PathItem -Directory).Count -gt 0) ) {
             $ParameterName = "Recurse"
             $ParameterAttributes = New-Object System.Management.Automation.ParameterAttribute
             $Parameter = New-Object System.Management.Automation.RuntimeDefinedParameter $ParameterName,switch,$ParameterAttributes
@@ -98,7 +98,28 @@ function Write-CUClassDiagram {
         }
     }
 
-    Begin { <# The begining #> }
+    Begin { <# The begining #>
+
+        ## Check Exclude Parameters, Wildcard is only allowed when Exclude contains One item
+        If ( $null -ne $MyInvocation.BoundParameters.Exclude )
+        {
+            If ( $MyInvocation.BoundParameters.Exclude.count -eq 1 )
+            {
+                 If ( $MyInvocation.BoundParameters.Exclude -notmatch '^*?\w+\*?$' )
+                {
+                    Throw "Wildcard must be positionned at the end of your item..."
+                }
+            }
+            If ( $MyInvocation.BoundParameters.Exclude.count -gt 1 )
+            {
+                If ( (@($MyInvocation.BoundParameters.Exclude) -notmatch '^\w+$').Count -gt 0 )
+                {
+                    throw "One of your Exclude item contains a wildcard... Wildcard is only allowed on one item..."
+                }
+            }
+        }
+
+    }
     
     Process {
 
@@ -119,11 +140,21 @@ function Write-CUClassDiagram {
 
                     If ( $PSBoundParameters['ExportFolder'] ) ## Export must be made in a specified folder
                     {
-                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat 
+                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat -Show    
+                        } Else ## Show switch not used
+                        {
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat
+                        }
                         
                     } Else ## Export must be in the same directory
                     {
-                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSitem.Directory -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat 
+                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSitem.Directory -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat -Show
+                        } Else  ## Show Switch not used
+                        {
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSitem.Directory -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat
+                        }
                     }
 
                 } ## Empty class variable, not a class file
@@ -131,7 +162,7 @@ function Write-CUClassDiagram {
 
             { $PSItem -is [System.Io.DirectoryInfo] } {
                 Write-Verbose "Write-CuClassDiagram -> Dealing with a Directory..."
-
+                
                 If ( $PSBoundParameters['Recurse'] ) {
                     Write-Verbose "Write-CuClassDiagram -> Recurse parameter used..."
 
@@ -148,9 +179,19 @@ function Write-CUClassDiagram {
                                 $GraphParams = New-CUGraphParameters -InputObject $Classes -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
 
                                 If ( $PSBoundParameters['ExportFolder'] ) {
-                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $Directory.Name -OutputFormat $OutputFormat 
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $Directory.Name -OutputFormat $OutputFormat -Show
+                                    } Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $Directory.Name -OutputFormat $OutputFormat
+                                    }
                                 } Else {
-                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $Directory.FullName -ChildPath $Directory.Name -OutputFormat $OutputFormat 
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $Directory.FullName -ChildPath $Directory.Name -OutputFormat $OutputFormat -Show
+                                    } Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $Directory.FullName -ChildPath $Directory.Name -OutputFormat $OutputFormat
+                                    }    
                                 }
                             } ## No Classe(s) found, Next directory please ..  ##>
                         } ## No more directories to parse
@@ -169,9 +210,20 @@ function Write-CUClassDiagram {
                                     $GraphParams = New-CUGraphParameters -InputObject $Group -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
 
                                     If ( $PSBoundParameters['ExportFolder'] ) {
-                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat 
+                                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                        } Else 
+                                        {
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                        }
                                     } Else {
-                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat 
+                                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                        } Else 
+                                        {
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                        }
+                                        
                                     }
                                 }
                             } ## No Classes found
@@ -180,8 +232,7 @@ function Write-CUClassDiagram {
                     
                 } Else {
                     Write-Verbose "Write-CuClassDiagram -> Recurse Parameter NOT specified..."
-
-                    $Classes = Find-CUClass -Item (""+$PSitem+"\*") -Exclude $PSBoundParameters['Exclude']
+                    $Classes = Find-CUClass -Item (""+$PSitem.FullName+"\*") -Exclude $PSBoundParameters['Exclude']
                     
                     If ( $Null -ne $Classes ) {
                         Write-Verbose "Write-CuClassDiagram -> $($Classes.Count) Class(es) were found..."
@@ -193,9 +244,20 @@ function Write-CUClassDiagram {
                             $GraphParams = New-CUGraphParameters -InputObject $Classes -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
                             
                             If ( $PSBoundParameters['ExportFolder'] ) {
-                                New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSItem.Name -OutputFormat $OutputFormat 
+                                If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSItem.Name -OutputFormat $OutputFormat -Show
+                                } Else
+                                {
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSItem.Name -OutputFormat $OutputFormat
+                                }
                             } Else {
-                                New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSItem.FullName -ChildPath $PSitem.Name -OutputFormat $OutputFormat 
+                                If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSItem.FullName -ChildPath $PSitem.Name -OutputFormat $OutputFormat -Show
+                                }
+                                Else
+                                {
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSItem.FullName -ChildPath $PSitem.Name -OutputFormat $OutputFormat
+                                }
                             }
                         }
 
@@ -206,9 +268,21 @@ function Write-CUClassDiagram {
                                 $GraphParams = New-CUGraphParameters -InputObject $Group -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
 
                                 If ( $PSBoundParameters['ExportFolder'] ) {
-                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat 
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                    }
+                                    Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                    }
                                 } Else {
-                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat 
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                    }
+                                    Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                    }
                                 }
                             }
                         }
