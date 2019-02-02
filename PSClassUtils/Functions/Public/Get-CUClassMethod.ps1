@@ -66,8 +66,8 @@ Function Get-CUClassMethod {
         [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
         [System.IO.FileInfo[]]$Path,
 
-        [Switch]$Raw,
-        $a
+        [Switch]$Raw
+        
     )
 
     BEGIN {}
