@@ -111,7 +111,11 @@ Class CUClass {
 
             }
 
-            $This.Method += [CUClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
+            $M = [CUClassMethod]::New($This.Name,$Method.Name, $Method.ReturnType, $Paras,$Method)
+            $M.SetIsStatic($Method.IsStatic)
+            
+            $This.Method += $M
+            $M = $null
         }
 
     }

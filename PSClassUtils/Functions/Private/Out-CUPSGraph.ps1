@@ -161,10 +161,15 @@ Function Out-CUPSGraph {
                                         If ( $mem.IsHidden ) {
                                             $visibility = "-"
                                         }
-        
-                                        $RowName = $visibility + $RowName
-                                        #$i++
-                                        #write-host $i + ' - ' + $RowName
+                                        
+                                        If($mem.IsStatic()){
+                                            
+                                            $RowName = "{0} {1} {2}" -f $visibility,"static",$RowName
+                                        }else{
+                                            $RowName = "{0} {1}" -f $visibility,$RowName
+                                            
+                                        }
+
                                         Row $RowName -Name "Row_$($mem.Name)"
 
                                     }
