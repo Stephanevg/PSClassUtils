@@ -7,7 +7,7 @@ function Install-CUDiagramPrerequisites {
     .EXAMPLE
         Istall-CUDiagramPrerequisites
     .EXAMPLE
-        Istall-CUDiagramPrerequisites -proxy "10.10.10.10"
+        Istall-CUDiagramPrerequisites -proxy "10.10.10.10" -Scope CurrentUser
     .NOTES   
         Author: Stephanevg
         Version: 2.0
