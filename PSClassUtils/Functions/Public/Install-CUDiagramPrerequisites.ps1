@@ -15,7 +15,8 @@ function Install-CUDiagramPrerequisites {
 
     [CmdletBinding()]
     param (
-        [String]$Proxy        
+        [String]$Proxy,
+        [ValidateSet("AllUsers","CurrentUser")][String]$Scope = "AllUsers"        
     )
     
     if(!(Get-Module -Name PSGraph)){
@@ -23,11 +24,11 @@ function Install-CUDiagramPrerequisites {
         if(!(get-module -listavailable -name psgraph )){
             if($proxy){
                 write-verbose "Install PSGraph"
-                Install-Module psgraph -Verbose -proxy $proxy
+                Install-Module psgraph -Verbose -proxy $proxy -Scope $Scope
                 Import-Module psgraph -Force
             }else{
                 write-verbose "Install PSGraph"
-                Install-Module psgraph -Verbose
+                Install-Module psgraph -Verbose -Scope $Scope
                 Import-Module psgraph -Force
             }
         }else{
