@@ -27,9 +27,9 @@ Function Get-CUEnum{
     [cmdletBinding()]
     Param(
  
-        [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
         [String[]]
-        $Path
+        $Path = (throw "Please provide a path")
     )
 
    begin{

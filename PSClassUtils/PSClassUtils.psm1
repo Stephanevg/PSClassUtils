@@ -1,4 +1,4 @@
-﻿#Generated at 02/24/2019 12:27:06 by Stephane van Gulick
+﻿#Generated at 02/24/2019 12:53:27 by Stephane van Gulick
 Class CUClassParameter {
     [String]$Name
     [String]$Type
@@ -1284,9 +1284,9 @@ Function Get-CUEnum{
     [cmdletBinding()]
     Param(
  
-        [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
         [String[]]
-        $Path
+        $Path = (throw "Please provide a path")
     )
 
    begin{
