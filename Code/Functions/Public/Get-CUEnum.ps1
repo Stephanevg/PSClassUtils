@@ -39,9 +39,9 @@ Function Get-CUEnum{
 
         foreach($p in $Path){
 
-            $AST = Get-cuast -Path $p 
+            $AST = Get-cuast -Path $p | ? {$_.IsEnum -eq $True}
      
-            foreach($enum in $AST.Enums){
+            foreach($enum in $AST){
                 [ClassEnum]::New($enum.Name,$enum.members.Name)
             }
         }

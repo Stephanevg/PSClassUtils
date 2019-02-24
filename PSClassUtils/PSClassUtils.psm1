@@ -1,4 +1,4 @@
-﻿#Generated at 02/23/2019 13:24:00 by Stephane van Gulick
+﻿#Generated at 02/24/2019 12:27:06 by Stephane van Gulick
 Class CUClassParameter {
     [String]$Name
     [String]$Type
@@ -1296,9 +1296,9 @@ Function Get-CUEnum{
 
         foreach($p in $Path){
 
-            $AST = Get-cuast -Path $p 
+            $AST = Get-cuast -Path $p | ? {$_.IsEnum -eq $True}
      
-            foreach($enum in $AST.Enums){
+            foreach($enum in $AST){
                 [ClassEnum]::New($enum.Name,$enum.members.Name)
             }
         }
