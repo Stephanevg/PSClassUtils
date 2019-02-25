@@ -42,6 +42,7 @@ Function Out-CUPSGraph {
     )
     
     begin {
+        Write-Verbose "Out-CUPSGraph -> BEGIN BLOCK..."
         $AllGraphs = @()
         if(!(Get-Module -Name PSGraph)){
             #Module is not loaded
@@ -55,6 +56,7 @@ Function Out-CUPSGraph {
     }
     
     process {
+        Write-Verbose "Out-CUPSGraph -> PROCESS BLOCK..."
         [System.Collections.ArrayList]$AllClasses = @()
         #$Graph = Graph -Attributes @{splines='ortho'} -ScriptBlock {
         $Graph = Graph -ScriptBlock {
@@ -159,10 +161,15 @@ Function Out-CUPSGraph {
                                         If ( $mem.IsHidden ) {
                                             $visibility = "-"
                                         }
-        
-                                        $RowName = $visibility + $RowName
-                                        #$i++
-                                        #write-host $i + ' - ' + $RowName
+                                        
+                                        If($mem.IsStatic()){
+                                            
+                                            $RowName = "{0} {1} {2}" -f $visibility,"static",$RowName
+                                        }else{
+                                            $RowName = "{0} {1}" -f $visibility,$RowName
+                                            
+                                        }
+
                                         Row $RowName -Name "Row_$($mem.Name)"
 
                                     }
@@ -189,14 +196,16 @@ Function Out-CUPSGraph {
                 ##Composition
 
                 if($ShowComposition){
-
+                    Write-Verbose "Out-CUPSGraph -> ShowCoposition"
                     #foreach class.Property.Type if in list of customClasses, then it is composition
+                    ## replace brackets when property type is an array of type
                     Foreach($ClassProperty in $obj.group.property){
-                        if($AllClasses -contains $ClassProperty.type){
-                            write-verbose "Composition relationship found:"
+                        #if( $AllClasses -contains $ClassProperty.type ){
+                        if( $AllClasses -contains ($ClassProperty.type -replace '\[\]','') ){    
+                            write-verbose "Out-CUPSGraph -> Composition relationship found:"
                             #CompositionFound
-                            Write-Verbose "$($ClassProperty.Name):Row_$($ClassProperty.Name) to $($ClassProperty.Type)"
-                            edge -From $ClassProperty.Type -To "$($ClassProperty.className):Row_$($ClassProperty.Name)" -Attributes @{arrowhead='diamond'}
+                            Write-Verbose "Out-CUPSGraph -> Composition: $($ClassProperty.Name):Row_$($ClassProperty.Name) to $($ClassProperty.Type)"
+                            edge -From ($ClassProperty.type -replace '\[\]','') -To "$($ClassProperty.className):Row_$($ClassProperty.Name -replace '\[\]','')" -Attributes @{arrowhead='diamond'}
                         }
                     }
                 }
@@ -208,8 +217,10 @@ Function Out-CUPSGraph {
     }
     
     end {
-
+        Write-Verbose "Out-CUPSGraph -> END BLOCK..."
+        Write-Verbose "Out-CUPSGraph -> END BLOCK: return graphs..."
         Return $AlLGraphs
+        
     
     }
 }

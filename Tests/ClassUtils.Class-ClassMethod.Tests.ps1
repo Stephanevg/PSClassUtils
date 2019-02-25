@@ -29,13 +29,6 @@ InModuleScope PSClassUtils -ScriptBlock {
         }
         Context "[CUClassMethod] Properties" {
 
-        
-            it '[CUClassMethod][Properties] Instance should have 3 Properties' {
-            
-                $Properties = [CUClassParameter[]]@()
-                $Instance = [CUClassMethod]::New("ClassName","DoStuffPlease", "String", $Properties)
-                ($Instance | gm | ? {$_.MemberType -eq "Property"} | measure).Count | should be 4
-            }
 
             $Properties = [CUClassParameter[]]@()
             $Properties += [CUClassParameter]::New("PropName", "String")

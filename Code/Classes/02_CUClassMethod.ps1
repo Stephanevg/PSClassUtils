@@ -4,7 +4,8 @@ Class CUClassMethod {
     [String]$ReturnType
     [CUClassParameter[]]$Parameter
     hidden $Raw
-    #hidden $Extent
+    [Bool]$Static
+    
 
     CUClassMethod([String]$ClassName,[String]$Name,[String]$ReturnType,[CUClassParameter[]]$Parameter){
         $this.ClassName = $ClassName
@@ -19,7 +20,15 @@ Class CUClassMethod {
         $This.ReturnType = $ReturnType
         $This.Parameter = $Parameter
         $This.Raw = $Raw
-        #$This.Extent = $Raw.Extent.Text
+        
+    }
+
+    SetIsStatic([Bool]$IsStatic){
+        $this.Static = $IsStatic
+    }
+
+    [Bool] IsStatic(){
+        return $this.Static
     }
 
 }

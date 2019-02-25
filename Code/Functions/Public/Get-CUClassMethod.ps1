@@ -67,6 +67,7 @@ Function Get-CUClassMethod {
         [System.IO.FileInfo[]]$Path,
 
         [Switch]$Raw
+        
     )
 
     BEGIN {}
