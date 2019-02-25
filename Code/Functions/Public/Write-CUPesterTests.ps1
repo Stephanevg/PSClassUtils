@@ -301,6 +301,7 @@ Function Write-CUPesterTests {
         }
 
         $TestfileName = $File
+        write-verbose "[PSClassUtils][Write-CUPesterTests]--> [Export] -->Exporting tests file to: $($ExportFullPath)"
         $sb.ToString() > $ExportFullPath
 
 
@@ -309,6 +310,3 @@ Function Write-CUPesterTests {
 
 
 }
-
-#Write-CUPesterTests -Path C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\ -verbose #D:\hosts.ps1
-#Write-CUPesterTEsts C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\DevCode\plop.ps1 -verbose
