@@ -10,10 +10,9 @@ The most usefull feature is probably the fact  **that it can generate UML-like C
 -----
 
 ## Build Status
-|Branch|Status|
-|---|---|
-|master |[![Build status](https://ci.appveyor.com/api/projects/status/p30qxvifokv5fsjg/branch/master?svg=true)](https://ci.appveyor.com/project/Stephanevg/psclassutils/branch/master) |
-|dev |[![Build status](https://ci.appveyor.com/api/projects/status/p30qxvifokv5fsjg/branch/master?svg=true)](https://ci.appveyor.com/project/Stephanevg/psclassutils/branch/dev) |
+|Master |Dev| Downloads
+|---|---|---|
+|[![master](https://ci.appveyor.com/api/projects/status/p30qxvifokv5fsjg/branch/master?svg=true)](https://ci.appveyor.com/project/Stephanevg/psclassutils/branch/master) |[![dev](https://ci.appveyor.com/api/projects/status/p30qxvifokv5fsjg/branch/master?svg=true)](https://ci.appveyor.com/project/Stephanevg/psclassutils/branch/dev) | [![PSClassUtils](https://img.shields.io/powershellgallery/dt/PsClassUtils.svg)](https://www.powershellgallery.com/packages/PsClassUtils/)
 
 -----
 ## How to install PSClassUtils
