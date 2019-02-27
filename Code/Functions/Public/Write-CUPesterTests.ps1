@@ -49,12 +49,15 @@ Function Write-CUPesterTests {
         Write-verbose "[PSClassUtils][Write-CUPesterTests] Generating tests for $($File.Name)"
         $Header = ""
         if ($File.Name.EndsWith(".psm1")) {
-            if($Combine){
-                If($CombineCount -eq 0){
+            $Header = "using module $($File.Name)"
+            
+            
+            #if($Combine){
+            #    If($CombineCount -eq 0){
 
-                    $Header = "using module $($File.Name)"
-                }
-            }
+            #        $Header = "using module $($File.Name)"
+            #    }
+            #}
         }
         else {
             $Header = ". $($File.Name)"
@@ -91,6 +94,12 @@ Function Write-CUPesterTests {
                 [void]$sb.AppendLine("")
                 [void]$sb.AppendLine("It '[$($Class.Name)]-[Constructor] - Parameterless - should Not Throw' {")
                 [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("# -- Arrange")
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("# -- Act")
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("# -- Assert")
+                [void]$sb.AppendLine("")
                 [void]$sb.AppendLine("{[$($Class.Name)]::New()} | Should not throw")
                 [void]$sb.AppendLine("")
                 [void]$sb.AppendLine("} #End of it block")
@@ -125,7 +134,7 @@ Function Write-CUPesterTests {
                 $ItBlock = "It '[$($Class.Name)]-[Constructor]$($Signature) should Not Throw' {"
                 [void]$sb.AppendLine($ItBlock)
                 [void]$sb.AppendLine("")
-                [void]$sb.AppendLine("#Instanciation:")
+                [void]$sb.AppendLine("# -- Arrange")
 
                 foreach ($p in $Constructor.Parameter) {
                     [void]$sb.AppendLine("")
@@ -134,12 +143,18 @@ Function Write-CUPesterTests {
                     
                 }
 
-                [void]$sb.AppendLine("#Constructor Call:")
+                [void]$sb.AppendLine("# -- Act")
+                [void]$sb.AppendLine("")
+
+                [void]$sb.AppendLine("# -- Assert")
                 [void]$sb.AppendLine("")
                 $ConstructorCallBody = "{[$($Class.Name)]::New" + "$($CallEnd)}"
                 [void]$sb.Append($ConstructorCallBody)
+
+                
                 $TestToExecute = " | Should Not Throw "
                 [void]$sb.AppendLine($TestToExecute)
+                [void]$sb.AppendLine("")
                 [void]$sb.AppendLine("}# end of it block") 
                 [void]$sb.AppendLine("")
             }
@@ -183,7 +198,7 @@ Function Write-CUPesterTests {
             }
             $REturnType = $Method.ReturnType.Extent.Text
             $Signature = "($SignatureRaw)"
-            if ($Method.IsStatic) {
+            if ($Method.IsStatic()) {
 
                 $MethodCall = $MethodCallBody.Replace("]", "]::") + $MethodCallEnd
             }
@@ -209,7 +224,7 @@ Function Write-CUPesterTests {
             [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should Not Throw' {")
             [void]$sb.AppendLine("")
             
-            [void]$sb.AppendLine("#Arrange")
+            [void]$sb.AppendLine("# -- Arrange")
             [void]$sb.AppendLine("")
 
             foreach ($parameter in $Method.Parameter) {
@@ -226,14 +241,15 @@ Function Write-CUPesterTests {
 
             [void]$sb.AppendLine("")
             [void]$sb.AppendLine("")
-            [void]$sb.AppendLine("#Act")
-            if(!($Method.IsStatic)){
+            [void]$sb.AppendLine("# -- Act")
+            if(!($Method.IsStatic())){
+                
                 [void]$sb.AppendLine("")
-                [void]$sb.AppendLine("#Instantiate your class here")
                 [void]$sb.AppendLine('$' + "Instance = [$($Class.Name)]::New()")
             }
             [void]$sb.AppendLine("")
-            [void]$sb.AppendLine("#Assert")
+            [void]$sb.AppendLine("# -- Assert")
+            [void]$sb.AppendLine("")
             [void]$sb.AppendLine("{$MethodCall} | Should Not Throw")
             [void]$sb.AppendLine("")
             [void]$sb.AppendLine("} #End It Block")
@@ -243,34 +259,31 @@ Function Write-CUPesterTests {
             [void]$sb.AppendLine($visibility)
 
             If($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType){
-                [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name) $($Signature) Should not return anything (voided)' {")
+                [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) Should not return anything (voided)' {")
             }else{
                 $ReturnType = $Method.ReturnType.Replace("[","").Replace("]","")
-                [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name) $($Signature) should return type [$($ReturnType)]' {")
+                [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) should return type [$($ReturnType)]' {")
             }
 
             [void]$sb.AppendLine("")
             
-            [void]$sb.AppendLine("#Arrange")
-            [void]$sb.AppendLine("# Add parameter values here")
+            [void]$sb.AppendLine("# -- Arrange")
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("# -- Act")
+            [void]$sb.AppendLine("")
 
-            [void]$sb.AppendLine("")
             
-            [void]$sb.AppendLine("")
-            [void]$sb.AppendLine("")
-            [void]$sb.AppendLine("#Act")
-
-            [void]$sb.AppendLine("#Instantiate your class here")
-            
-            if(!($Method.IsStatic)){
-                [void]$sb.AppendLine("")
-                [void]$sb.AppendLine("#Instantiate your class here")
+            if(!($Method.IsStatic())){
+                
                 [void]$sb.AppendLine('$' + "Instance = [$($Class.Name)]::New()")
             }
-            [void]$sb.AppendLine("#Test Values")
-
+            
+            [void]$sb.AppendLine("# -- Assert")
+            [void]$sb.AppendLine("")
             If($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType){
-                [void]$sb.AppendLine("$MethodCall | should be $null")
+                [void]$sb.AppendLine("$MethodCall" + '| should be $null')
             }else{
                 
                 [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
