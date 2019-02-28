@@ -31,9 +31,7 @@ function Get-CUClass {
     .OUTPUTS
         Return type [CuClass]
     .NOTES
-        Author: Tobias Weltner
-        Version: ??
-        Source --> http://community.idera.com/powershell/powertips/b/tips/posts/finding-powershell-classes
+        Author: Stéphane van Gulick
         Participate & contribute --> https://github.com/Stephanevg/PSClassUtils
     #>
 
@@ -79,19 +77,22 @@ function Get-CUClass {
             
                     $Ast = Get-CUAst -Path $ClassParams.Path
                     Foreach ( $x in $Ast ) {
-                        If ( $PSBoundParameters['ClassName'] ) {
-                            If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                        If(!($x.IsEnum)){
+
+                            If ( $PSBoundParameters['ClassName'] ) {
+                                If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                                    If ( $PSBoundParameters['Raw'] ) {
+                                        ([CUClass]::New($x)).Raw
+                                    } Else {
+                                        [CUClass]::New($x)
+                                    }
+                                }
+                            } Else {
                                 If ( $PSBoundParameters['Raw'] ) {
                                     ([CUClass]::New($x)).Raw
                                 } Else {
                                     [CUClass]::New($x)
                                 }
-                            }
-                        } Else {
-                            If ( $PSBoundParameters['Raw'] ) {
-                                ([CUClass]::New($x)).Raw
-                            } Else {
-                                [CUClass]::New($x)
                             }
                         }
                     }
