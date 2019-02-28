@@ -114,6 +114,10 @@ PrivateData = @{
         # ReleaseNotes of this module
         ReleaseNotes = '
         
+        2.5.0 - 20190228
+            Enhanced Write-CUPEsterScripts (Added -PassThru)
+            Fixed Minor bugs.
+
         2.4.2 - 20190227
             Added Write-CUPesterScripts
             Added Get-CUPesterScripts
@@ -128,7 +132,7 @@ PrivateData = @{
         '
 
         # Prerelease string of this module
-        Prerelease = 'alpha'
+        Prerelease = 'Beta'
 
         # Flag to indicate whether the module requires explicit user acceptance for install/update
         # RequireLicenseAcceptance = $false
