@@ -42,10 +42,11 @@ function Write-CUClassDiagram {
         Will generate a diagram of all the private classes available in the Path specified, and immediatley show the diagram.
     .NOTES
         Author: Stephanevg / LxLeChat
-        Version: xx.xx.xx
         www: https://github.com/Stephanevg  https://github.com/LxLeChat
         Report bugs or ask for feature requests here:
-        https://github.com/Stephanevg/Write-CUClassDiagram
+        https://github.com/Stephanevg/PsClassUtils
+    .LINK
+        https://github.com/Stephanevg/PsClassUtils
     #>
     [CmdletBinding()]
     param (
