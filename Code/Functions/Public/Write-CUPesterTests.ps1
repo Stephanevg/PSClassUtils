@@ -18,6 +18,11 @@ Function Write-CUPesterTests {
     Must point to *.ps1 or *.psm1 file.
     The files must contain powershell classes.
 
+    .PARAMETER ModulefolderPath
+
+    Use this parameter to generate tests for a complete module.
+    Specifiy the Root of a module folder. 
+
     .EXAMPLE
         # The File C:\plop.ps1 MUST contain at least one class.
         Write-CUPesterTests -Path C:\plop.ps1
@@ -43,6 +48,11 @@ Function Write-CUPesterTests {
        Write-CUPesterTests -Path C:\plop.ps1 -IgnoreParameterLessConstructor
 
        #This example will return create all the tests, except for the parameterLess constructor (which can be usefull for inheritence / 'interface' situations.)
+    
+    .EXAMPLE
+
+        Write-CUPesterTests -ModuleFolderPath "C:\Program files\WindowsPowershell\Modules\plop\"
+    
     .INPUTS
         File containing Classes. Or folder containing files that contain classes.
     .OUTPUTS
@@ -59,20 +69,36 @@ Function Write-CUPesterTests {
     [cmdletBinding()]
     Param(
 
+        [parameter(ParameterSetName="Path")]
+        [String]$Path, #= (Throw "Path is mandatory. Please specifiy a Path to a .ps1 a .psm1 file or a folder containing one or more of these file types."),
 
-        $Path = (Throw "Path is mandatory. Please specifiy a Path to a .ps1 a .psm1 file or a folder containing one or more of these file types."),
+        [parameter(ParameterSetName="__AllParameterSets")]
         [System.IO.DirectoryInfo]$ExportFolderPath,
+
+        [parameter(ParameterSetName="ModuleFolder")]
+        [System.IO.directoryInfo]$ModuleFolderPath,
+
+        [parameter(ParameterSetName="__AllParameterSets")]
         [Switch]$IgnoreParameterLessConstructor,
+
+        [parameter(ParameterSetName="__AllParameterSets")]
         [Switch]$Combine,
+
+        [parameter(ParameterSetName="__AllParameterSets")]
         [Switch]$Passthru
     )
 
-    $PathObject = Get-Item $Path
-    if ($PathObject -is [System.IO.DirectoryInfo]) {
-        $Classes = gci $PathObject | Get-CUClass
-    }
-    elseif ($PathObject -is [System.IO.FileInfo]) {
-        $Classes = Get-CUClass -Path $PathObject.FullName
+    If($ModuleFolderPath){
+        $Classes = gci $ModuleFolderPath.FullName -Recurse | Get-CUClass
+    }Else{
+
+        $PathObject = Get-Item $Path
+        if ($PathObject -is [System.IO.DirectoryInfo]) {
+            $Classes = gci $PathObject | Get-CUClass
+        }
+        elseif ($PathObject -is [System.IO.FileInfo]) {
+            $Classes = Get-CUClass -Path $PathObject.FullName
+        }
     }
 
 
@@ -87,29 +113,43 @@ Function Write-CUPesterTests {
     Foreach ($File in $AllFiles) {
         Write-verbose "[PSClassUtils][Write-CUPesterTests] Generating tests for $($File.Name)"
         $Header = ""
-        if ($File.Name.EndsWith(".psm1")) {
+        $IsModule = $False
+        if ($ModuleFolderPath -Or $File.Name.EndsWith(".psm1")) {
             
-            
-            
-            
-            If ($CombineCount -eq 0) {
+            $IsModule = $True
 
-                $Header = "using module $($File.Name)"
-            }
-            
         }
         else {
-            $Header = ". $($File.Name)"
+            
+            $IsModule = $False
+        }
+
+        If($IsModule){
+            If ($CombineCount -eq 0) {
+
+                If(!($ModuleFolderPath)){
+
+                    $F = Get-Item $File.Name
+                    $ModuleName = $F.BaseName
+                    [void]$sb.AppendLine("using module $($File.Name)")
+                }else{
+                    
+                    $ModuleName = $ModuleFolderPath.BaseName
+                    [void]$sb.AppendLine("using module $($ModuleFolderPath.FullName)")
+                }
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("InModuleScope -ModuleName $($ModuleName) -ScriptBlock {")
+                [void]$sb.AppendLine("")
+            }
+        }Else{
+            [void]$sb.AppendLine(". $($File.Name)")
         }
         
+        #Context blocks (TBD)
 
-        #Optional Context blocks
+        #Creating Describe Block for
 
-        #Creating Describe Block
-        
-        [void]$sb.AppendLine($Header)
-        
-
+    
         Foreach ($Class in $File.Group) {
             Write-verbose "[PSClassUtils][Write-CUPesterTests][$($Class.Name)] Starting tests Generating process for class --> [$($Class.Name)]"
             Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] Generating 'Describe' block for Constructors"
@@ -162,6 +202,7 @@ Function Write-CUPesterTests {
     
                         $ItBlock = "It '[$($Class.Name)]-[Constructor]$($Signature) should Not Throw' {"
                     }
+                    [void]$sb.AppendLine("")
                     [void]$sb.AppendLine($ItBlock)
                     [void]$sb.AppendLine("")
                     [void]$sb.AppendLine("# -- Arrange")
@@ -171,7 +212,7 @@ Function Write-CUPesterTests {
     
                         foreach ($p in $Constructor.Parameter) {
                             [void]$sb.AppendLine("")
-                            [void]$sb.AppendLine('$' + $p.Name + "=" + "''")
+                            [void]$sb.AppendLine($p.Type + '$' + $p.Name + "=" + "''")
                             [void]$sb.AppendLine("") 
                             
                         }
@@ -200,9 +241,7 @@ Function Write-CUPesterTests {
         }
 
 
-        
-
-        
+        #Create Describe block for Methods
         If (!($Class.Method)) {
             Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> No Methods to process"
             
@@ -313,13 +352,32 @@ Function Write-CUPesterTests {
                 }
                 else {
                     $ReturnType = $Method.ReturnType.Replace("[", "").Replace("]", "")
-                    [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) should return type [$($ReturnType)]' {")
+                    [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should return type [$($ReturnType)]' {")
                 }
 
                 [void]$sb.AppendLine("")
                 
                 [void]$sb.AppendLine("# -- Arrange")
-                [void]$sb.AppendLine("")
+
+                If(!($MethodIsParameterLess)){
+
+                    foreach ($parameter in $Method.Parameter) {
+                        If ($parameter.Type) {
+                                
+                            [void]$sb.AppendLine($parameter.Type + "$" + $parameter.Name + " = ''")
+                            
+                        }
+                        else {
+                            [void]$sb.AppendLine("$" + $parameter.Name + " = ''")
+                        }
+                        [void]$sb.AppendLine("")
+                    
+                    }
+                }Else{
+                    [void]$sb.AppendLine("")
+                }
+
+                
                 [void]$sb.AppendLine("# -- Act")
                 [void]$sb.AppendLine("")
 
@@ -351,11 +409,16 @@ Function Write-CUPesterTests {
         #Closing Describe Block
         [void]$sb.AppendLine("}#EndDescribeBlock")
 
+        If($IsModule){
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("}#End InModuleScope")
+            [void]$sb.AppendLine("")
+        }
         $Item = Get-Item $File.Name
         $ExportFilename = $Item.Name.Replace($Item.Extension, ".Tests.Ps1")
         if ($ExportFolderPath) {
-
-            $ExportFullPath = Join-Path $ExportFolder -ChildPath $ExportFilename
+            
+            $ExportFullPath = Join-Path $ExportFolderPath -ChildPath $ExportFilename
         }
         else {
             $ExportFullPath = Join-Path $Item.PSParentPath -ChildPath $ExportFilename 
@@ -370,6 +433,7 @@ Function Write-CUPesterTests {
             Get-Item $ExportFullPath
         }
 
+        $Null = $Sb.Clear()
 
 
     }#End Foreach File

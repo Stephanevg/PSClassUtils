@@ -103,6 +103,55 @@ Class Woop {
 
             }
 
+            It '[Write-CUPesterTests] - Path .\Plop.ps1 -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
+
+                #Arrange
+                $File = "plop.ps1"
+                
+                gci -Path $TestDrive | Remove-Item -Force
+                $FullFile = Join-Path -Path $TestDrive -ChildPath $File
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+                $ExportFolderPath = Join-Path -Path $TestDrive -ChildPath "Export"
+                mkdir $ExportFolderPath | out-null
+
+                #Act 
+
+
+                Write-CUPesterTests -Path $FullFile -ExportFolderPath $ExportFolderPath
+
+
+
+
+                #Assert
+
+                Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1' | Should beNullOrEmpty
+                Get-ChildItem -Path $ExportFolderPath -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
+                
+
+            }
+
+            It '[Write-CUPesterTests] - Path .\Plop.ps1 -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
+
+                #Arrange
+                $File = "plop.ps1"
+                
+                #Act 
+                gci $testdrive | remove-item -force -Recurse
+                $FullFile = Join-Path -Path $TestDrive -ChildPath $File
+
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+
+                Write-CUPesterTests -Path $TestDrive -IgnoreParameterLessConstructor
+                #Assert
+
+                $f = Gci -path $TestDrive -Filter "*.tests.ps1"
+
+                $res = select-string -Pattern '^.*Constructor.*-.*Parameterless should not Throw.*$' -Path $f.FullName
+
+                $Res | Should beNullOrEmpty  
+
+            }
+
         }
 
         Context "Testing -Path with '*.psm1'" {
@@ -159,6 +208,56 @@ Class Woop {
                 $Out.GetType().FullName | Should be 'System.IO.FileInfo'
 
             }
+
+            It '[Write-CUPesterTests] - Path .\Plop.psm1 -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
+
+                #Arrange
+                $File = "plop.psm1"
+                
+                gci -Path $TestDrive | Remove-Item -Force
+                $FullFile = Join-Path -Path $TestDrive -ChildPath $File
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+                $ExportFolderPath = Join-Path -Path $TestDrive -ChildPath "Export"
+                mkdir $ExportFolderPath | out-null
+                
+                #Act 
+
+
+                Write-CUPesterTests -Path $FullFile -ExportFolderPath $ExportFolderPath
+
+
+
+
+                #Assert
+
+                Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1' | Should beNullOrEmpty
+                Get-ChildItem -Path $ExportFolderPath -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
+                
+
+            }
+
+            It '[Write-CUPesterTests] - Path .\Plop.psm1 -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
+
+                #Arrange
+                $File = "plop.psm1"
+                
+                #Act 
+
+                gci $testdrive | remove-item -force -Recurse
+                $FullFile = Join-Path -Path $TestDrive -ChildPath $File
+
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+
+                Write-CUPesterTests -Path $TestDrive -IgnoreParameterLessConstructor
+                #Assert
+
+                $f = Gci -path $FullFile -Filter "*.tests.ps1"
+
+                $res = select-string -Pattern '^.*Constructor.*-.*Parameterless should not Throw.*$' -Path $f.FullName
+
+                $Res | Should beNullOrEmpty 
+
+            }
         }
 
 
@@ -209,10 +308,92 @@ Class Woop {
                 $Out.GetType().FullName | Should be 'System.IO.FileInfo'
 
             }
+
+            It '[Write-CUPesterTests] - Path [Folder] -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
+
+                #Arrange
+                $File = "plop.psm1"
+                
+                gci -Path $TestDrive | Remove-Item -Force
+                $FullFile = Join-Path -Path $TestDrive -ChildPath $File
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+
+                $ExportFolderPath = Join-Path -Path $TestDrive -ChildPath "Export"
+                mkdir $ExportFolderPath | out-null
+                
+                #Act 
+
+                Write-CUPesterTests -Path $TestDrive -ExportFolderPath $ExportFolderPath
+
+                #Assert
+
+                Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1' | Should beNullOrEmpty
+                Get-ChildItem -Path $ExportFolderPath -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
+                
+
+            }
+
+            It '[Write-CUPesterTests] - Path [Folder] -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
+
+                #Arrange
+                $File = "plop.psm1"
+                
+                #Act 
+
+                gci $testdrive | remove-item -force -Recurse
+                $FullFile = Join-Path -Path $TestDrive -ChildPath $File
+
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+
+                Write-CUPesterTests -Path $TestDrive -IgnoreParameterLessConstructor
+                #Assert
+
+                $f = Gci -path $TestDrive -Filter "*.tests.ps1"
+
+                $res = select-string -Pattern '^.*Constructor.*-.*Parameterless should not Throw.*$' -Path $f.FullName
+
+                $Res | Should beNullOrEmpty 
+
+            }
         }
 
+        Context "Testing -ModuleFolderPath" {
+
+            It '[Write-CUPesterTests] - ModuleFolderPath & -Path should not be allowed.' {
+
+                #Arrange
+                
+                
+                #Act 
+
+               
+
+                #Assert
+                {Write-CUPesterTests -Path $TestDrive -ModuleFolderPath $TestDrive} | Should throw
 
 
-        
+            }
+
+            It '[Write-CUPesterTests] - ModuleFolderPath Plop Should Create a Test file' {
+
+                #Arrange
+                $File = "plop.psm1"
+                $FakeModulePath = Join-Path $TestDrive -ChildPath "plop" 
+                mkdir $FakeModulePath | out-null
+                $psd1 = New-ModuleManifest -Path ($FakeModulePath + ".plop.psd1")
+
+                #Act 
+
+                $FullFile = Join-Path -Path $FakeModulePath -ChildPath $File
+
+                Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
+
+                Write-CUPesterTests -Path $FullFile
+                #Assert
+
+                Get-ChildItem -Path $FakeModulePath -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
+                Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1'  | Should beNullOrEmpty
+            }
+        }
     }
 }
