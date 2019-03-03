@@ -126,7 +126,7 @@ Write-CUClassDiagram -Path ".\Inheritance.ps1"
 
 #### Results
 
-![example with inheritance](/Examples/02/Inheritance.png)
+![example with inheritance](/PSClassUtils/Examples/02/Inheritance.png)
 
 ## Live examples from existing modules on the internet:
 
