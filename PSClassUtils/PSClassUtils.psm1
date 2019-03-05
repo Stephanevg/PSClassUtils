@@ -1,4 +1,8 @@
-#Generated at 03/02/2019 22:48:46 by Stephane van Gulick
+﻿#Generated at 03/04/2019 17:50:43 by Stephane van Gulick
+#Needed for 07_CUInterfaceAuthor
+
+using namespace System.Collections.Generic
+using namespace System.Reflection
 Class CUClassParameter {
     [String]$Name
     [String]$Type
@@ -305,6 +309,51 @@ Class CUClass {
 
     }
 
+}
+
+class CUInterfaceAuthor
+{
+    hidden [List[PropertyInfo]] $_properties
+    hidden [List[MethodInfo]] $_methods
+
+    [List[Type]]$Interfaces
+
+    InterfaceAuthor([string]$Name,[type]$Interface)
+    {
+        $this.Interfaces = [List[type]]::new()
+        $this.Interfaces.Add($Interface)
+        $this.Interfaces.AddRange($Interface.GetInterfaces())
+
+        $this._properties = [List[PropertyInfo]]::new()
+        $this._methods = [List[MethodInfo]]::new()
+
+        foreach($iface in $this.Interfaces){
+            $this._properties.AddRange($iface.GetProperties())
+            $this._methods.AddRange($iface.GetMethods())
+        }
+    }
+
+    [string]
+    GetPropertySection()
+    {
+        $sb = [System.Text.StringBuilder]::new()
+        foreach($property in $this._properties){
+            $sb = $sb.AppendFormat('  [{0}]${1}', $property.PropertyType, $property.Name).AppendLine()
+        }
+
+        return $sb.ToString()
+    }
+
+    [string]
+    GetMethodSection()
+    {
+        $sb = [System.Text.StringBuilder]::new()
+        foreach($method in $this._methods |? Name -notmatch '^(g|s)et_'){
+            $sb = $sb.AppendFormat("  [{0}]{1}  {2}({3}){1}  {{{1}    throw '{2} not implemented '{1}  }}", $method.ReturnType, [Environment]::NewLine, $method.Name, ($method.GetParameters().ForEach({'[{0}]${1}' -f $_.ParameterType,$_.Name}) -join ', ')).AppendLine().AppendLine()
+        }
+
+        return $sb.ToString()
+    }
 }
 
 Enum PesterType {
@@ -1966,6 +2015,38 @@ function Write-CUClassDiagram {
     }
     
     End { <# The end #> }
+}
+function Write-CUInterfaceImplementation
+{
+    param(
+        [string]$Name,
+        [type]$InterfaceType
+    )
+
+    if(-not [System.CodeDom.Compiler.CodeGenerator]::IsValidLanguageIndependentIdentifier($Name)){
+        throw "'$Name' is not a valid type name"
+        return
+    }
+
+    if(-not $InterfaceType.IsInterface){
+        throw "'$InterfaceType' is not an interface"
+    }
+
+    try{
+        $author = [CUInterfaceAuthor]::new($Name, $InterfaceType)
+
+        $sb = [System.Text.StringBuilder]::new()
+        $sb = $sb.AppendFormat("class {0} : {1}", $Name, $InterfaceType).AppendLine()
+        $sb = $sb.AppendLine('{')
+        $sb = $sb.AppendLine($author.GetPropertySection())
+        $sb = $sb.Append($author.GetMethodSection())
+        $sb = $sb.AppendLine('}')
+
+        return $sb.ToString()
+    }
+    finally{
+        $null = $sb.Clear()
+    }
 }
 
 Function Write-CUPesterTests {
