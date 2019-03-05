@@ -28,13 +28,13 @@ function Install-CUDiagramPrerequisites {
                 Import-Module psgraph -Force
             }else{
                 write-verbose "Install PSGraph"
-                Install-Module psgraph -Verbose
+                Install-Module psgraph -Verbose -Scope $Scope
                 Import-Module psgraph -Force
             }
         }else{
-            Import-Module psgraph -Force -Scope $Scope
+            Import-Module psgraph -Force
         }
 
-        Install-GraphViz
+        Install-GraphViz -Scope $Scope
     }
 }
