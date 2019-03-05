@@ -352,6 +352,11 @@ Function Write-CUPesterTests {
                 }
                 else {
                     $ReturnType = $Method.ReturnType.Replace("[", "").Replace("]", "")
+                    if($Method.ReturnType -match '^\[.*\[\]\]$'){
+                        #Return type is an array
+                        $REturnType = $ReturnType + "[]"
+                    }
+
                     [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should return type [$($ReturnType)]' {")
                 }
 
