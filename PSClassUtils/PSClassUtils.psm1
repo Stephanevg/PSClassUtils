@@ -1,4 +1,4 @@
-﻿#Generated at 03/02/2019 22:48:46 by Stephane van Gulick
+#Generated at 03/02/2019 22:48:46 by Stephane van Gulick
 Class CUClassParameter {
     [String]$Name
     [String]$Type
@@ -2311,6 +2311,11 @@ Function Write-CUPesterTests {
                 }
                 else {
                     $ReturnType = $Method.ReturnType.Replace("[", "").Replace("]", "")
+                    if($Method.ReturnType -match '^\[.*\[\]\]$'){
+                        #Return type is an array
+                        $REturnType = $ReturnType + "[]"
+                    }
+
                     [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should return type [$($ReturnType)]' {")
                 }
 
