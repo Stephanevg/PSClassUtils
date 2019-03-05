@@ -1,5 +1,3 @@
-using namespace System.Collections.Generic
-using namespace System.Reflection
 
 class CUInterfaceAuthor
 {
