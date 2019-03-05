@@ -1987,6 +1987,11 @@ Function Write-CUPesterTests {
     Must point to *.ps1 or *.psm1 file.
     The files must contain powershell classes.
 
+    .PARAMETER ModulefolderPath
+
+    Use this parameter to generate tests for a complete module.
+    Specifiy the Root of a module folder. 
+
     .EXAMPLE
         # The File C:\plop.ps1 MUST contain at least one class.
         Write-CUPesterTests -Path C:\plop.ps1
@@ -2012,6 +2017,11 @@ Function Write-CUPesterTests {
        Write-CUPesterTests -Path C:\plop.ps1 -IgnoreParameterLessConstructor
 
        #This example will return create all the tests, except for the parameterLess constructor (which can be usefull for inheritence / 'interface' situations.)
+    
+    .EXAMPLE
+
+        Write-CUPesterTests -ModuleFolderPath "C:\Program files\WindowsPowershell\Modules\plop\"
+    
     .INPUTS
         File containing Classes. Or folder containing files that contain classes.
     .OUTPUTS
