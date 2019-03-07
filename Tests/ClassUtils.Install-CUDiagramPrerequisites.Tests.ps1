@@ -11,7 +11,6 @@ InModuleScope PSClassUtils -ScriptBlock {
         it '[Function][Parameter] The scope parameter should be available.' {
 
             (Get-Command Install-CUDiagramPrerequisites).Parameters.keys -contains "scope"  
-  
         } 
     }
 }

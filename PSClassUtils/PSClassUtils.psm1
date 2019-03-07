@@ -1,4 +1,4 @@
-﻿#Generated at 02/24/2019 12:53:27 by Stephane van Gulick
+﻿#Generated at 03/02/2019 22:48:46 by Stephane van Gulick
 Class CUClassParameter {
     [String]$Name
     [String]$Type
@@ -305,6 +305,71 @@ Class CUClass {
 
     }
 
+}
+
+Enum PesterType {
+    It
+    Describe
+    Context
+}
+Class PesterItBlock{
+    [String]$Name
+    [String]$Value
+    [PesterType]$Type
+    [String]$Content
+    [HashTable]$TestCases
+    [Bool]$Pending = $false
+    [Bool]$Skipped = $False
+
+    PesterITBlock([String]$Name,[String]$Value,[PesterType]$Type,[String]$Content,[HashTable]$TestCases){
+        $this.Name = $Name
+        $this.Value = $Value
+        $this.Type = $Type
+        $this.Content = $Content
+        $This.TestCases = $TestCases
+    }
+
+    SetPending([Bool]$IsPending){
+        $this.Pending = $IsPending
+    }
+
+    [Bool] IsPending(){
+        return $This.Pending
+    }
+
+    SetSkipped([Bool]$IsSkipped){
+        $this.Pending = $IsSkipped
+    }
+
+    [Bool] IsSkipped(){
+        return $This.Skipped
+    }
+
+}
+Class PesterDescribeBlock {
+    [String]$Name
+    [PesterItBlock[]]$ItBlocks
+    [PesterType]$Type
+    [String]$Fixture
+    [String[]]$Tags
+
+    PesterDescribeBlock([String]$Name,[PesterItBlock[]]$ItBlocks,[PesterType]$Type,[String]$Fixture,[String[]]$Tags){
+        $this.Name = $Name
+        $this.ItBlocks = $ItBlocks
+        $this.Type = $Type
+        $this.Fixture = $Fixture
+        $This.Tags = $Tags
+    }
+}
+
+Class PesterScript {
+    [System.IO.FileInfo]$path
+    [PesterDescribeBlock[]]$DescribeBlocks
+
+    PesterScript([System.Io.FileInfo]$Path){
+        $this.Path = $Path
+        $This.DescribeBlocks = Get-CUPesterDescribeBlock -Path $This.path.FullName
+    }
 }
 Function ConvertTo-titleCase {
     [CmdletBinding()]
@@ -712,9 +777,7 @@ function Get-CUClass {
     .OUTPUTS
         Return type [CuClass]
     .NOTES
-        Author: Tobias Weltner
-        Version: ??
-        Source --> http://community.idera.com/powershell/powertips/b/tips/posts/finding-powershell-classes
+        Author: StÃ©phane van Gulick
         Participate & contribute --> https://github.com/Stephanevg/PSClassUtils
     #>
 
@@ -760,19 +823,22 @@ function Get-CUClass {
             
                     $Ast = Get-CUAst -Path $ClassParams.Path
                     Foreach ( $x in $Ast ) {
-                        If ( $PSBoundParameters['ClassName'] ) {
-                            If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                        If(!($x.IsEnum)){
+
+                            If ( $PSBoundParameters['ClassName'] ) {
+                                If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                                    If ( $PSBoundParameters['Raw'] ) {
+                                        ([CUClass]::New($x)).Raw
+                                    } Else {
+                                        [CUClass]::New($x)
+                                    }
+                                }
+                            } Else {
                                 If ( $PSBoundParameters['Raw'] ) {
                                     ([CUClass]::New($x)).Raw
                                 } Else {
                                     [CUClass]::New($x)
                                 }
-                            }
-                        } Else {
-                            If ( $PSBoundParameters['Raw'] ) {
-                                ([CUClass]::New($x)).Raw
-                            } Else {
-                                [CUClass]::New($x)
                             }
                         }
                     }
@@ -1360,6 +1426,94 @@ function Get-CULoadedClass {
     END {
     }
 }
+Function Get-CUPesterDescribeBlock {
+    [CmdletBinding()]
+    Param(
+        $Path,
+        $InputObject
+    )
+    if($Path){
+        $P = Get-Item -path $Path
+        $Raw = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
+
+    }elseif($InputObject){
+        $Raw = [System.Management.Automation.Language.Parser]::ParseInput($InputObject,[ref]$null, [ref]$Null)
+    }
+    $String = $Raw.FindAll( {$args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst]}, $true)
+    $Data = @()
+    $Data += $String | ? {$_.StringConstantType -eq "BareWord" -and $_.Value -eq 'Describe'}
+    $AllDescribeBlocks = @()
+    Foreach($d in $data){
+
+        $Hash = @{}
+        $Hash.ElementType = $d.Value
+        $Hash.ItBlocks = @()
+        $Hash.Tags = ""
+        $Hash.ItBlocks += Get-CUPesterITBlock -InputObject $d.Parent.Extent.Text
+        $Hash.Content = $d.Parent.Extent.Text
+       
+        $Obj = [PesterDescribeBlock]::New($Hash.Name,$Hash.ItBlocks,[PesterType]::Describe,$Hash.Content,[String[]]$Tags)
+        
+            $Pattern = '^.*-tag(?<Tags>.*$)'
+            $Options = @()
+            $Options += [System.Text.RegularExpressions.RegexOptions]::Multiline
+            $Options += [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+            $rgx = [regex]::New($Pattern,$Options)
+            $MyMatches = $rgx.Match($d.Parent.Extent.Text)
+            $Hash.Tags = $MyMatches.Groups['Tags'].Value
+        $Obj.Tags = $Hash.Tags
+
+        $AllDescribeBlocks += $Obj
+    }
+
+    Return $AllDescribeBlocks
+}
+Function Get-CUPesterITBlock {
+    [CmdletBinding()]
+    Param(
+        $Path, 
+        $InputObject
+    )
+    if($Path){
+        $P = Get-Item -path $Path
+        $Raw = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
+
+    }elseif($InputObject){
+        $Raw = [System.Management.Automation.Language.Parser]::ParseInput($InputObject,[ref]$null, [ref]$Null)
+    }
+    $String = $Raw.FindAll( {$args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst]}, $true)
+    $Data = @()
+    $Data += $String | ? {$_.StringConstantType -eq "BareWord" -and $_.Value -eq 'it'}
+
+    Foreach($d in $data){
+
+        $Hash = @{value='';content=''}
+        $Hash.ElementType = $d.Value
+        $Hash.Content = $d.Parent.Extent.Text
+        $Hash.Name = $d.Parent.commandElements.Value[1]
+        $Hash.Value =  $d.Parent.CommandElements.Scriptblock.Extent
+        $Hash.TestCases =  $d.Parent.Parent.PipelineElements.CommandElements[-1].Elements
+
+
+        $AllItBlocks = @()
+        $Obj = [PesterItBlock]::New($Hash.Name,$Hash.Value,[PesterType]::It,$Hash.Content,$Hash.TestCases)
+        $AllItBlocks += $Obj
+    }
+
+    return $AllItBlocks
+}
+Function Get-CUPesterScript {
+    [CmdletBinding()]
+    Param(
+        [System.IO.FileInfo]$path
+    )
+    $Hash = @{}
+    $Hash.Path = $Path.FullName
+    $Hash.Data = Get-CUPesterDescribeBlock -Path $path.FullName
+
+    $obj = [PesterScript]::New($Path)
+    return $obj
+}
 function Get-CURaw {
     <#
     .SYNOPSIS
@@ -1554,10 +1708,11 @@ function Write-CUClassDiagram {
         Will generate a diagram of all the private classes available in the Path specified, and immediatley show the diagram.
     .NOTES
         Author: Stephanevg / LxLeChat
-        Version: xx.xx.xx
         www: https://github.com/Stephanevg  https://github.com/LxLeChat
         Report bugs or ask for feature requests here:
-        https://github.com/Stephanevg/Write-CUClassDiagram
+        https://github.com/Stephanevg/PsClassUtils
+    .LINK
+        https://github.com/Stephanevg/PsClassUtils
     #>
     [CmdletBinding()]
     param (
@@ -1811,4 +1966,436 @@ function Write-CUClassDiagram {
     }
     
     End { <# The end #> }
+}
+
+Function Write-CUPesterTests {
+    <#
+    .SYNOPSIS
+        Generates Pester tests automatically for PowerShell Classes
+    .DESCRIPTION
+        Creates a Describe block for the class constructors, and for the Class Methods.
+        Each of the describe block will contain child 'it' blocks which contains the corresponding tests.
+
+        For each Method and Constructor the following tests will be created:
+        1) test to ensure that the command doesn't throw
+        2) for methods, it will first create an instance (using a parameterless constructor by default), then check if the return type is of the right type (for voided methods, it will check that nothing is returned.)
+        3) For Static Methods, it will check it will Check that when it is called, it doens't throws an error, and validated the return type is correct. (For voided methods it will check that nothing is returned.)
+
+    .PARAMETER Path
+
+    The Path parameter is mandatory.
+    Must point to *.ps1 or *.psm1 file.
+    The files must contain powershell classes.
+
+    .EXAMPLE
+        # The File C:\plop.ps1 MUST contain at least one class.
+        Write-CUPesterTests -Path C:\plop.ps1
+
+        #Generates a C:\plop.Tests.Ps1 file with pester tests in it.
+    .EXAMPLE
+        Write-CUPesterTests -Path C:\plop.ps1 -Verbose
+
+        VERBOSE: [PSClassUtils][Write-CUPesterTests] Generating tests for C:\Plop.ps1
+        VERBOSE: [PSClassUtils][Write-CUPesterTests][Woop] Starting tests Generating process for class --> [Woop]
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop][Constructors] Generating 'Describe' block for Constructors
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop][Constructors] Generating 'IT' blocks
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> [Woop]::new()
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> [Woop]::new([String]String,[int]Number)
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop][Methods]
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> DoSomething()
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> TrickyMethod($Salutations,$IsthatTrue)
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> VoidedMethod()
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> MyStaticMethod()
+        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Export] -->Exporting tests file to: Microsoft.PowerShell.Core\FileSystem::C:\Plop.Tests.Ps1
+
+    .EXAMPLE
+       Write-CUPesterTests -Path C:\plop.ps1 -IgnoreParameterLessConstructor
+
+       #This example will return create all the tests, except for the parameterLess constructor (which can be usefull for inheritence / 'interface' situations.)
+    .INPUTS
+        File containing Classes. Or folder containing files that contain classes.
+    .OUTPUTS
+        Void
+        Or
+        When Passthru is specified
+            [Directory.IO.FileInfo] 
+    .NOTES
+        Author: StÃ©phane van Gulick
+        Version: 1.0.0
+    .LINK
+        https://github.com/Stephanevg/PsClassUtils
+    #>
+    [cmdletBinding()]
+    Param(
+
+        [parameter(ParameterSetName="Path")]
+        [String]$Path, #= (Throw "Path is mandatory. Please specifiy a Path to a .ps1 a .psm1 file or a folder containing one or more of these file types."),
+
+        [parameter(ParameterSetName="__AllParameterSets")]
+        [System.IO.DirectoryInfo]$ExportFolderPath,
+
+        [parameter(ParameterSetName="ModuleFolder")]
+        [System.IO.directoryInfo]$ModuleFolderPath,
+
+        [parameter(ParameterSetName="__AllParameterSets")]
+        [Switch]$IgnoreParameterLessConstructor,
+
+        [parameter(ParameterSetName="__AllParameterSets")]
+        [Switch]$Combine,
+
+        [parameter(ParameterSetName="__AllParameterSets")]
+        [Switch]$Passthru
+    )
+
+    If($ModuleFolderPath){
+        $Classes = gci $ModuleFolderPath.FullName -Recurse | Get-CUClass
+    }Else{
+
+        $PathObject = Get-Item $Path
+        if ($PathObject -is [System.IO.DirectoryInfo]) {
+            $Classes = gci $PathObject | Get-CUClass
+        }
+        elseif ($PathObject -is [System.IO.FileInfo]) {
+            $Classes = Get-CUClass -Path $PathObject.FullName
+        }
+    }
+
+
+
+
+    $AllFiles = $Classes | Group-Object -Property Path
+    $PesterTest = $null
+
+
+    $sb = [System.Text.StringBuilder]::new()
+    $CombineCount = 0
+    Foreach ($File in $AllFiles) {
+        Write-verbose "[PSClassUtils][Write-CUPesterTests] Generating tests for $($File.Name)"
+        $Header = ""
+        $IsModule = $False
+        if ($ModuleFolderPath -Or $File.Name.EndsWith(".psm1")) {
+            
+            $IsModule = $True
+
+        }
+        else {
+            
+            $IsModule = $False
+        }
+
+        If($IsModule){
+            If ($CombineCount -eq 0) {
+
+                If(!($ModuleFolderPath)){
+
+                    $F = Get-Item $File.Name
+                    $ModuleName = $F.BaseName
+                    [void]$sb.AppendLine("using module $($File.Name)")
+                }else{
+                    
+                    $ModuleName = $ModuleFolderPath.BaseName
+                    [void]$sb.AppendLine("using module $($ModuleFolderPath.FullName)")
+                }
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("InModuleScope -ModuleName $($ModuleName) -ScriptBlock {")
+                [void]$sb.AppendLine("")
+            }
+        }Else{
+            [void]$sb.AppendLine(". $($File.Name)")
+        }
+        
+        #Context blocks (TBD)
+
+        #Creating Describe Block for
+
+    
+        Foreach ($Class in $File.Group) {
+            Write-verbose "[PSClassUtils][Write-CUPesterTests][$($Class.Name)] Starting tests Generating process for class --> [$($Class.Name)]"
+            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] Generating 'Describe' block for Constructors"
+            $StartDescribeBlock = "Describe '[$($Class.Name)]-[Constructors]'{"  
+
+            [void]$sb.AppendLine($StartDescribeBlock)    
+
+            
+            
+            If (!($Class.Constructor)) {
+
+                Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] No overloaded Constructor to process"
+            }
+            else {
+                
+                Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] Generating 'IT' blocks"
+
+                #Creating itBlocks
+    
+                Foreach ($Constructor in $Class.Constructor) {
+                    $ConstructorIsParameterLess = $False
+                    #Constructors
+                    #$Constructor
+                    $Parstr = ""
+                    $SignatureRaw = ""
+                    foreach ($p in $Constructor.Parameter) {
+                        $Parstr = $Parstr + '$' + $p.Name + ","
+                        $SignatureRaw = $SignatureRaw + $p.Type + $p.Name + ","
+                    }
+                    $Signature = "(" + $SignatureRaw.Trim(",") + ")"
+                    $Parstr = $Parstr.trim(",")
+                    
+                    if ($Parstr) {
+                        $CallEnd = "(" + $Parstr + ")"
+                    }
+                    else {
+                        $ConstructorIsParameterLess = $true
+                        $CallEnd = "()"
+                        If($IgnoreParameterLessConstructor){
+                            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] `$IgnoreParameterLessConstructor detected! Parameterless constructor has been ignored"
+                            Continue
+                        }
+                        
+                    }
+                    Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> [$($Class.Name)]::new$($Signature)"
+                    
+                    If($ConstructorIsParameterLess){
+                        $ItBlock = "It '[$($Class.Name)]-[Constructor] - Parameterless should Not Throw' {"
+                    }Else{
+    
+                        $ItBlock = "It '[$($Class.Name)]-[Constructor]$($Signature) should Not Throw' {"
+                    }
+                    [void]$sb.AppendLine("")
+                    [void]$sb.AppendLine($ItBlock)
+                    [void]$sb.AppendLine("")
+                    [void]$sb.AppendLine("# -- Arrange")
+    
+                    [void]$sb.AppendLine("")
+                    if(!($ConstructorIsParameterLess)){
+    
+                        foreach ($p in $Constructor.Parameter) {
+                            [void]$sb.AppendLine("")
+                            [void]$sb.AppendLine($p.Type + '$' + $p.Name + "=" + "''")
+                            [void]$sb.AppendLine("") 
+                            
+                        }
+                    }
+    
+                    [void]$sb.AppendLine("# -- Act")
+                    [void]$sb.AppendLine("")
+    
+                    [void]$sb.AppendLine("# -- Assert")
+                    [void]$sb.AppendLine("")
+                    $ConstructorCallBody = "{[$($Class.Name)]::New" + "$($CallEnd)}"
+                    [void]$sb.Append($ConstructorCallBody)
+    
+                    
+                    $TestToExecute = " | Should Not Throw "
+                    [void]$sb.AppendLine($TestToExecute)
+                    [void]$sb.AppendLine("")
+                    [void]$sb.AppendLine("}# end of it block") 
+                    [void]$sb.AppendLine("")
+                } #Foreach Constructor
+            }
+
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("}# end of Describe block")
+           
+        }
+
+
+        #Create Describe block for Methods
+        If (!($Class.Method)) {
+            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> No Methods to process"
+            
+        }else{
+
+            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Methods]"
+            [void]$sb.AppendLine("Describe '[$($Class.Name)]-[Methods]'{")
+            [void]$sb.AppendLine("")
+
+            Foreach ($Method in $class.Method) {
+
+
+                $MethodIsParameterLess = $False
+                $Parstr = ""
+                $SignatureRaw = ""
+                foreach ($p in $Method.Parameter) {
+                    $Parstr = $Parstr + $p.Name + ","
+                    $SignatureRaw = $SignatureRaw + '$' + $p.Name + ","
+                }
+                $Parstr = $Parstr.trim(",")
+                $SignatureRaw = $SignatureRaw.trim(",")
+
+                    
+                $MethodCall = ""
+                $MethodCallBody = "[$($Class.Name)]$($Method.Name)"
+                $MethodCallEnd = ""
+                if ($Parstr) {
+                    $MethodCallEnd = "(" + $SignatureRaw + ")"
+                }
+                else {
+                    $MethodIsParameterLess = $True
+                    $MethodCallEnd += "()"
+
+                }
+                $REturnType = $Method.ReturnType.Extent.Text
+                $Signature = "($SignatureRaw)"
+                if ($Method.IsStatic()) {
+
+                    $MethodCall = $MethodCallBody.Replace("]", "]::") + $MethodCallEnd
+                }
+                else {
+                    $MethodCall = '$Instance.' + $($Method.Name) + $MethodCallEnd
+                }
+                $MethodCallEnd = ""
+                if ($Method.IsHidden) {
+                    
+                    $visibility = "#Hidden Method"
+                        
+                }
+                else {
+
+                    $visibility = "#Public Method"
+                }
+
+                
+                
+                
+                Write-Verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> $($Method.Name)$($Signature)"
+                [void]$sb.AppendLine($visibility)
+                [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should Not Throw' {")
+                [void]$sb.AppendLine("")
+                
+                [void]$sb.AppendLine("# -- Arrange")
+                [void]$sb.AppendLine("")
+
+                If(!($MethodIsParameterLess)){
+
+                    foreach ($parameter in $Method.Parameter) {
+                        If ($parameter.Type) {
+                                
+                            [void]$sb.AppendLine($parameter.Type + "$" + $parameter.Name + " = ''")
+                            
+                        }
+                        else {
+                            [void]$sb.AppendLine("$" + $parameter.Name + " = ''")
+                        }
+                        [void]$sb.AppendLine("")
+                    
+                    }
+                }Else{
+
+                }
+
+
+                
+                [void]$sb.AppendLine("# -- Act")
+                [void]$sb.AppendLine("")
+                if (!($Method.IsStatic())) {
+                    
+                    
+                    [void]$sb.AppendLine('$' + "Instance = [$($Class.Name)]::New()")
+                    [void]$sb.AppendLine("")
+                }else{
+                    
+                }
+                [void]$sb.AppendLine("# -- Assert")
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("{$MethodCall} | Should Not Throw")
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("} #End It Block")
+                [void]$sb.AppendLine("")
+
+
+                [void]$sb.AppendLine($visibility)
+
+                If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
+                    [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) Should not return anything (voided)' {")
+                }
+                else {
+                    $ReturnType = $Method.ReturnType.Replace("[", "").Replace("]", "")
+                    [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should return type [$($ReturnType)]' {")
+                }
+
+                [void]$sb.AppendLine("")
+                
+                [void]$sb.AppendLine("# -- Arrange")
+
+                If(!($MethodIsParameterLess)){
+
+                    foreach ($parameter in $Method.Parameter) {
+                        If ($parameter.Type) {
+                                
+                            [void]$sb.AppendLine($parameter.Type + "$" + $parameter.Name + " = ''")
+                            
+                        }
+                        else {
+                            [void]$sb.AppendLine("$" + $parameter.Name + " = ''")
+                        }
+                        [void]$sb.AppendLine("")
+                    
+                    }
+                }Else{
+                    [void]$sb.AppendLine("")
+                }
+
+                
+                [void]$sb.AppendLine("# -- Act")
+                [void]$sb.AppendLine("")
+
+                
+                if (!($Method.IsStatic())) {
+                    
+                    [void]$sb.AppendLine('$' + "Instance = [$($Class.Name)]::New()")
+                }
+                
+                [void]$sb.AppendLine("# -- Assert")
+                [void]$sb.AppendLine("")
+                If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
+                    [void]$sb.AppendLine("$MethodCall" + '| should be $null')
+                }
+                else {
+                    
+                    [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                }
+
+                
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("} #End It Block")
+                [void]$sb.AppendLine("")
+                
+            } #Foreach Method
+        }
+
+
+        #Closing Describe Block
+        [void]$sb.AppendLine("}#EndDescribeBlock")
+
+        If($IsModule){
+            [void]$sb.AppendLine("")
+            [void]$sb.AppendLine("}#End InModuleScope")
+            [void]$sb.AppendLine("")
+        }
+        $Item = Get-Item $File.Name
+        $ExportFilename = $Item.Name.Replace($Item.Extension, ".Tests.Ps1")
+        if ($ExportFolderPath) {
+            
+            $ExportFullPath = Join-Path $ExportFolderPath -ChildPath $ExportFilename
+        }
+        else {
+            $ExportFullPath = Join-Path $Item.PSParentPath -ChildPath $ExportFilename 
+        }
+
+        $TestfileName = $File
+        write-verbose "[PSClassUtils][Write-CUPesterTests]--> [Export] -->Exporting tests file to: $($ExportFullPath)"
+        
+        $sb.ToString() | out-file -FilePath $ExportFullPath -Encoding utf8
+
+        If($Passthru){
+            Get-Item $ExportFullPath
+        }
+
+        $Null = $Sb.Clear()
+
+
+    }#End Foreach File
+
+
 }

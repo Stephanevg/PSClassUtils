@@ -32,7 +32,7 @@ function Install-CUDiagramPrerequisites {
                 Import-Module psgraph -Force
             }
         }else{
-            Import-Module psgraph -Force
+            Import-Module psgraph -Force -Scope $Scope
         }
 
         Install-GraphViz
