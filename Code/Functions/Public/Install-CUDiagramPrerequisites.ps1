@@ -5,9 +5,9 @@ function Install-CUDiagramPrerequisites {
     .DESCRIPTION   
         Installation of PSGraph
     .EXAMPLE
-        Istall-CUDiagramPrerequisites
+        Install-CUDiagramPrerequisites
     .EXAMPLE
-        Istall-CUDiagramPrerequisites -proxy "10.10.10.10" -Scope CurrentUser
+        Install-CUDiagramPrerequisites -proxy "10.10.10.10" -Scope CurrentUser
     .NOTES   
         Author: Stephanevg
         Version: 2.0
@@ -28,7 +28,7 @@ function Install-CUDiagramPrerequisites {
                 Import-Module psgraph -Force
             }else{
                 write-verbose "Install PSGraph"
-                Install-Module psgraph -Verbose
+                Install-Module psgraph -Verbose -scope $Scope
                 Import-Module psgraph -Force
             }
         }else{
