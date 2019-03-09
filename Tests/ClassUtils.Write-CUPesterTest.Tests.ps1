@@ -36,19 +36,19 @@ Class Woop {
 '@
 
 
-    Describe "testing Write-CUPesterTests" {
+    Describe "testing write-CupesterTest" {
 
        
 
-        It '[Write-CUPesterTests] - Parameterless Should throw' {
-            {Write-CUPesterTests } | Should throw
+        It '[write-CupesterTest] - Parameterless Should throw' {
+            {write-CupesterTest } | Should throw
         }
 
 
         Context "Testing -Path with '*.ps1'" {
 
             
-            It '[Write-CUPesterTests] - Path Plop.ps1 Should not throw' {
+            It '[write-CupesterTest] - Path Plop.ps1 Should not throw' {
 
                 #Arrange
                 $File = "plop.ps1"
@@ -61,10 +61,10 @@ Class Woop {
 
                 #Assert
 
-                {Write-CUPesterTests -Path $FullFile } | Should Not Throw
+                {write-CupesterTest -Path $FullFile } | Should Not Throw
             }
 
-            It '[Write-CUPesterTests] - Path Plop.ps1 Should Create a Test file' {
+            It '[write-CupesterTest] - Path Plop.ps1 Should Create a Test file' {
 
                 #Arrange
                 $File = "plop.ps1"
@@ -75,14 +75,14 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $FullFile
+                write-CupesterTest -Path $FullFile
                 #Assert
 
                 Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
 
             }
 
-            It '[Write-CUPesterTests] - Path .\Plop.ps1 -PassThru Should Create a Test file and return [System.IO.FileInfo]' {
+            It '[write-CupesterTest] - Path .\Plop.ps1 -PassThru Should Create a Test file and return [System.IO.FileInfo]' {
 
                 #Arrange
                 $File = "plop.ps1"
@@ -93,7 +93,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                $Out = Write-CUPesterTests -Path $FullFile -PassThru
+                $Out = write-CupesterTest -Path $FullFile -PassThru
 
                 #Assert
 
@@ -103,7 +103,7 @@ Class Woop {
 
             }
 
-            It '[Write-CUPesterTests] - Path .\Plop.ps1 -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
+            It '[write-CupesterTest] - Path .\Plop.ps1 -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
 
                 #Arrange
                 $File = "plop.ps1"
@@ -117,7 +117,7 @@ Class Woop {
                 #Act 
 
 
-                Write-CUPesterTests -Path $FullFile -ExportFolderPath $ExportFolderPath
+                write-CupesterTest -Path $FullFile -ExportFolderPath $ExportFolderPath
 
 
 
@@ -130,7 +130,7 @@ Class Woop {
 
             }
 
-            It '[Write-CUPesterTests] - Path .\Plop.ps1 -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
+            It '[write-CupesterTest] - Path .\Plop.ps1 -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
 
                 #Arrange
                 $File = "plop.ps1"
@@ -141,7 +141,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $TestDrive -IgnoreParameterLessConstructor
+                write-CupesterTest -Path $TestDrive -IgnoreParameterLessConstructor
                 #Assert
 
                 $f = Gci -path $TestDrive -Filter "*.tests.ps1"
@@ -155,7 +155,7 @@ Class Woop {
         }
 
         Context "Testing -Path with '*.psm1'" {
-            It '[Write-CUPesterTests] - Path Plop.psm1 Should not throw' {
+            It '[write-CupesterTest] - Path Plop.psm1 Should not throw' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -167,10 +167,10 @@ Class Woop {
     
                 #Assert
     
-                {Write-CUPesterTests -Path $FullFile} | Should Not Throw
+                {write-CupesterTest -Path $FullFile} | Should Not Throw
             }
 
-            It '[Write-CUPesterTests] - Path Plop.psm1 Should Create a Test file' {
+            It '[write-CupesterTest] - Path Plop.psm1 Should Create a Test file' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -181,14 +181,14 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $FullFile
+                write-CupesterTest -Path $FullFile
                 #Assert
 
                 Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
 
             }
 
-            It '[Write-CUPesterTests] - Path .\Plop.psm1 -PassThru Should Create a Test file and return [System.IO.FileInfo]' {
+            It '[write-CupesterTest] - Path .\Plop.psm1 -PassThru Should Create a Test file and return [System.IO.FileInfo]' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -199,7 +199,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                $Out = Write-CUPesterTests -Path $FullFile -PassThru
+                $Out = write-CupesterTest -Path $FullFile -PassThru
 
                 #Assert
 
@@ -209,7 +209,7 @@ Class Woop {
 
             }
 
-            It '[Write-CUPesterTests] - Path .\Plop.psm1 -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
+            It '[write-CupesterTest] - Path .\Plop.psm1 -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -223,7 +223,7 @@ Class Woop {
                 #Act 
 
 
-                Write-CUPesterTests -Path $FullFile -ExportFolderPath $ExportFolderPath
+                write-CupesterTest -Path $FullFile -ExportFolderPath $ExportFolderPath
 
 
 
@@ -236,7 +236,7 @@ Class Woop {
 
             }
 
-            It '[Write-CUPesterTests] - Path .\Plop.psm1 -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
+            It '[write-CupesterTest] - Path .\Plop.psm1 -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -248,7 +248,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $TestDrive -IgnoreParameterLessConstructor
+                write-CupesterTest -Path $TestDrive -IgnoreParameterLessConstructor
                 #Assert
 
                 $f = Gci -path $FullFile -Filter "*.tests.ps1"
@@ -263,12 +263,12 @@ Class Woop {
 
         Context "Testing -Path with 'Folder'" {
 
-            It '[Write-CUPesterTests] - Path [System.IO.DirectoryInfo] Should not throw' {
+            It '[write-CupesterTest] - Path [System.IO.DirectoryInfo] Should not throw' {
     
-                {Write-CUPesterTests -Path $TestDrive} | Should Not Throw
+                {write-CupesterTest -Path $TestDrive} | Should Not Throw
             }
 
-            It '[Write-CUPesterTests] - Path [Folder] Should Create a Test file' {
+            It '[write-CupesterTest] - Path [Folder] Should Create a Test file' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -279,14 +279,14 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $TestDrive
+                write-CupesterTest -Path $TestDrive
                 #Assert
 
                 Get-ChildItem -Path $TestDrive -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
 
             }
 
-            It '[Write-CUPesterTests] - Path [Folder] -Passtru Should Create a Test file and return [System.IO.FileInfo]' {
+            It '[write-CupesterTest] - Path [Folder] -Passtru Should Create a Test file and return [System.IO.FileInfo]' {
                 
                     Get-ChildItem -Path $TestDrive | Remove-Item -Force
                 
@@ -299,7 +299,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                $Out = Write-CUPesterTests -Path $TestDrive -PassThru
+                $Out = write-CupesterTest -Path $TestDrive -PassThru
 
                 #Assert
 
@@ -309,7 +309,7 @@ Class Woop {
 
             }
 
-            It '[Write-CUPesterTests] - Path [Folder] -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
+            It '[write-CupesterTest] - Path [Folder] -ExportFolderPath [System.IO.DirectoryInfo] Should Create a Tests file on alternative path' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -323,7 +323,7 @@ Class Woop {
                 
                 #Act 
 
-                Write-CUPesterTests -Path $TestDrive -ExportFolderPath $ExportFolderPath
+                write-CupesterTest -Path $TestDrive -ExportFolderPath $ExportFolderPath
 
                 #Assert
 
@@ -333,7 +333,7 @@ Class Woop {
 
             }
 
-            It '[Write-CUPesterTests] - Path [Folder] -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
+            It '[write-CupesterTest] - Path [Folder] -IgnoreParameterLessConstructor Should not add the parameterless constructor test.' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -345,7 +345,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $TestDrive -IgnoreParameterLessConstructor
+                write-CupesterTest -Path $TestDrive -IgnoreParameterLessConstructor
                 #Assert
 
                 $f = Gci -path $TestDrive -Filter "*.tests.ps1"
@@ -359,7 +359,7 @@ Class Woop {
 
         Context "Testing -ModuleFolderPath" {
 
-            It '[Write-CUPesterTests] - ModuleFolderPath & -Path should not be allowed.' {
+            It '[write-CupesterTest] - ModuleFolderPath & -Path should not be allowed.' {
 
                 #Arrange
                 
@@ -369,12 +369,12 @@ Class Woop {
                
 
                 #Assert
-                {Write-CUPesterTests -Path $TestDrive -ModuleFolderPath $TestDrive} | Should throw
+                {write-CupesterTest -Path $TestDrive -ModuleFolderPath $TestDrive} | Should throw
 
 
             }
 
-            It '[Write-CUPesterTests] - ModuleFolderPath Plop Should Create a Test file' {
+            It '[write-CupesterTest] - ModuleFolderPath Plop Should Create a Test file' {
 
                 #Arrange
                 $File = "plop.psm1"
@@ -388,7 +388,7 @@ Class Woop {
 
                 Out-file -InputObject $ClassTest -FilePath $FullFile -Encoding utf8 -Force
 
-                Write-CUPesterTests -Path $FullFile
+                write-CupesterTest -Path $FullFile
                 #Assert
 
                 Get-ChildItem -Path $FakeModulePath -Filter '*.Tests.ps1' | Should Not beNullOrEmpty
