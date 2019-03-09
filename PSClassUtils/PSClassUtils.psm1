@@ -1,4 +1,4 @@
-﻿#Generated at 03/09/2019 11:46:15 by Stephane van Gulick
+﻿#Generated at 03/09/2019 13:32:59 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -2050,7 +2050,7 @@ function Write-CUInterfaceImplementation
     }
 }
 
-Function Write-CUPesterTests {
+Function Write-CUPesterTest {
     <#
     .SYNOPSIS
         Generates Pester tests automatically for PowerShell Classes
@@ -2076,33 +2076,33 @@ Function Write-CUPesterTests {
 
     .EXAMPLE
         # The File C:\plop.ps1 MUST contain at least one class.
-        Write-CUPesterTests -Path C:\plop.ps1
+        write-CupesterTest -Path C:\plop.ps1
 
         #Generates a C:\plop.Tests.Ps1 file with pester tests in it.
     .EXAMPLE
-        Write-CUPesterTests -Path C:\plop.ps1 -Verbose
+        write-CupesterTest -Path C:\plop.ps1 -Verbose
 
-        VERBOSE: [PSClassUtils][Write-CUPesterTests] Generating tests for C:\Plop.ps1
-        VERBOSE: [PSClassUtils][Write-CUPesterTests][Woop] Starting tests Generating process for class --> [Woop]
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop][Constructors] Generating 'Describe' block for Constructors
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop][Constructors] Generating 'IT' blocks
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> [Woop]::new()
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> [Woop]::new([String]String,[int]Number)
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop][Methods]
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> DoSomething()
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> TrickyMethod($Salutations,$IsthatTrue)
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> VoidedMethod()
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Woop] --> MyStaticMethod()
-        VERBOSE: [PSClassUtils][Write-CUPesterTests]--> [Export] -->Exporting tests file to: Microsoft.PowerShell.Core\FileSystem::C:\Plop.Tests.Ps1
+        VERBOSE: [PSClassUtils][write-CupesterTest] Generating tests for C:\Plop.ps1
+        VERBOSE: [PSClassUtils][write-CupesterTest][Woop] Starting tests Generating process for class --> [Woop]
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop][Constructors] Generating 'Describe' block for Constructors
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop][Constructors] Generating 'IT' blocks
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop] --> [Woop]::new()
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop] --> [Woop]::new([String]String,[int]Number)
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop][Methods]
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop] --> DoSomething()
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop] --> TrickyMethod($Salutations,$IsthatTrue)
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop] --> VoidedMethod()
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Woop] --> MyStaticMethod()
+        VERBOSE: [PSClassUtils][write-CupesterTest]--> [Export] -->Exporting tests file to: Microsoft.PowerShell.Core\FileSystem::C:\Plop.Tests.Ps1
 
     .EXAMPLE
-       Write-CUPesterTests -Path C:\plop.ps1 -IgnoreParameterLessConstructor
+       write-CupesterTest -Path C:\plop.ps1 -IgnoreParameterLessConstructor
 
        #This example will return create all the tests, except for the parameterLess constructor (which can be usefull for inheritence / 'interface' situations.)
     
     .EXAMPLE
 
-        Write-CUPesterTests -ModuleFolderPath "C:\Program files\WindowsPowershell\Modules\plop\"
+        write-CupesterTest -ModuleFolderPath "C:\Program files\WindowsPowershell\Modules\plop\"
     
     .INPUTS
         File containing Classes. Or folder containing files that contain classes.
@@ -2165,7 +2165,7 @@ Function Write-CUPesterTests {
     $sb = [System.Text.StringBuilder]::new()
     $CombineCount = 0
     Foreach ($File in $AllFiles) {
-        Write-verbose "[PSClassUtils][Write-CUPesterTests] Generating tests for $($File.Name)"
+        Write-verbose "[PSClassUtils][write-CupesterTest] Generating tests for $($File.Name)"
         $Header = ""
         $IsModule = $False
         if ($ModuleFolderPath -Or $File.Name.EndsWith(".psm1")) {
@@ -2213,8 +2213,8 @@ Function Write-CUPesterTests {
 
     
         Foreach ($Class in $File.Group) {
-            Write-verbose "[PSClassUtils][Write-CUPesterTests][$($Class.Name)] Starting tests Generating process for class --> [$($Class.Name)]"
-            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] Generating 'Describe' block for Constructors"
+            Write-verbose "[PSClassUtils][write-CupesterTest][$($Class.Name)] Starting tests Generating process for class --> [$($Class.Name)]"
+            Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)][Constructors] Generating 'Describe' block for Constructors"
             $StartDescribeBlock = "Describe '[$($Class.Name)]-[Constructors]'{"  
 
             [void]$sb.AppendLine($StartDescribeBlock)    
@@ -2223,11 +2223,11 @@ Function Write-CUPesterTests {
             
             If (!($Class.Constructor)) {
 
-                Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] No overloaded Constructor to process"
+                Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)][Constructors] No overloaded Constructor to process"
             }
             else {
                 
-                Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Constructors] Generating 'IT' blocks"
+                Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)][Constructors] Generating 'IT' blocks"
 
                 #Creating itBlocks
     
@@ -2251,12 +2251,12 @@ Function Write-CUPesterTests {
                         $ConstructorIsParameterLess = $true
                         $CallEnd = "()"
                         If($IgnoreParameterLessConstructor){
-                            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] `$IgnoreParameterLessConstructor detected! Parameterless constructor has been ignored"
+                            Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)] `$IgnoreParameterLessConstructor detected! Parameterless constructor has been ignored"
                             Continue
                         }
                         
                     }
-                    Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> [$($Class.Name)]::new$($Signature)"
+                    Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)] --> [$($Class.Name)]::new$($Signature)"
                     
                     If($ConstructorIsParameterLess){
                         $ItBlock = "It '[$($Class.Name)]-[Constructor] - Parameterless should Not Throw' {"
@@ -2305,11 +2305,11 @@ Function Write-CUPesterTests {
 
         #Create Describe block for Methods
         If (!($Class.Method)) {
-            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> No Methods to process"
+            Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)] --> No Methods to process"
             
         }else{
 
-            Write-verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)][Methods]"
+            Write-verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)][Methods]"
             [void]$sb.AppendLine("Describe '[$($Class.Name)]-[Methods]'{")
             [void]$sb.AppendLine("")
 
@@ -2361,7 +2361,7 @@ Function Write-CUPesterTests {
                 
                 
                 
-                Write-Verbose "[PSClassUtils][Write-CUPesterTests]--> [$($Class.Name)] --> $($Method.Name)$($Signature)"
+                Write-Verbose "[PSClassUtils][write-CupesterTest]--> [$($Class.Name)] --> $($Method.Name)$($Signature)"
                 [void]$sb.AppendLine($visibility)
                 [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) : $($Method.ReturnType) - should Not Throw' {")
                 [void]$sb.AppendLine("")
@@ -2492,7 +2492,7 @@ Function Write-CUPesterTests {
         }
 
         $TestfileName = $File
-        write-verbose "[PSClassUtils][Write-CUPesterTests]--> [Export] -->Exporting tests file to: $($ExportFullPath)"
+        write-verbose "[PSClassUtils][write-CupesterTest]--> [Export] -->Exporting tests file to: $($ExportFullPath)"
         
         $sb.ToString() | out-file -FilePath $ExportFullPath -Encoding utf8
 
