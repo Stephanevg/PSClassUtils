@@ -85,7 +85,10 @@ Function Write-CUPesterTests {
         [Switch]$Combine,
 
         [parameter(ParameterSetName="__AllParameterSets")]
-        [Switch]$Passthru
+        [Switch]$Passthru,
+
+        [parameter(ParameterSetName="Path")]
+        [String]$AddInModuleScope
     )
 
     If($ModuleFolderPath){
@@ -142,7 +145,15 @@ Function Write-CUPesterTests {
                 [void]$sb.AppendLine("")
             }
         }Else{
-            [void]$sb.AppendLine(". $($File.Name)")
+            If($AddInModuleScope){
+                [void]$sb.AppendLine("using module $($AddInModuleScope)")
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("InModuleScope -ModuleName $($AddInModuleScope) -ScriptBlock {")
+                [void]$sb.AppendLine("")
+            }else{
+
+                [void]$sb.AppendLine(". $($File.Name)")
+            }
         }
         
         #Context blocks (TBD)
@@ -414,7 +425,7 @@ Function Write-CUPesterTests {
         #Closing Describe Block
         [void]$sb.AppendLine("}#EndDescribeBlock")
 
-        If($IsModule){
+        If($IsModule -or $AddInModuleScope){
             [void]$sb.AppendLine("")
             [void]$sb.AppendLine("}#End InModuleScope")
             [void]$sb.AppendLine("")
