@@ -6,7 +6,7 @@ class CUInterfaceAuthor
 
     [List[Type]]$Interfaces
 
-    InterfaceAuthor([string]$Name,[type]$Interface)
+    CUInterfaceAuthor([string]$Name,[type]$Interface)
     {
         $this.Interfaces = [List[type]]::new()
         $this.Interfaces.Add($Interface)

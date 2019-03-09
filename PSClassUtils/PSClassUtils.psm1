@@ -1,4 +1,4 @@
-﻿#Generated at 03/04/2019 17:50:43 by Stephane van Gulick
+﻿#Generated at 03/09/2019 11:46:15 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -318,7 +318,7 @@ class CUInterfaceAuthor
 
     [List[Type]]$Interfaces
 
-    InterfaceAuthor([string]$Name,[type]$Interface)
+    CUInterfaceAuthor([string]$Name,[type]$Interface)
     {
         $this.Interfaces = [List[type]]::new()
         $this.Interfaces.Add($Interface)
@@ -1645,9 +1645,9 @@ function Install-CUDiagramPrerequisites {
     .DESCRIPTION   
         Installation of PSGraph
     .EXAMPLE
-        Istall-CUDiagramPrerequisites
+        Install-CUDiagramPrerequisites
     .EXAMPLE
-        Istall-CUDiagramPrerequisites -proxy "10.10.10.10"
+        Install-CUDiagramPrerequisites -proxy "10.10.10.10" -Scope CurrentUser
     .NOTES   
         Author: Stephanevg
         Version: 2.0
@@ -1655,7 +1655,8 @@ function Install-CUDiagramPrerequisites {
 
     [CmdletBinding()]
     param (
-        [String]$Proxy        
+        [String]$Proxy,
+        [ValidateSet("AllUsers","CurrentUser")][String]$Scope = "AllUsers"       
     )
     
     if(!(Get-Module -Name PSGraph)){
@@ -1663,15 +1664,15 @@ function Install-CUDiagramPrerequisites {
         if(!(get-module -listavailable -name psgraph )){
             if($proxy){
                 write-verbose "Install PSGraph"
-                Install-Module psgraph -Verbose -proxy $proxy
+                Install-Module psgraph -Verbose -proxy $proxy -Scope $Scope
                 Import-Module psgraph -Force
             }else{
                 write-verbose "Install PSGraph"
-                Install-Module psgraph -Verbose
+                Install-Module psgraph -Verbose -scope $Scope
                 Import-Module psgraph -Force
             }
         }else{
-            Import-Module psgraph -Force
+            Import-Module psgraph -Force -Scope $Scope
         }
 
         Install-GraphViz
@@ -2135,7 +2136,10 @@ Function Write-CUPesterTests {
         [Switch]$Combine,
 
         [parameter(ParameterSetName="__AllParameterSets")]
-        [Switch]$Passthru
+        [Switch]$Passthru,
+
+        [parameter(ParameterSetName="Path")]
+        [String]$AddInModuleScope
     )
 
     If($ModuleFolderPath){
@@ -2192,7 +2196,15 @@ Function Write-CUPesterTests {
                 [void]$sb.AppendLine("")
             }
         }Else{
-            [void]$sb.AppendLine(". $($File.Name)")
+            If($AddInModuleScope){
+                [void]$sb.AppendLine("using module $($AddInModuleScope)")
+                [void]$sb.AppendLine("")
+                [void]$sb.AppendLine("InModuleScope -ModuleName $($AddInModuleScope) -ScriptBlock {")
+                [void]$sb.AppendLine("")
+            }else{
+
+                [void]$sb.AppendLine(". $($File.Name)")
+            }
         }
         
         #Context blocks (TBD)
@@ -2464,7 +2476,7 @@ Function Write-CUPesterTests {
         #Closing Describe Block
         [void]$sb.AppendLine("}#EndDescribeBlock")
 
-        If($IsModule){
+        If($IsModule -or $AddInModuleScope){
             [void]$sb.AppendLine("")
             [void]$sb.AppendLine("}#End InModuleScope")
             [void]$sb.AppendLine("")
