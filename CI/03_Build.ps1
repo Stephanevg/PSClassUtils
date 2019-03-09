@@ -27,7 +27,19 @@ $MainPSM1Contents += $PublicClasses
 $MainPSM1Contents += $PrivateFunctions
 $MainPSM1Contents += $PublicFunctions
 
+Write-Host "[BUILD][START][PRE] Adding Pre content" -ForegroundColor RED -BackgroundColor White
 
+$PreContentPath = Join-Path -Path $Current -ChildPath "03_PreContent.ps1"
+
+If($PrecontentPath){
+    
+    $file = Get-item $PreContentPath
+    Gc $File.FullName | out-File -FilePath $ExportPath -Encoding utf8 -Append
+
+}else{
+    Write-Host "[BUILD][START][POST] No post content file found!" -ForegroundColor RED -BackgroundColor White
+
+}
 
 #Creating PSM1
 Write-Host "[BUILD][START][MAIN PSM1] Building main PSM1" -ForegroundColor RED -BackgroundColor White
@@ -39,8 +51,13 @@ Foreach($file in $MainPSM1Contents){
 Write-Host "[BUILD][START][POST] Adding post content" -ForegroundColor RED -BackgroundColor White
 
 $PostContentPath = Join-Path -Path $Current -ChildPath "03_postContent.ps1"
-$file = Get-item $PostContentPath
-Gc $File.FullName | out-File -FilePath $ExportPath -Encoding utf8 -Append
+If($PostContentPath){
+
+    $file = Get-item $PostContentPath
+    Gc $File.FullName | out-File -FilePath $ExportPath -Encoding utf8 -Append
+}else{
+    Write-Host "[BUILD][START][POST] No post content file found!" -ForegroundColor RED -BackgroundColor White
+}
 
 Write-Host "[BUILD][START][PSD1] Adding functions to export" -ForegroundColor RED -BackgroundColor White
 
