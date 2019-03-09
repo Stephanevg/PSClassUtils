@@ -1,4 +1,4 @@
-﻿using module C:\Users\taavast3\OneDrive\Repo\Projects\OpenSource\PSClassUtils\PSClassUtils\PSClassUtils.psd1
+﻿Import-Module -Force $PSScriptRoot\..\PSClassUtils\PSClassUtils.psm1
 
 InModuleScope -ModuleName PsClassUtils -ScriptBlock {
 
