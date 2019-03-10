@@ -39,9 +39,6 @@ Get-CUClassProperty
 Get-CUCommands
 Get-CUEnum
 Get-CULoadedClass
-Get-CUPesterDescribeBlock
-Get-CUPesterITBlock
-Get-CUPesterScript
 Install-CUDiagramPrerequisites
 Write-CUClassDiagram
 Write-CUInterfaceImplementation
