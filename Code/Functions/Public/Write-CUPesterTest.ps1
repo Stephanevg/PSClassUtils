@@ -422,9 +422,6 @@ Function Write-CUPesterTest {
         }
 
 
-        #Closing Describe Block
-        [void]$sb.AppendLine("}#EndDescribeBlock")
-
         If($IsModule -or $AddInModuleScope){
             [void]$sb.AppendLine("")
             [void]$sb.AppendLine("}#End InModuleScope")
