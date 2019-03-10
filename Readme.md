@@ -5,7 +5,9 @@
 
 PsClassUtils, is a Powershell module which contains tools to ease the work with Powershell Classes.
 
-The most usefull feature is probably the fact  **that it can generate UML-like Class Diagrams in png format of your scripts / modules in a glimps!** (See Write-CUClassDiagram)
+One cool feature is available is the fact  **that it can generate UML-like Class Diagrams in png format of your scripts / modules in a glimps!** (See ```Write-CUClassDiagram```)
+
+Since version `2.6.0` we have also added the possibility to **automatically generate your pester tests for your entiere module / script / file(s)**.( See ```Write-CUPesterTest``` below.)
 
 -----
 
@@ -30,20 +32,27 @@ Release notes can be found here --> [Release Notes](.\ReleaseNotes.md)
 
 ```powershell
 
-Install-CUDiagramPrerequisites
-Write-CUClassDiagram
 Get-CUClass
 Get-CUClassConstructor
 Get-CUClassMethod
 Get-CUClassProperty
 Get-CUCommands
 Get-CUEnum
+Get-CULoadedClass
+Get-CUPesterDescribeBlock
+Get-CUPesterITBlock
+Get-CUPesterScript
+Install-CUDiagramPrerequisites
+Write-CUClassDiagram
+Write-CUInterfaceImplementation
+Write-CUPesterTest
+
 
 ```
 
 
 
-### Write-CUClassDiagram
+## Write-CUClassDiagram
 
 Allows to generate UML diagrams of powerShell scripts / modules that contain PowerShell classes.
 
@@ -94,7 +103,7 @@ Class Woop {
     [int]$number
 
     Woop([String]$String,[int]$Number){
-s
+
     }
 
     [String]DoSomething(){
@@ -147,7 +156,18 @@ Below is the export of the Class Diagram of a module I wrote that helps to manag
 
 Write-CUClassDiagram allows to generate diagrams of complex class based modules, and gives you the ability to have a global picture of any project quickly, without reading through the code. PoshBot is probably the best example:
 
-![PoshBot](https://github.com/Stephanevg/PSClassUtils/blob/master/Examples/06/PoshBot_Diagram.png?raw=true)
+![PoshBot](https://github.com/Stephanevg/PSClassUtils/blob/master/PSClassUtils/Examples/06/PoshBot_Diagram.png?raw=true)
+https://github.com/Stephanevg/PSClassUtils/blob/master/PSClassUtils/Examples/06/PoshBot_Diagram.png
+
+
+## Write-CUPesterTest
+
+Since version `2.6.0` the PsClassUtils module received a few new cmdlets related to pester tests. The most interesting one is without a doubt the: ```Write-CUPesterTest```
+
+As it's name implies, this function allows to automatically generate your pester tests. (Click on the image below for an example.)
+
+<a href="http://powershelldistrict.com/wp-content/uploads/2019/03/write-cupestertest-demo-org.mp4/">![PesterTest](./Images/PesterTests.jpg)]</a>
+
 
 
 ## Contributing guide
@@ -170,4 +190,4 @@ Thanks to [LxLeChat](https://github.com/LxLeChat) !!
 
 Acl class is used to create a 3 levels folder structure in a standardized way. The acl creates both folders and corresponding groups and set acl.
 
-![AclApp](https://github.com/LxLeChat/PSClassUtils/blob/master/Examples/07/aclapp.class.png)
+![AclApp](https://raw.githubusercontent.com/Stephanevg/PSClassUtils/master/PSClassUtils/Examples/07/aclapp.class.png)
