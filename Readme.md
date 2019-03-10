@@ -166,7 +166,7 @@ Since version `2.6.0` the PsClassUtils module received a few new cmdlets related
 
 As it's name implies, this function allows to automatically generate your pester tests. (Click on the image below for an example.)
 
-<a href="http://powershelldistrict.com/wp-content/uploads/2019/03/write-cupestertest-demo-org.mp4/">![PesterTest](./Images/PesterTests.jpg)]</a>
+<a href="http://powershelldistrict.com/write-cupestertest-demo-org//">![PesterTest](./Images/PesterTests.jpg)]</a>
 
 
 
