@@ -23,6 +23,23 @@ Function Write-CUPesterTest {
     Use this parameter to generate tests for a complete module.
     Specifiy the Root of a module folder. 
 
+    .PARAMETER AddInModuleScope
+
+    If you have a case, where you want to write pester tests for a individual file that contains classes, but you know that it is actually part of a module.
+    And if using -ModuleFolderPath is not an option for you, then AddinModuleScope is what you need.
+
+    This parameter will add a 'using module' and the InModuleScope to your tests. see example
+  
+    Write-CUPesterTest -Path C:\plop.ps1 -AddInModuleScope "Woop"
+
+    Will generate
+
+    Using Module Woop
+
+    InModuleScope -ModuleName "Woop" -Scriptblock {
+        #Pester tests for specific classes
+    }
+
     .EXAMPLE
         # The File C:\plop.ps1 MUST contain at least one class.
         write-CupesterTest -Path C:\plop.ps1
@@ -418,7 +435,10 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("} #End It Block")
                 [void]$sb.AppendLine("")
                 
-            } #Foreach Method
+            } # end Foreach Method
+
+            #Closing Describe Block
+            [void]$sb.AppendLine("}#EndDescribeBlock")
         }
 
 

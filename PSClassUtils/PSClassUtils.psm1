@@ -1,4 +1,4 @@
-﻿#Generated at 03/09/2019 13:32:59 by Stephane van Gulick
+﻿#Generated at 03/10/2019 18:28:13 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -2469,12 +2469,12 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("} #End It Block")
                 [void]$sb.AppendLine("")
                 
-            } #Foreach Method
+            } # end Foreach Method
+
+            #Closing Describe Block
+            [void]$sb.AppendLine("}#EndDescribeBlock")
         }
 
-
-        #Closing Describe Block
-        [void]$sb.AppendLine("}#EndDescribeBlock")
 
         If($IsModule -or $AddInModuleScope){
             [void]$sb.AppendLine("")
