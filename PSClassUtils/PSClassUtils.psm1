@@ -1,4 +1,4 @@
-﻿#Generated at 03/10/2019 18:28:13 by Stephane van Gulick
+﻿#Generated at 03/10/2019 21:20:24 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -1475,94 +1475,6 @@ function Get-CULoadedClass {
     END {
     }
 }
-Function Get-CUPesterDescribeBlock {
-    [CmdletBinding()]
-    Param(
-        $Path,
-        $InputObject
-    )
-    if($Path){
-        $P = Get-Item -path $Path
-        $Raw = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
-
-    }elseif($InputObject){
-        $Raw = [System.Management.Automation.Language.Parser]::ParseInput($InputObject,[ref]$null, [ref]$Null)
-    }
-    $String = $Raw.FindAll( {$args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst]}, $true)
-    $Data = @()
-    $Data += $String | ? {$_.StringConstantType -eq "BareWord" -and $_.Value -eq 'Describe'}
-    $AllDescribeBlocks = @()
-    Foreach($d in $data){
-
-        $Hash = @{}
-        $Hash.ElementType = $d.Value
-        $Hash.ItBlocks = @()
-        $Hash.Tags = ""
-        $Hash.ItBlocks += Get-CUPesterITBlock -InputObject $d.Parent.Extent.Text
-        $Hash.Content = $d.Parent.Extent.Text
-       
-        $Obj = [PesterDescribeBlock]::New($Hash.Name,$Hash.ItBlocks,[PesterType]::Describe,$Hash.Content,[String[]]$Tags)
-        
-            $Pattern = '^.*-tag(?<Tags>.*$)'
-            $Options = @()
-            $Options += [System.Text.RegularExpressions.RegexOptions]::Multiline
-            $Options += [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
-            $rgx = [regex]::New($Pattern,$Options)
-            $MyMatches = $rgx.Match($d.Parent.Extent.Text)
-            $Hash.Tags = $MyMatches.Groups['Tags'].Value
-        $Obj.Tags = $Hash.Tags
-
-        $AllDescribeBlocks += $Obj
-    }
-
-    Return $AllDescribeBlocks
-}
-Function Get-CUPesterITBlock {
-    [CmdletBinding()]
-    Param(
-        $Path, 
-        $InputObject
-    )
-    if($Path){
-        $P = Get-Item -path $Path
-        $Raw = [System.Management.Automation.Language.Parser]::ParseFile($p.FullName, [ref]$null, [ref]$Null)
-
-    }elseif($InputObject){
-        $Raw = [System.Management.Automation.Language.Parser]::ParseInput($InputObject,[ref]$null, [ref]$Null)
-    }
-    $String = $Raw.FindAll( {$args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst]}, $true)
-    $Data = @()
-    $Data += $String | ? {$_.StringConstantType -eq "BareWord" -and $_.Value -eq 'it'}
-
-    Foreach($d in $data){
-
-        $Hash = @{value='';content=''}
-        $Hash.ElementType = $d.Value
-        $Hash.Content = $d.Parent.Extent.Text
-        $Hash.Name = $d.Parent.commandElements.Value[1]
-        $Hash.Value =  $d.Parent.CommandElements.Scriptblock.Extent
-        $Hash.TestCases =  $d.Parent.Parent.PipelineElements.CommandElements[-1].Elements
-
-
-        $AllItBlocks = @()
-        $Obj = [PesterItBlock]::New($Hash.Name,$Hash.Value,[PesterType]::It,$Hash.Content,$Hash.TestCases)
-        $AllItBlocks += $Obj
-    }
-
-    return $AllItBlocks
-}
-Function Get-CUPesterScript {
-    [CmdletBinding()]
-    Param(
-        [System.IO.FileInfo]$path
-    )
-    $Hash = @{}
-    $Hash.Path = $Path.FullName
-    $Hash.Data = Get-CUPesterDescribeBlock -Path $path.FullName
-
-    $obj = [PesterScript]::New($Path)
-    return $obj
-}
 function Get-CURaw {
     <#
     .SYNOPSIS
@@ -2073,6 +1985,23 @@ Function Write-CUPesterTest {
 
     Use this parameter to generate tests for a complete module.
     Specifiy the Root of a module folder. 
+
+    .PARAMETER AddInModuleScope
+
+    If you have a case, where you want to write pester tests for a individual file that contains classes, but you know that it is actually part of a module.
+    And if using -ModuleFolderPath is not an option for you, then AddinModuleScope is what you need.
+
+    This parameter will add a 'using module' and the InModuleScope to your tests. see example
+  
+    Write-CUPesterTest -Path C:\plop.ps1 -AddInModuleScope "Woop"
+
+    Will generate
+
+    Using Module Woop
+
+    InModuleScope -ModuleName "Woop" -Scriptblock {
+        #Pester tests for specific classes
+    }
 
     .EXAMPLE
         # The File C:\plop.ps1 MUST contain at least one class.
