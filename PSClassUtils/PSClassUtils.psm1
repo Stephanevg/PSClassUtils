@@ -1,4 +1,4 @@
-#Generated at 03/12/2019 08:24:26 by Stephane van Gulick
+#Generated at 03/13/2019 00:53:08 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -489,7 +489,7 @@ Class CUClassGraphOptions {
 }
 
 Class CUDiagram {
-    [String]$GraphVizDocument
+    $GraphVizDocument
     [Object[]]$Objects
     [CUClassGraphOptions]$Options
 
@@ -778,7 +778,7 @@ Function Out-CUPSGraph {
     )
     
     begin {
-        Write-Verbose "Out-CUPSGraph -> BEGIN BLOCK..."
+        
         $AllGraphs = @()
         if(!(Get-Module -Name PSGraph)){
             #Module is not loaded
@@ -792,14 +792,16 @@ Function Out-CUPSGraph {
     }
     
     process {
-        Write-Verbose "Out-CUPSGraph -> PROCESS BLOCK..."
+        
         [System.Collections.ArrayList]$AllClasses = @()
+        $inputObjectGrouped = $inputObject | Group Path
         #$Graph = Graph -Attributes @{splines='ortho'} -ScriptBlock {
         $Graph = Graph -ScriptBlock {
-            foreach($obj in $inputObject){
+            foreach($obj in $inputObjectGrouped){
                 $CurrName = split-Path -leaf $obj.Name
-                subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
-                        Foreach( $Class in $obj ) {
+                    subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
+                
+                        Foreach( $Class in $obj.group ) {
 
                             If($IgnoreCase){
                                 $RecordName = ConvertTo-TitleCase -String $Class.Name
@@ -917,7 +919,7 @@ Function Out-CUPSGraph {
                     }#End SubGraph
                 
                 ## InHeritance
-                Foreach ($class in ($Obj | where-Object IsInherited)){
+                Foreach ($class in ($inputObjectGrouped.group | where-Object IsInherited)){
                     If($IgnoreCase){
                         $Parent = ConvertTo-TitleCase -String $Class.ParentClassName
                         $Child = ConvertTo-TitleCase -String $Class.Name
@@ -926,7 +928,7 @@ Function Out-CUPSGraph {
                         $Parent = $Class.ParentClassName
                         $Child = $Class.Name
                     }
-                    edge -From $Parent -To $Child -Attributes @{arrowhead="empty"}
+                    edge -From $Parent -To $Child -Attributes @{dir="back";arrowhead="empty"}
                 }
 
                 ##Composition
@@ -935,7 +937,7 @@ Function Out-CUPSGraph {
                     Write-Verbose "Out-CUPSGraph -> ShowCoposition"
                     #foreach class.Property.Type if in list of customClasses, then it is composition
                     ## replace brackets when property type is an array of type
-                    Foreach($ClassProperty in $obj.property){
+                    Foreach($ClassProperty in $obj.group.property){
                         #if( $AllClasses -contains $ClassProperty.type ){
                         if( $AllClasses -contains ($ClassProperty.type -replace '\[\]','') ){    
                             write-verbose "Out-CUPSGraph -> Composition relationship found:"
@@ -953,8 +955,7 @@ Function Out-CUPSGraph {
     }
     
     end {
-        Write-Verbose "Out-CUPSGraph -> END BLOCK..."
-        Write-Verbose "Out-CUPSGraph -> END BLOCK: return graphs..."
+        
         Return $AlLGraphs
         
     

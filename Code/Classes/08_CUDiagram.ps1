@@ -67,7 +67,7 @@ Class CUClassGraphOptions {
 }
 
 Class CUDiagram {
-    [String]$GraphVizDocument
+    $GraphVizDocument
     [Object[]]$Objects
     [CUClassGraphOptions]$Options
 
