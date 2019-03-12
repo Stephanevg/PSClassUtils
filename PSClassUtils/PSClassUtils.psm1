@@ -1,4 +1,4 @@
-﻿#Generated at 03/10/2019 21:20:24 by Stephane van Gulick
+#Generated at 03/12/2019 08:24:26 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -420,6 +420,173 @@ Class PesterScript {
         $This.DescribeBlocks = Get-CUPesterDescribeBlock -Path $This.path.FullName
     }
 }
+
+enum GraphOutputFormat{
+    jpg
+    png
+    gif
+    imap
+    cmapx
+    jp2
+    pdf
+    plain
+    dot
+}
+
+Class CUClassGraphOptions {
+    [Object]$InputObject #Should be [CUClass[]] and / or [CUEnum[]]
+    [bool]$IgnoreCase
+    [Bool]$ShowComposition
+    [Bool]$Show
+    [Bool]$PassThru
+    [GraphOutputFormat]$OutputFormat
+
+    CUClassGraphOptions(){
+
+    }
+
+    [CUClassGraphOptions] SetInputObject([Object]$InputObject){
+        $this.Object = $InputObject
+        return $this
+    }
+
+
+    [CUClassGraphOptions] SetShowComposition(){
+        $this.ShowComposition = $true
+        return $this
+    }
+
+    [CUClassGraphOptions] SetIgnoreCase(){
+        $this.IgnoreCase = $true
+        return $this
+    }
+
+    [CUClassGraphOptions] SetShow(){
+        $this.Show = $true
+        return $this
+    }
+
+    [CUClassGraphOptions] SetPassThru(){
+        $this.PassThru = $true
+        return $this
+    }
+
+    [CUClassGraphOptions] SetOutputFormat([GraphOutputFormat]$OutputFormat){
+        $this.OutputFormat = $OutputFormat
+        return $this
+    }
+
+    [HashTable] GetParameterHashTable(){
+        
+        $Options = $this.psobject.Members | ? {$_.MemberType -eq 'Property'} | select Name,Value
+        $Hash = @{}
+        Foreach($opt in $options){
+            $Hash.$($opt.Name) = $opt.Value
+        }
+
+        return $Hash
+    }
+}
+
+Class CUDiagram {
+    [String]$GraphVizDocument
+    [Object[]]$Objects
+    [CUClassGraphOptions]$Options
+
+    CUDiagram(){
+
+    }
+
+    CUDiagram([CUClassGraphOptions]$Options){
+        $this.SetOptions($Options)
+    }
+
+    CuDiagram([Object[]]$Objects){
+        $this.Objects += $Objects
+        
+    }
+
+    CUDiagram([Object[]]$Objects,[CUClassGraphOptions]$Options){
+        $this.Objects += $Objects
+        $this.SetOptions($Options)
+    }
+
+    AddObjects([Object[]]$Objects){
+        $Allowed = @('CUClass','ClassEnum')
+        foreach($obj in $Objects){
+            if($obj.GetType().Name -in $Allowed){
+                $This.Objects += $obj
+            }else{
+                Throw "$($obj.GetType()) Is not an allowed type."
+            }
+        }
+    }
+
+    
+    <#
+    AddClass([CUClass[]]$Class){
+        $this.Objects += $Class
+    }
+
+    AddEnum([ClassEnum[]]$Enum){
+       $this.Objects += $Enum
+    }
+    #>
+
+
+    CreateGraphVizDocument(){
+        #actions for creating graph
+        If($this.Objects){
+            $o = $this.Options.GetParameterHashTable()
+            $Pars = @{}
+            $Pars.InputObject = $this.Objects
+            $Pars.IgnoreCase = $o.IgnoreCase
+            $Pars.ShowCOmposition = $o.showComposition
+            $Pars.ErrorAction = "Stop"
+            
+            try{
+                
+                $this.GraphVizDocument = Out-CUPSGraph @Pars 
+            }Catch{
+                Throw "Failed to create raw graph: $($_)"
+            }
+            IF(!($this.GraphVizDocument)){
+                Throw "Generated graph is empty. Did you point to a document that contains classes / enums?"
+            }
+        }Else{
+            throw "Add classes or Enums"
+        }
+    }
+    
+    CreateDiagram(){
+        If(!($this.GraphVizDocument)){
+            Throw "Create a graphViz document first using CreateGraph"
+        }else{
+            $o = $this.Options.GetParameterHashTable()
+            $ParsExport = @{}
+            $ParsExport.ShowGraph = $o.show
+            
+            $ParsExport.OutputFormat = $o.OutputFormat
+            $this.GraphVizDocument | export-PSGraph @ParsExport
+            If( $o.PassThru){
+                
+            }
+            
+        }
+    }
+
+    [CUClassGraphOptions] GetOptions(){
+        Return $This.Options
+    }
+
+    SetOptions([CUClassGraphOptions]$Options){
+        $This.Options = $Options
+    }
+
+}
+
+
+
 Function ConvertTo-titleCase {
     [CmdletBinding()]
     Param(
@@ -632,7 +799,7 @@ Function Out-CUPSGraph {
             foreach($obj in $inputObject){
                 $CurrName = split-Path -leaf $obj.Name
                 subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
-                        Foreach( $Class in $obj.Group ) {
+                        Foreach( $Class in $obj ) {
 
                             If($IgnoreCase){
                                 $RecordName = ConvertTo-TitleCase -String $Class.Name
@@ -750,7 +917,7 @@ Function Out-CUPSGraph {
                     }#End SubGraph
                 
                 ## InHeritance
-                Foreach ($class in ($Obj.Group | where-Object IsInherited)){
+                Foreach ($class in ($Obj | where-Object IsInherited)){
                     If($IgnoreCase){
                         $Parent = ConvertTo-TitleCase -String $Class.ParentClassName
                         $Child = ConvertTo-TitleCase -String $Class.Name
@@ -768,7 +935,7 @@ Function Out-CUPSGraph {
                     Write-Verbose "Out-CUPSGraph -> ShowCoposition"
                     #foreach class.Property.Type if in list of customClasses, then it is composition
                     ## replace brackets when property type is an array of type
-                    Foreach($ClassProperty in $obj.group.property){
+                    Foreach($ClassProperty in $obj.property){
                         #if( $AllClasses -contains $ClassProperty.type ){
                         if( $AllClasses -contains ($ClassProperty.type -replace '\[\]','') ){    
                             write-verbose "Out-CUPSGraph -> Composition relationship found:"
@@ -826,7 +993,7 @@ function Get-CUClass {
     .OUTPUTS
         Return type [CuClass]
     .NOTES
-        Author: StÃ©phane van Gulick
+        Author: Stéphane van Gulick
         Participate & contribute --> https://github.com/Stephanevg/PSClassUtils
     #>
 
@@ -966,7 +1133,7 @@ Function Get-CUClassConstructor {
     .OUTPUTS
         ClassConstructor
     .NOTES   
-        Author: StÃ©phane van Gulick
+        Author: Stéphane van Gulick
         Version: 0.7.1
         www.powershellDistrict.com
         Report bugs or submit feature requests here:
@@ -1134,7 +1301,7 @@ Function Get-CUClassMethod {
     .OUTPUTS
         CUClassMethod
     .NOTES   
-        Author: StÃ©phane van Gulick
+        Author: Stéphane van Gulick
         Version: 0.7.1
         www.powershellDistrict.com
         Report bugs or submit feature requests here:
@@ -1360,7 +1527,7 @@ function Get-CUCommands {
         Get-CUCommands
 
     .NOTES
-        Author: StÃ©phane van Gulick
+        Author: Stéphane van Gulick
         
     #>
     [CmdletBinding()]
@@ -1390,7 +1557,7 @@ Function Get-CUEnum{
     .OUTPUTS
         Classenum
     .NOTES   
-        Author: StÃ©phane van Gulick
+        Author: Stéphane van Gulick
         Version: 0.2.0
         
     .LINK
@@ -1596,7 +1763,7 @@ function Test-IsCustomType {
 
 # Test-PowershellDynamicClass MyClass
 
-# extrait et adaptÃ© de  https://github.com/PowerShell/PowerShell-Tests
+# extrait et adapté de  https://github.com/PowerShell/PowerShell-Tests
 
  
 
@@ -2041,7 +2208,7 @@ Function Write-CUPesterTest {
         When Passthru is specified
             [Directory.IO.FileInfo] 
     .NOTES
-        Author: StÃ©phane van Gulick
+        Author: Stéphane van Gulick
         Version: 1.0.0
     .LINK
         https://github.com/Stephanevg/PsClassUtils

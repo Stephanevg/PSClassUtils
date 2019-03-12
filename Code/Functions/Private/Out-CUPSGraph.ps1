@@ -63,7 +63,7 @@ Function Out-CUPSGraph {
             foreach($obj in $inputObject){
                 $CurrName = split-Path -leaf $obj.Name
                 subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
-                        Foreach( $Class in $obj.Group ) {
+                        Foreach( $Class in $obj ) {
 
                             If($IgnoreCase){
                                 $RecordName = ConvertTo-TitleCase -String $Class.Name
@@ -181,7 +181,7 @@ Function Out-CUPSGraph {
                     }#End SubGraph
                 
                 ## InHeritance
-                Foreach ($class in ($Obj.Group | where-Object IsInherited)){
+                Foreach ($class in ($Obj | where-Object IsInherited)){
                     If($IgnoreCase){
                         $Parent = ConvertTo-TitleCase -String $Class.ParentClassName
                         $Child = ConvertTo-TitleCase -String $Class.Name
@@ -199,7 +199,7 @@ Function Out-CUPSGraph {
                     Write-Verbose "Out-CUPSGraph -> ShowCoposition"
                     #foreach class.Property.Type if in list of customClasses, then it is composition
                     ## replace brackets when property type is an array of type
-                    Foreach($ClassProperty in $obj.group.property){
+                    Foreach($ClassProperty in $obj.property){
                         #if( $AllClasses -contains $ClassProperty.type ){
                         if( $AllClasses -contains ($ClassProperty.type -replace '\[\]','') ){    
                             write-verbose "Out-CUPSGraph -> Composition relationship found:"

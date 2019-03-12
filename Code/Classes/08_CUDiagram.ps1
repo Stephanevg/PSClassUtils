@@ -1,74 +1,5 @@
 
-
-Class CUDiagram {
-    [String]$Graph
-    [CUClass[]]$Class
-    [CUEnum[]]$Enum
-
-    CUDiagram(){
-
-    }
-
-    CuDiagram([CUClass[]]$Class){
-        $this.addClass($Class)
-        $this.Enum = $Enum
-    }
-
-    CuDiagram([CUClass[]]$Class,[CUEnum[]]$Enum){
-        $this.AddClass($Class)
-        $this.AddEnum($Enum)
-    }
-
-    AddClass([CUClass[]]$Class){
-        $this.AddClass($Class){
-
-        }
-    }
-
-    AddEnum([CUEnum[]]$Enum){
-        $this.Enum = $Enum
-    }
-
-
-    CreateGraph(){
-        #actions for creating graph
-        If($this.Class -or $this.Enum){
-            $Pars = @{}
-            $Pars.InputObject = ""
-            $Pars.IgnoreCase = ""
-            $Pars.ShowCOmposition = ""
-            $Pars.IgnoreCase = ""
-            
-            try{
-
-                $this.Graph = Out-CUGraph @$Pars -ErrorAction -Stop
-            }Catch{
-                Throw "Failed to create raw graph: $($_)"
-            }
-            IF(!($this.Path)){
-                Throw "Generated graph is empty. Did you point to a document that contains classes / enums?"
-            }
-        }Else{
-            throw "Add classes or Enums"
-        }
-    }
-    
-    CreateDiagram(){
-        If(!($this.Graph)){
-            Throw "Create a graph first using CreateGraph"
-        }else{
-            $ParsExport = @{}
-            $ParsExport.Show = ""
-            $ParsExport.PassThru = ""
-            $ParsExport.OutputFormat = ""
-            $this.Graph | export-PSGraph @ParsExport
-            
-        }
-    }
-
-}
-#>
-Enum GraphOutputFormat{
+enum GraphOutputFormat{
     jpg
     png
     gif
@@ -80,46 +11,46 @@ Enum GraphOutputFormat{
     dot
 }
 
-Class ClassGraphOptions {
-    [Object]$InputObject #Show be [CUClass[]] and / or [CUEnum[]]
+Class CUClassGraphOptions {
+    [Object]$InputObject #Should be [CUClass[]] and / or [CUEnum[]]
     [bool]$IgnoreCase
     [Bool]$ShowComposition
     [Bool]$Show
     [Bool]$PassThru
-    [GraphOutputFormat]$Format
+    [GraphOutputFormat]$OutputFormat
 
-    ClassGraphOptions(){
+    CUClassGraphOptions(){
 
     }
 
-    [ClassGraphOptions] SetInputObject([Object]$InputObject){
+    [CUClassGraphOptions] SetInputObject([Object]$InputObject){
         $this.Object = $InputObject
         return $this
     }
 
 
-    [ClassGraphOptions] SetShowComposition(){
+    [CUClassGraphOptions] SetShowComposition(){
         $this.ShowComposition = $true
         return $this
     }
 
-    [ClassGraphOptions] SetIgnoreCase(){
+    [CUClassGraphOptions] SetIgnoreCase(){
         $this.IgnoreCase = $true
         return $this
     }
 
-    [ClassGraphOptions] SetShow(){
+    [CUClassGraphOptions] SetShow(){
         $this.Show = $true
         return $this
     }
 
-    [ClassGraphOptions] SetPassThru(){
+    [CUClassGraphOptions] SetPassThru(){
         $this.PassThru = $true
         return $this
     }
 
-    [ClassGraphOptions] SetOutputFormat([GraphOutputFormat]$Format){
-        $this.Format = $Format
+    [CUClassGraphOptions] SetOutputFormat([GraphOutputFormat]$OutputFormat){
+        $this.OutputFormat = $OutputFormat
         return $this
     }
 
@@ -134,4 +65,103 @@ Class ClassGraphOptions {
         return $Hash
     }
 }
+
+Class CUDiagram {
+    [String]$GraphVizDocument
+    [Object[]]$Objects
+    [CUClassGraphOptions]$Options
+
+    CUDiagram(){
+
+    }
+
+    CUDiagram([CUClassGraphOptions]$Options){
+        $this.SetOptions($Options)
+    }
+
+    CuDiagram([Object[]]$Objects){
+        $this.Objects += $Objects
+        
+    }
+
+    CUDiagram([Object[]]$Objects,[CUClassGraphOptions]$Options){
+        $this.Objects += $Objects
+        $this.SetOptions($Options)
+    }
+
+    AddObjects([Object[]]$Objects){
+        $Allowed = @('CUClass','ClassEnum')
+        foreach($obj in $Objects){
+            if($obj.GetType().Name -in $Allowed){
+                $This.Objects += $obj
+            }else{
+                Throw "$($obj.GetType()) Is not an allowed type."
+            }
+        }
+    }
+
+    
+    <#
+    AddClass([CUClass[]]$Class){
+        $this.Objects += $Class
+    }
+
+    AddEnum([ClassEnum[]]$Enum){
+       $this.Objects += $Enum
+    }
+    #>
+
+
+    CreateGraphVizDocument(){
+        #actions for creating graph
+        If($this.Objects){
+            $o = $this.Options.GetParameterHashTable()
+            $Pars = @{}
+            $Pars.InputObject = $this.Objects
+            $Pars.IgnoreCase = $o.IgnoreCase
+            $Pars.ShowCOmposition = $o.showComposition
+            $Pars.ErrorAction = "Stop"
+            
+            try{
+                
+                $this.GraphVizDocument = Out-CUPSGraph @Pars 
+            }Catch{
+                Throw "Failed to create raw graph: $($_)"
+            }
+            IF(!($this.GraphVizDocument)){
+                Throw "Generated graph is empty. Did you point to a document that contains classes / enums?"
+            }
+        }Else{
+            throw "Add classes or Enums"
+        }
+    }
+    
+    CreateDiagram(){
+        If(!($this.GraphVizDocument)){
+            Throw "Create a graphViz document first using CreateGraph"
+        }else{
+            $o = $this.Options.GetParameterHashTable()
+            $ParsExport = @{}
+            $ParsExport.ShowGraph = $o.show
+            
+            $ParsExport.OutputFormat = $o.OutputFormat
+            $this.GraphVizDocument | export-PSGraph @ParsExport
+            If( $o.PassThru){
+                
+            }
+            
+        }
+    }
+
+    [CUClassGraphOptions] GetOptions(){
+        Return $This.Options
+    }
+
+    SetOptions([CUClassGraphOptions]$Options){
+        $This.Options = $Options
+    }
+
+}
+
+
 
