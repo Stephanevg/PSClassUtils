@@ -17,7 +17,12 @@ Class CUClassGraphOptions {
     [Bool]$ShowComposition
     [Bool]$Show
     [Bool]$PassThru
+    [System.IO.DirectoryInfo]$OutputFolderPath
+    [String]$FileName
     [GraphOutputFormat]$OutputFormat
+    [String]$Exclude
+    [String]$Only
+    [Bool]$Recurse
 
     CUClassGraphOptions(){
 
@@ -64,19 +69,88 @@ Class CUClassGraphOptions {
 
         return $Hash
     }
+
+    [Void] SetOutputFolderPath([String]$Path){
+        If(test-Path $Path){
+            $Item = get-Item $Path
+
+            Switch($Item.GetType().FullName){
+                'system.io.DirectoryInfo' {
+                    $this.OutputFolderPath = $Item.FullName
+                    If(!($this.FileName)){
+                        $this.ApplyFileName($Item.BaseName)
+                    }else{
+
+                        $this.ApplyFileName($this.FileName)
+                    }
+                    ;Break}
+                'system.io.FileInfo' {
+                    $this.OutputFolderPath = $Item.Directory.FullName
+                    $this.ApplyFileName($Item.BaseName)
+                    ;Break
+                }
+            }
+        }
+        
+    }
+
+    [Void]ApplyFileName([String]$FileName){
+        $this.FileName = $FileName + "." + $This.OutputFormat
+    }
+
+    [CUClassGraphOptions] SetOutputFolderPath([System.IO.DirectoryInfo]$OutputFolderPath){
+        $this.OutputFolderPath = $OutputFolderPath
+        return $this
+    }
+
+    [CUClassGraphOptions] SetFileName([String]$FileName){
+        $this.FileName = $FileName
+        return $this
+    }
+
+    [CUClassGraphOptions] SetExclude([String]$Exclude){
+        $this.Exclude = $Exclude
+        return $this
+    }
+
+    [CUClassGraphOptions] SetRecurse(){
+        $this.Recurse = $True
+        return $this
+    }
+
+    [CUClassGraphOptions] SetOnly([String]$Only){
+        $this.Only = $Only
+        return $this
+    }
+
+    [String]GetFullExportPath(){
+        return "{0}\{1}" -f $this.OutputFolderPath,$this.FileName
+    }
+
 }
 
 Class CUDiagram {
-    $GraphVizDocument
+    [String]$Path
     [Object[]]$Objects
     [CUClassGraphOptions]$Options
+    hidden $GraphVizDocument
+    [String[]]$String
 
     CUDiagram(){
 
     }
-
+    CUDiagram([String]$Path){
+        if(test-Path $Path){
+            $this.Path = $Path
+            $this.GetClassObjects()
+            $this.Options = [CUClassGraphOptions]::New() #I know this is bad. But It seems the right thing to do. For now...
+        }else{
+            throw "$($Path) not found. Please provide a path that exists."
+        }
+    }
     CUDiagram([CUClassGraphOptions]$Options){
         $this.SetOptions($Options)
+        $this.Options.SetOutputFolderPath()
     }
 
     CuDiagram([Object[]]$Objects){
@@ -140,11 +214,22 @@ Class CUDiagram {
         If(!($this.GraphVizDocument)){
             Throw "Create a graphViz document first using CreateGraph"
         }else{
+            $this.Options.SetOutputFolderPath($this.Path)
             $o = $this.Options.GetParameterHashTable()
             $ParsExport = @{}
-            $ParsExport.ShowGraph = $o.show
-            
-            $ParsExport.OutputFormat = $o.OutputFormat
+            if($o.Show){
+
+                $ParsExport.ShowGraph = $o.show
+            }
+            If($o.OutputFolderPath){
+
+                $ParsExport.DestinationPath = $this.Options.GetFullExportPath()
+            }
+
+            If($O.OutputFormat){
+
+                $ParsExport.OutputFormat = $o.OutputFormat
+            }
             $this.GraphVizDocument | export-PSGraph @ParsExport
             If( $o.PassThru){
                 
@@ -161,6 +246,33 @@ Class CUDiagram {
         $This.Options = $Options
     }
 
+    [Void]GetClassObjects(){
+        If($this.Path){
+            $item = Get-Item $this.Path
+            Switch($item.GEtType().FullName){
+
+                ("System.IO.FileInfo"){
+                    $this.Objects = Get-CUClass -path $item.FullName
+                    ;Break
+                }
+                ("System.IO.DirectoryInfo"){
+                    $h = @{}
+                    if($this.Options.Recurse){
+                        $h.recurse = $true
+                    }
+                    $h.path = $Item.FullName
+                    $this.Objects = Get-ChildItem -path @h | Get-CUClass
+                    ;Break
+                } 
+            }
+
+            If($this.Options.Only){
+                $this.Objects = $this.Objects | ? {$_.Name -in $Only}
+            }elseif($this.Options.Exclude){
+                $this.Objects = $this.Objects | ? {$_.Name -NotIn $Exclude}
+            }
+        }
+    }
 }
 
 
