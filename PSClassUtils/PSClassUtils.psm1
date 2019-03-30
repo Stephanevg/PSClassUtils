@@ -1,4 +1,4 @@
-#Generated at 03/14/2019 01:51:27 by Stephane van Gulick
+﻿#Generated at 03/25/2019 10:37:11 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -1106,7 +1106,7 @@ function Get-CUClass {
     .OUTPUTS
         Return type [CuClass]
     .NOTES
-        Author: Stéphane van Gulick
+        Author: StÃ©phane van Gulick
         Participate & contribute --> https://github.com/Stephanevg/PSClassUtils
     #>
 
@@ -1246,7 +1246,7 @@ Function Get-CUClassConstructor {
     .OUTPUTS
         ClassConstructor
     .NOTES   
-        Author: Stéphane van Gulick
+        Author: StÃ©phane van Gulick
         Version: 0.7.1
         www.powershellDistrict.com
         Report bugs or submit feature requests here:
@@ -1414,7 +1414,7 @@ Function Get-CUClassMethod {
     .OUTPUTS
         CUClassMethod
     .NOTES   
-        Author: Stéphane van Gulick
+        Author: StÃ©phane van Gulick
         Version: 0.7.1
         www.powershellDistrict.com
         Report bugs or submit feature requests here:
@@ -1640,7 +1640,7 @@ function Get-CUCommands {
         Get-CUCommands
 
     .NOTES
-        Author: Stéphane van Gulick
+        Author: StÃ©phane van Gulick
         
     #>
     [CmdletBinding()]
@@ -1670,7 +1670,7 @@ Function Get-CUEnum{
     .OUTPUTS
         Classenum
     .NOTES   
-        Author: Stéphane van Gulick
+        Author: StÃ©phane van Gulick
         Version: 0.2.0
         
     .LINK
@@ -1876,7 +1876,7 @@ function Test-IsCustomType {
 
 # Test-PowershellDynamicClass MyClass
 
-# extrait et adapté de  https://github.com/PowerShell/PowerShell-Tests
+# extrait et adaptÃ© de  https://github.com/PowerShell/PowerShell-Tests
 
  
 
@@ -2061,6 +2061,7 @@ function Write-CUClassDiagram {
         $Diagram.GetClassObjects()
         $Diagram.CreateGraphVizDocument()
         $Diagram.CreateDiagram()
+        return [System.IO.FileInfo]$Diagram.Path
 
     }
     
@@ -2180,7 +2181,7 @@ Function Write-CUPesterTest {
         When Passthru is specified
             [Directory.IO.FileInfo] 
     .NOTES
-        Author: Stéphane van Gulick
+        Author: StÃ©phane van Gulick
         Version: 1.0.0
     .LINK
         https://github.com/Stephanevg/PsClassUtils
@@ -2525,11 +2526,11 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("# -- Assert")
                 [void]$sb.AppendLine("")
                 If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
-                    [void]$sb.AppendLine("$MethodCall" + '| should be $null')
+                    [void]$sb.AppendLine("$MethodCall" + '| Should -Be $null')
                 }
                 else {
                     
-                    [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    [void]$sb.AppendLine("($MethodCall).GetType().Name | Should -Be $ReturnType")
                 }
 
                 

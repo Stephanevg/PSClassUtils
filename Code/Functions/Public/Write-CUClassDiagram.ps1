@@ -153,6 +153,7 @@ function Write-CUClassDiagram {
         $Diagram.GetClassObjects()
         $Diagram.CreateGraphVizDocument()
         $Diagram.CreateDiagram()
+        return [System.IO.FileInfo]$Diagram.Path
 
     }
     
