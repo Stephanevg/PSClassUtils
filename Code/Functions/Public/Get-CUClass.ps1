@@ -103,23 +103,23 @@ function Get-CUClass {
         } Else {
             
             Foreach ( $x in (Get-CULoadedClass @ClassParams ) ) {
-
-                If ( $PSBoundParameters['ClassName'] ) {
-                    If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                If ( !$x.IsEnum ){
+                    If ( $PSBoundParameters['ClassName'] ) {
+                        If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                            If ( $PSBoundParameters['Raw'] ) {
+                                ([CUClass]::New($x)).Raw
+                            } Else {
+                                [CUClass]::New($x)
+                            }
+                        }
+                    } Else {
                         If ( $PSBoundParameters['Raw'] ) {
                             ([CUClass]::New($x)).Raw
                         } Else {
                             [CUClass]::New($x)
                         }
                     }
-                } Else {
-                    If ( $PSBoundParameters['Raw'] ) {
-                        ([CUClass]::New($x)).Raw
-                    } Else {
-                        [CUClass]::New($x)
-                    }
                 }
-                
             } 
         }
     }
