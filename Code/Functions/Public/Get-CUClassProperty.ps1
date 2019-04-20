@@ -18,7 +18,7 @@ Function Get-CUClassProperty {
     Param(
         [Alias("FullName")]
         [Parameter(ParameterSetName = "Path", Position = 1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
-        [System.IO.FileInfo[]]$Path,
+        [String[]]$Path,
         
         [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
@@ -43,7 +43,8 @@ Function Get-CUClassProperty {
         }
 
         If ($Path -or $PSBoundParameters['Path'] ) {
-            $ClassParams.Path = $Path.FullName
+            $item=Get-Item -Path (Resolve-Path -Path $Path).path 
+            $ClassParams.Path = $Item.FullName
         }
 
         If ($InputObject) {
