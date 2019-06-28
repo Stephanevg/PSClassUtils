@@ -8,12 +8,12 @@ schema: 2.0.0
 # Get-CUClassProperty
 
 ## SYNOPSIS
-Short description
+Find Properties from Powershell Classes.
 
 ## SYNTAX
 
 ```
-Get-CUClassProperty [[-Path] <FileInfo[]>] [-ClassName <String[]>] [-InputObject <Object[]>] [-Raw]
+Get-CUClassProperty [[-Path] <String[]>] [-ClassName <String[]>] [-InputObject <Object[]>] [-Raw]
  [<CommonParameters>]
 ```
 
