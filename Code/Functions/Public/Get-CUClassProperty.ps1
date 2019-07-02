@@ -14,22 +14,21 @@ Function Get-CUClassProperty {
     .NOTES
         General notes
     #>
-    [cmdletBinding()]
+    [cmdletBinding(DefaultParameterSetName="All")]
+    [OutputType([CUClassMethod[]])]
     Param(
-        [Alias("FullName")]
-        [Parameter(ParameterSetName = "Path", Position = 1, Mandatory = $False, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
-        [String[]]$Path,
-        
         [Parameter(Mandatory=$False, ValueFromPipeline=$False)]
         [String[]]$ClassName,
 
-        [Parameter(ValueFromPipeline=$True)]
-        [ValidateScript({
-            If ( !($_.GetType().Name -eq "CUClass" ) ) { Throw "InputObect Must be of type CUClass.."} Else { $True }
-        })]
-        [Object[]]$InputObject,
+        [Parameter(ValueFromPipeline=$True,ParameterSetName="Set1")]
+        [CUClass[]]$InputObject,
+
+        [Alias("FullName")]
+        [Parameter(ValueFromPipeline=$True,ParameterSetName="Set2",ValueFromPipelineByPropertyName=$True)]
+        [System.IO.FileInfo[]]$Path,
 
         [Switch]$Raw
+
     )
 
     BEGIN {}
@@ -42,49 +41,80 @@ Function Get-CUClassProperty {
             $ClassParams.ClassName = $ClassName
         }
 
-        If ($Path -or $PSBoundParameters['Path'] ) {
-            $item=Get-Item -Path (Resolve-Path -Path $Path).path 
-            $ClassParams.Path = $Item.FullName
-        }
+        Switch ( $PSCmdlet.ParameterSetName ) {
 
-        If ($InputObject) {
-            $ClassParams.ClassName = $ClassName
-        }
+            ## CUClass as input
+            Set1 {
 
-       
-        $Class = Get-CuClass @ClassParams
-        If ($Class) {
-
-            If($Raw){
-                $Class.GetCuClassProperty().Raw
-            }else{
-
-                $Class.GetCuClassProperty()
+                Foreach ( $Class in $InputObject ) {
+                    If ( $ClassParams.ClassName ) {
+                        If ( $Class.Name -eq $ClassParams.ClassName ) {
+                            If ( $PSBoundParameters['Raw'] ) {
+                                ($Class.GetCuClassProperty()).Raw
+                            } Else {
+                                $Class.GetCuClassProperty()
+                            }
+                        }
+                    } Else {
+                        If ( $PSBoundParameters['Raw'] ) {
+                            ($Class.GetCuClassProperty()).Raw
+                        } Else {
+                            $Class.GetCuClassProperty()
+                        }
+                    }
+                }
+                
             }
-        }
 
-        <# If ( $MyInvocation.PipelinePosition -eq 1 ) {
-            ## Not from the Pipeline
-            If ( $Null -eq $PSBoundParameters['InputObject'] ) {
-                Throw "Please Specify an InputObject of type CUClass"
+            ## File as Input
+            Set2 {
+                Write-Verbose '[Get-CUClassProperty][FileInput]'
+                Foreach ( $P in $Path ) {
+                    Write-Verbose '[Get-CUClassProperty][FileInput Path is: $($p.fullname) ]'
+                    If ( $P.extension -in ".ps1",".psm1" ) {
+
+                        If ($PSCmdlet.MyInvocation.ExpectingInput) {
+                            $ClassParams.Path = $P.FullName
+                        } Else {
+                            $ClassParams.Path = (Get-Item (Resolve-Path $P).Path).FullName
+                        }
+                        
+                        $x=Get-CuClass @ClassParams
+                        If ( $null -ne $x.Property ) {
+                            If ( $PSBoundParameters['Raw'] ) {
+                                
+                                ($x.GetCuClassProperty()).Raw
+                            } Else {
+                                $x.GetCuClassProperty()
+                            }
+                            
+                        }
+                    }
+                }
+
             }
-            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
-                $InputObject.GetCuClassProperty()
-            } Else {
-                Foreach ( $C in $ClassName ){
-                    ($InputObject | where Name -eq $c).GetCuClassProperty()
+
+            Default {
+                $ClassParams = @{}
+
+                If ( $null -ne $PSBoundParameters['ClassName'] ) {
+                    $ClassParams.ClassName = $PSBoundParameters['ClassName']
+                }
+
+                Foreach($Class in (Get-CuClass @ClassParams)) {
+                    If ( $Class.Constructor.count -ne 0 ) {
+                        If ( $Raw ) {
+                            $Class.GetCuClassProperty().Raw
+                        } Else {
+
+                            $Class.GetCuClassProperty()
+                        }
+                        
+                    }
                 }
             }
-
-        } Else {
-            ## From the Pipeline
-            If ( $Null -eq $PSBoundParameters['ClassName'] ) {
-                $InputObject.GetCuClassProperty()
-            } Else {
-                Throw "-ClassName parameter must be specified on the left side of the pipeline"
-            }
         }
- #>
+
     }
 
     END {}
