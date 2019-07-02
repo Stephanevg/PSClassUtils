@@ -27,7 +27,7 @@ Function Get-CUEnum{
     [cmdletBinding()]
     Param(
         [Alias("FullName")]
-        [Parameter(ValueFromPipeline=$True,Position=1,ValueFromPipelineByPropertyName=$True)]
+        [Parameter(ValueFromPipeline=$True,ValueFromPipelineByPropertyName=$True)]
         [string[]]$Path
     )
 
@@ -37,7 +37,7 @@ Function Get-CUEnum{
 
    Process{
         ForEach( $p in $Path) {
-            Write-Verbose "ICI"
+
             $item = get-item (resolve-path -path $p).path
                 If ( $item -is [system.io.FileInfo] -and $item.Extension -in @('.ps1','.psm1') ) {
                 Write-Verbose "[Get-CUEnum][Path] $($item.FullName)"

@@ -1,4 +1,4 @@
-﻿#Generated at 07/02/2019 19:51:39 by Stephane van Gulick
+﻿#Generated at 07/02/2019 21:37:51 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -1306,8 +1306,9 @@ Function Get-CUClassProperty {
 
             ## CUClass as input
             Set1 {
-
+                Write-Verbose '[Get-CUClassProperty][CUClassInput]'
                 Foreach ( $Class in $InputObject ) {
+                    Write-Verbose "[Get-CUClassProperty][CUClass Class Name is: $($Class.Name) ]"
                     If ( $ClassParams.ClassName ) {
                         If ( $Class.Name -eq $ClassParams.ClassName ) {
                             If ( $PSBoundParameters['Raw'] ) {
@@ -1331,7 +1332,7 @@ Function Get-CUClassProperty {
             Set2 {
                 Write-Verbose '[Get-CUClassProperty][FileInput]'
                 Foreach ( $P in $Path ) {
-                    Write-Verbose '[Get-CUClassProperty][FileInput Path is: $($p.fullname) ]'
+                    Write-Verbose "[Get-CUClassProperty][FileInput Path is: $($p.fullname) ]"
                     If ( $P.extension -in ".ps1",".psm1" ) {
 
                         If ($PSCmdlet.MyInvocation.ExpectingInput) {
@@ -1430,7 +1431,7 @@ Function Get-CUEnum{
     [cmdletBinding()]
     Param(
         [Alias("FullName")]
-        [Parameter(ValueFromPipeline=$True,Position=1,ValueFromPipelineByPropertyName=$True)]
+        [Parameter(ValueFromPipeline=$True,ValueFromPipelineByPropertyName=$True)]
         [string[]]$Path
     )
 
@@ -1440,7 +1441,7 @@ Function Get-CUEnum{
 
    Process{
         ForEach( $p in $Path) {
-            Write-Verbose "ICI"
+
             $item = get-item (resolve-path -path $p).path
                 If ( $item -is [system.io.FileInfo] -and $item.Extension -in @('.ps1','.psm1') ) {
                 Write-Verbose "[Get-CUEnum][Path] $($item.FullName)"

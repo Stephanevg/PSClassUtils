@@ -45,8 +45,9 @@ Function Get-CUClassProperty {
 
             ## CUClass as input
             Set1 {
-
+                Write-Verbose '[Get-CUClassProperty][CUClassInput]'
                 Foreach ( $Class in $InputObject ) {
+                    Write-Verbose "[Get-CUClassProperty][CUClass Class Name is: $($Class.Name) ]"
                     If ( $ClassParams.ClassName ) {
                         If ( $Class.Name -eq $ClassParams.ClassName ) {
                             If ( $PSBoundParameters['Raw'] ) {
@@ -70,7 +71,7 @@ Function Get-CUClassProperty {
             Set2 {
                 Write-Verbose '[Get-CUClassProperty][FileInput]'
                 Foreach ( $P in $Path ) {
-                    Write-Verbose '[Get-CUClassProperty][FileInput Path is: $($p.fullname) ]'
+                    Write-Verbose "[Get-CUClassProperty][FileInput Path is: $($p.fullname) ]"
                     If ( $P.extension -in ".ps1",".psm1" ) {
 
                         If ($PSCmdlet.MyInvocation.ExpectingInput) {
