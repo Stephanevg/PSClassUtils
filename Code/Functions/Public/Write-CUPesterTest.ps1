@@ -423,11 +423,11 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("# -- Assert")
                 [void]$sb.AppendLine("")
                 If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
-                    [void]$sb.AppendLine("$MethodCall" + '| should be $null')
+                    [void]$sb.AppendLine("$MethodCall" + '| Should -Be $null')
                 }
                 else {
                     
-                    [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    [void]$sb.AppendLine("($MethodCall).GetType().Name | Should -Be $ReturnType")
                 }
 
                 

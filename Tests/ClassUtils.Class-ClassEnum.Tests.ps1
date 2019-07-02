@@ -28,7 +28,7 @@ InModuleScope PSClassUtils -ScriptBlock {
                     $mem -in $EnumMembers | should be $true
                 }
 
-            }
+            } 
         }
     }
 }

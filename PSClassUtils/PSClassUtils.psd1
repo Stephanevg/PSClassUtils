@@ -1,99 +1,100 @@
 #
-# Manifeste de module pour le module « PSGet_PSClassUtils »
+# Manifeste de module pour le module ï¿½ï¿½PSGet_PSClassUtilsï¿½ï¿½
 #
-# Généré par : StÃ©phane van Gulick
+# Gï¿½nï¿½rï¿½ parï¿½: StÃ©phane van Gulick
 #
-# Généré le : 02/07/2019
+# Generated on: 3/25/2019
 #
 
 @{
 
-# Module de script ou fichier de module binaire associé à ce manifeste
+# Module de script ou fichier de module binaire associï¿½ ï¿½ ce manifeste
 RootModule = 'PSClassUtils.psm1'
 
-# Numéro de version de ce module.
+# Numï¿½ro de version de ce module.
 ModuleVersion = '2.6.3'
 
-# Éditions PS prises en charge
+# ï¿½ditions PS prises en charge
 # CompatiblePSEditions = @()
 
-# ID utilisé pour identifier de manière unique ce module
+# ID utilisï¿½ pour identifier de maniï¿½re unique ce module
 GUID = 'c60f1a5b-deb3-44e7-8193-77aaa92ffb42'
 
 # Auteur de ce module
 Author = 'StÃ©phane van Gulick'
 
-# Société ou fournisseur de ce module
+# Sociï¿½tï¿½ ou fournisseur de ce module
 CompanyName = 'District'
 
-# Déclaration de copyright pour ce module
+# Dï¿½claration de copyright pour ce module
 Copyright = '(c) 2018 TAAVAST3. All rights reserved.'
 
-# Description de la fonctionnalité fournie par ce module
+# Description de la fonctionnalitï¿½ fournie par ce module
 Description = 'Contains a set of utilities to work with Powershell Classes.'
 
 # Version minimale du moteur Windows PowerShell requise par ce module
 PowerShellVersion = '5.0'
 
-# Nom de l'hôte Windows PowerShell requis par ce module
+# Nom de l'hï¿½te Windows PowerShell requis par ce module
 # PowerShellHostName = ''
 
-# Version minimale de l'hôte Windows PowerShell requise par ce module
+# Version minimale de l'hï¿½te Windows PowerShell requise par ce module
 # PowerShellHostVersion = ''
 
 # Version minimale du Microsoft .NET Framework requise par ce module. Cette configuration requise est valide uniquement pour PowerShell Desktop Edition.
 # DotNetFrameworkVersion = ''
 
-# Version minimale de l’environnement CLR (Common Language Runtime) requise par ce module. Cette configuration requise est valide uniquement pour PowerShell Desktop Edition.
+# Version minimale de lï¿½environnement CLR (Common Language Runtime) requise par ce module. Cette configuration requise est valide uniquement pour PowerShell Desktop Edition.
 # CLRVersion = ''
 
 # Architecture de processeur (None, X86, Amd64) requise par ce module
 # ProcessorArchitecture = ''
 
-# Modules qui doivent être importés dans l'environnement global préalablement à l'importation de ce module
+# Modules qui doivent ï¿½tre importï¿½s dans l'environnement global prï¿½alablement ï¿½ l'importation de ce module
 # RequiredModules = @()
 
-# Assemblys qui doivent être chargés préalablement à l'importation de ce module
+# Assemblys qui doivent ï¿½tre chargï¿½s prï¿½alablement ï¿½ l'importation de ce module
 # RequiredAssemblies = @()
 
-# Fichiers de script (.ps1) exécutés dans l’environnement de l’appelant préalablement à l’importation de ce module
+# Fichiers de script (.ps1) exï¿½cutï¿½s dans lï¿½environnement de lï¿½appelant prï¿½alablement ï¿½ lï¿½importation de ce module
 # ScriptsToProcess = @()
 
-# Fichiers de types (.ps1xml) à charger lors de l'importation de ce module
+# Fichiers de types (.ps1xml) ï¿½ charger lors de l'importation de ce module
 # TypesToProcess = @()
 
-# Fichiers de format (.ps1xml) à charger lors de l'importation de ce module
+# Fichiers de format (.ps1xml) ï¿½ charger lors de l'importation de ce module
 # FormatsToProcess = @()
 
-# Modules à importer en tant que modules imbriqués du module spécifié dans RootModule/ModuleToProcess
+# Modules ï¿½ importer en tant que modules imbriquï¿½s du module spï¿½cifiï¿½ dans RootModule/ModuleToProcess
 # NestedModules = @()
 
-# Fonctions à exporter à partir de ce module. Pour de meilleures performances, n’utilisez pas de caractères génériques et ne supprimez pas l’entrée. Utilisez un tableau vide si vous n’avez aucune fonction à exporter.
+# Fonctions ï¿½ exporter ï¿½ partir de ce module. Pour de meilleures performances, nï¿½utilisez pas de caractï¿½res gï¿½nï¿½riques et ne supprimez pas lï¿½entrï¿½e. Utilisez un tableau vide si vous nï¿½avez aucune fonction ï¿½ exporter.
 FunctionsToExport = 'Get-CUClass', 'Get-CUClassConstructor', 'Get-CUClassMethod', 
                'Get-CUClassProperty', 'Get-CUCommands', 'Get-CUEnum', 
                'Get-CULoadedClass', 'Get-CURaw', 'Install-CUDiagramPrerequisites', 
                'Test-IsCustomType', 'Write-CUClassDiagram', 
                'Write-CUInterfaceImplementation', 'Write-CUPesterTest'
 
-# Applets de commande à exporter à partir de ce module. Pour de meilleures performances, n’utilisez pas de caractères génériques et ne supprimez pas l’entrée. Utilisez un tableau vide si vous n’avez aucune applet de commande à exporter.
+# Applets de commande ï¿½ exporter ï¿½ partir de ce module. Pour de meilleures performances, nï¿½utilisez pas de caractï¿½res gï¿½nï¿½riques et ne supprimez pas lï¿½entrï¿½e. Utilisez un tableau vide si vous nï¿½avez aucune applet de commande ï¿½ exporter.
 CmdletsToExport = @()
 
-# Variables à exporter à partir de ce module
+# Variables ï¿½ exporter ï¿½ partir de ce module
 VariablesToExport = '*'
 
-# Alias à exporter à partir de ce module. Pour de meilleures performances, n’utilisez pas de caractères génériques et ne supprimez pas l’entrée. Utilisez un tableau vide si vous n’avez aucun alias à exporter.
-AliasesToExport = @()
 
-# Ressources DSC à exporter depuis ce module
+# Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
+AliasesToExport = 'digraph'
+
+# Ressources DSC ï¿½ exporter depuis ce module
 # DscResourcesToExport = @()
 
-# Liste de tous les modules empaquetés avec ce module
+# Liste de tous les modules empaquetï¿½s avec ce module
 # ModuleList = @()
 
-# Liste de tous les fichiers empaquetés avec ce module
+# Liste de tous les fichiers empaquetï¿½s avec ce module
 # FileList = @()
 
-# Données privées à transmettre au module spécifié dans RootModule/ModuleToProcess. Cela peut également inclure une table de hachage PSData avec des métadonnées de modules supplémentaires utilisées par PowerShell.
+# Donnï¿½es privï¿½es ï¿½ transmettre au module spï¿½cifiï¿½ dans RootModule/ModuleToProcess. Cela peut ï¿½galement inclure une table de hachage PSData avec des mï¿½tadonnï¿½es de modules supplï¿½mentaires utilisï¿½es par PowerShell.
 PrivateData = @{
 
     PSData = @{
@@ -146,7 +147,7 @@ PrivateData = @{
 # URI HelpInfo de ce module
 # HelpInfoURI = ''
 
-# Le préfixe par défaut des commandes a été exporté à partir de ce module. Remplacez le préfixe par défaut à l’aide d’Import-Module -Prefix.
+# Le prï¿½fixe par dï¿½faut des commandes a ï¿½tï¿½ exportï¿½ ï¿½ partir de ce module. Remplacez le prï¿½fixe par dï¿½faut ï¿½ lï¿½aide dï¿½Import-Module -Prefix.
 # DefaultCommandPrefix = ''
 
 }
