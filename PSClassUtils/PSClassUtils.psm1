@@ -1,4 +1,4 @@
-#Generated at 07/02/2019 16:41:05 by Stephane van Gulick
+﻿#Generated at 07/02/2019 19:51:39 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -420,285 +420,6 @@ Class PesterScript {
         $This.DescribeBlocks = Get-CUPesterDescribeBlock -Path $This.path.FullName
     }
 }
-
-enum GraphOutputFormat{
-    jpg
-    png
-    gif
-    imap
-    cmapx
-    jp2
-    pdf
-    plain
-    dot
-}
-
-Class CUClassGraphOptions {
-    [Object]$InputObject #Should be [CUClass[]] and / or [CUEnum[]]
-    [bool]$IgnoreCase
-    [Bool]$ShowComposition
-    [Bool]$Show
-    [Bool]$PassThru
-    [System.IO.DirectoryInfo]$OutputFolderPath
-    [String]$FileName
-    [GraphOutputFormat]$OutputFormat
-    [String]$Exclude
-    [String]$Only
-    [Bool]$Recurse
-
-    CUClassGraphOptions(){
-
-    }
-
-    [CUClassGraphOptions] SetInputObject([Object]$InputObject){
-        $this.Object = $InputObject
-        return $this
-    }
-
-
-    [CUClassGraphOptions] SetShowComposition(){
-        $this.ShowComposition = $true
-        return $this
-    }
-
-    [CUClassGraphOptions] SetIgnoreCase(){
-        $this.IgnoreCase = $true
-        return $this
-    }
-
-    [CUClassGraphOptions] SetShow(){
-        $this.Show = $true
-        return $this
-    }
-
-    [CUClassGraphOptions] SetPassThru(){
-        $this.PassThru = $true
-        return $this
-    }
-
-    [CUClassGraphOptions] SetOutputFormat([GraphOutputFormat]$OutputFormat){
-        $this.OutputFormat = $OutputFormat
-        return $this
-    }
-
-    [HashTable] GetParameterHashTable(){
-        
-        $Options = $this.psobject.Members | ? {$_.MemberType -eq 'Property'} | select Name,Value
-        $Hash = @{}
-        Foreach($opt in $options){
-            $Hash.$($opt.Name) = $opt.Value
-        }
-
-        return $Hash
-    }
-
-    [Void] SetOutputFolderPath([String]$Path){
-        If(test-Path $Path){
-            $Item = get-Item $Path
-
-            Switch($Item.GetType().FullName){
-                'system.io.DirectoryInfo' {
-                    $this.OutputFolderPath = $Item.FullName
-                    If(!($this.FileName)){
-                        $this.ApplyFileName($Item.BaseName)
-                    }else{
-
-                        $this.ApplyFileName($this.FileName)
-                    }
-                    ;Break}
-                'system.io.FileInfo' {
-                    $this.OutputFolderPath = $Item.Directory.FullName
-                    $this.ApplyFileName($Item.BaseName)
-                    ;Break
-                }
-            }
-        }
-        
-    }
-
-    [Void]ApplyFileName([String]$FileName){
-        $this.FileName = $FileName + "." + $This.OutputFormat
-    }
-
-    [CUClassGraphOptions] SetOutputFolderPath([System.IO.DirectoryInfo]$OutputFolderPath){
-        $this.OutputFolderPath = $OutputFolderPath
-        return $this
-    }
-
-    [CUClassGraphOptions] SetFileName([String]$FileName){
-        $this.FileName = $FileName
-        return $this
-    }
-
-    [CUClassGraphOptions] SetExclude([String]$Exclude){
-        $this.Exclude = $Exclude
-        return $this
-    }
-
-    [CUClassGraphOptions] SetRecurse(){
-        $this.Recurse = $True
-        return $this
-    }
-
-    [CUClassGraphOptions] SetOnly([String]$Only){
-        $this.Only = $Only
-        return $this
-    }
-
-    [String]GetFullExportPath(){
-        return "{0}\{1}" -f $this.OutputFolderPath,$this.FileName
-    }
-
-}
-
-Class CUDiagram {
-    [String]$Path
-    [Object[]]$Objects
-    [CUClassGraphOptions]$Options
-    hidden $GraphVizDocument
-    [String[]]$String
-
-    CUDiagram(){
-
-    }
-    CUDiagram([String]$Path){
-        if(test-Path $Path){
-            $this.Path = $Path
-            $this.GetClassObjects()
-            $this.Options = [CUClassGraphOptions]::New() #I know this is bad. But It seems the right thing to do. For now...
-        }else{
-            throw "$($Path) not found. Please provide a path that exists."
-        }
-    }
-    CUDiagram([CUClassGraphOptions]$Options){
-        $this.SetOptions($Options)
-        $this.Options.SetOutputFolderPath()
-    }
-
-    CuDiagram([Object[]]$Objects){
-        $this.Objects += $Objects
-        
-    }
-
-    CUDiagram([Object[]]$Objects,[CUClassGraphOptions]$Options){
-        $this.Objects += $Objects
-        $this.SetOptions($Options)
-    }
-
-    AddObjects([Object[]]$Objects){
-        $Allowed = @('CUClass','ClassEnum')
-        foreach($obj in $Objects){
-            if($obj.GetType().Name -in $Allowed){
-                $This.Objects += $obj
-            }else{
-                Throw "$($obj.GetType()) Is not an allowed type."
-            }
-        }
-    }
-
-    
-    <#
-    AddClass([CUClass[]]$Class){
-        $this.Objects += $Class
-    }
-
-    AddEnum([ClassEnum[]]$Enum){
-       $this.Objects += $Enum
-    }
-    #>
-
-
-    CreateGraphVizDocument(){
-        #actions for creating graph
-        If($this.Objects){
-            $o = $this.Options.GetParameterHashTable()
-            $Pars = @{}
-            $Pars.InputObject = $this.Objects
-            $Pars.IgnoreCase = $o.IgnoreCase
-            $Pars.ShowCOmposition = $o.showComposition
-            $Pars.ErrorAction = "Stop"
-            
-            try{
-                
-                $this.GraphVizDocument = Out-CUPSGraph @Pars 
-            }Catch{
-                Throw "Failed to create raw graph: $($_)"
-            }
-            IF(!($this.GraphVizDocument)){
-                Throw "Generated graph is empty. Did you point to a document that contains classes / enums?"
-            }
-        }Else{
-            throw "Add classes or Enums"
-        }
-    }
-    
-    CreateDiagram(){
-        If(!($this.GraphVizDocument)){
-            Throw "Create a graphViz document first using CreateGraph"
-        }else{
-            $this.Options.SetOutputFolderPath($this.Path)
-            $o = $this.Options.GetParameterHashTable()
-            $ParsExport = @{}
-            if($o.Show){
-
-                $ParsExport.ShowGraph = $o.show
-            }
-            If($o.OutputFolderPath){
-
-                $ParsExport.DestinationPath = $this.Options.GetFullExportPath()
-            }
-
-            If($O.OutputFormat){
-
-                $ParsExport.OutputFormat = $o.OutputFormat
-            }
-            $this.GraphVizDocument | export-PSGraph @ParsExport
-            If( $o.PassThru){
-                
-            }
-            
-        }
-    }
-
-    [CUClassGraphOptions] GetOptions(){
-        Return $This.Options
-    }
-
-    SetOptions([CUClassGraphOptions]$Options){
-        $This.Options = $Options
-    }
-
-    [Void]GetClassObjects(){
-        If($this.Path){
-            $item = Get-Item $this.Path
-            Switch($item.GEtType().FullName){
-
-                ("System.IO.FileInfo"){
-                    $this.Objects = Get-CUClass -path $item.FullName
-                    ;Break
-                }
-                ("System.IO.DirectoryInfo"){
-                    $h = @{}
-                    if($this.Options.Recurse){
-                        $h.recurse = $true
-                    }
-                    $h.path = $Item.FullName
-                    $this.Objects = Get-ChildItem -path @h | Get-CUClass
-                    ;Break
-                } 
-            }
-
-            If($this.Options.Only){
-                $this.Objects = $this.Objects | ? {$_.Name -in $Only}
-            }elseif($this.Options.Exclude){
-                $this.Objects = $this.Objects | ? {$_.Name -NotIn $Exclude}
-            }
-        }
-    }
-}
-
-
-
 Function ConvertTo-titleCase {
     [CmdletBinding()]
     Param(
@@ -890,7 +611,7 @@ Function Out-CUPSGraph {
     )
     
     begin {
-        
+        Write-Verbose "Out-CUPSGraph -> BEGIN BLOCK..."
         $AllGraphs = @()
         if(!(Get-Module -Name PSGraph)){
             #Module is not loaded
@@ -904,16 +625,14 @@ Function Out-CUPSGraph {
     }
     
     process {
-        
+        Write-Verbose "Out-CUPSGraph -> PROCESS BLOCK..."
         [System.Collections.ArrayList]$AllClasses = @()
-        $inputObjectGrouped = $inputObject | Group Path
         #$Graph = Graph -Attributes @{splines='ortho'} -ScriptBlock {
         $Graph = Graph -ScriptBlock {
-            foreach($obj in $inputObjectGrouped){
+            foreach($obj in $inputObject){
                 $CurrName = split-Path -leaf $obj.Name
-                    subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
-                
-                        Foreach( $Class in $obj.group ) {
+                subgraph -Attributes @{label=($CurrName)} -ScriptBlock {
+                        Foreach( $Class in $obj.Group ) {
 
                             If($IgnoreCase){
                                 $RecordName = ConvertTo-TitleCase -String $Class.Name
@@ -1031,7 +750,7 @@ Function Out-CUPSGraph {
                     }#End SubGraph
                 
                 ## InHeritance
-                Foreach ($class in ($inputObjectGrouped.group | where-Object IsInherited)){
+                Foreach ($class in ($Obj.Group | where-Object IsInherited)){
                     If($IgnoreCase){
                         $Parent = ConvertTo-TitleCase -String $Class.ParentClassName
                         $Child = ConvertTo-TitleCase -String $Class.Name
@@ -1040,7 +759,7 @@ Function Out-CUPSGraph {
                         $Parent = $Class.ParentClassName
                         $Child = $Class.Name
                     }
-                    edge -From $Parent -To $Child -Attributes @{dir="back";arrowhead="empty"}
+                    edge -From $Parent -To $Child -Attributes @{arrowhead="empty"}
                 }
 
                 ##Composition
@@ -1067,7 +786,8 @@ Function Out-CUPSGraph {
     }
     
     end {
-        
+        Write-Verbose "Out-CUPSGraph -> END BLOCK..."
+        Write-Verbose "Out-CUPSGraph -> END BLOCK: return graphs..."
         Return $AlLGraphs
         
     
@@ -1178,23 +898,23 @@ function Get-CUClass {
         } Else {
             
             Foreach ( $x in (Get-CULoadedClass @ClassParams ) ) {
-
-                If ( $PSBoundParameters['ClassName'] ) {
-                    If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                If ( !$x.IsEnum ){
+                    If ( $PSBoundParameters['ClassName'] ) {
+                        If ( $x.name -eq $PSBoundParameters['ClassName'] ) {
+                            If ( $PSBoundParameters['Raw'] ) {
+                                ([CUClass]::New($x)).Raw
+                            } Else {
+                                [CUClass]::New($x)
+                            }
+                        }
+                    } Else {
                         If ( $PSBoundParameters['Raw'] ) {
                             ([CUClass]::New($x)).Raw
                         } Else {
                             [CUClass]::New($x)
                         }
                     }
-                } Else {
-                    If ( $PSBoundParameters['Raw'] ) {
-                        ([CUClass]::New($x)).Raw
-                    } Else {
-                        [CUClass]::New($x)
-                    }
                 }
-                
             } 
         }
     }
@@ -1709,35 +1429,41 @@ Function Get-CUEnum{
     #>
     [cmdletBinding()]
     Param(
- 
-        [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-        [String[]]
-        $Path = (throw "Please provide a path")
+        [Alias("FullName")]
+        [Parameter(ValueFromPipeline=$True,Position=1,ValueFromPipelineByPropertyName=$True)]
+        [string[]]$Path
     )
 
    begin{
 
    }
+
    Process{
-
-        foreach($p in $Path){
-
-            $AST = Get-cuast -Path $p | ? {$_.IsEnum -eq $True}
-     
-            foreach($enum in $AST){
-                [ClassEnum]::New($enum.Name,$enum.members.Name)
+        ForEach( $p in $Path) {
+            Write-Verbose "ICI"
+            $item = get-item (resolve-path -path $p).path
+                If ( $item -is [system.io.FileInfo] -and $item.Extension -in @('.ps1','.psm1') ) {
+                Write-Verbose "[Get-CUEnum][Path] $($item.FullName)"
+                $AST = Get-cuast -Path $item.FullName | Where-Object IsEnum
+        
+                foreach($enum in $AST){
+                    [ClassEnum]::New($enum.Name,$enum.members.Name)
+                }
             }
         }
-       
 
+        If ( $null -eq $PSBoundParameters['Path']) {
+            Foreach ( $Enum in (Get-CULoadedClass ) ) {
+                If($Enum.IsEnum){
+                    [ClassEnum]::New($Enum.Name,$Enum.members.Name)
+                }
+            }
+        }
    }
    End{
 
    }
 }
-
-
-
 function Get-CULoadedClass {
     <#
     .SYNOPSIS
@@ -2019,10 +1745,7 @@ function Write-CUClassDiagram {
         $PassThru,
 
         [Parameter(Mandatory = $False)]
-        [String[]]$Exclude,
-
-        [Parameter(Mandatory = $False)]
-        [String[]]$Only
+        [String[]]$Exclude
 
     )
 
@@ -2041,11 +1764,7 @@ function Write-CUClassDiagram {
         }
     }
 
-    Begin {
-
-        $Diagram = [CUDiagram]::new($Path)
-
-
+    Begin { <# The begining #>
 
         ## Check Exclude Parameters, Wildcard is only allowed when Exclude contains One item
         If ( $null -ne $MyInvocation.BoundParameters.Exclude )
@@ -2070,35 +1789,182 @@ function Write-CUClassDiagram {
     
     Process {
 
+        ## Depending on the Type of the Path Parameter... File or Directory, other (default)
+        $PathItem = Get-Item $PSBoundParameters['Path']
 
-        $Options = [CUClassGraphOptions]::New()
+        Switch ( $PathItem ) {
 
-        foreach($key in $PSBoundParameters.Keys ){
+            { $PSItem -is [System.Io.FileInfo] } {
+                Write-Verbose "Write-CuClassDiagram -> Dealing with a File..."
 
-            switch($Key){
-                'IgnoreCase'{$Options = $Options.SetIgnoreCase();Break}
-                'ShowComposition'{$Options = $Options.SetShowComposition();Break}
-                'Show'{$Options = $Options.SetShow();Break}
-                'PassThru'{$Options = $Options.SetPassThru();Break}
-                'OutputFormat'{$Options = $Options.SetOutputFormat($PsBoundParameters.$Key);Break}
-                'OutputFolderPath' {$Options = $Options.SetOutputFolderPath($PsBoundParameters.$Key);Break}
-                'Only' {$Options = $Options.SetOnly($PsBoundParameters.$Key);Break}
-                'Exclude'{$Options = $Options.SetExclude($PsBoundParameters.$Key) ;Break}
-                #Need to add Exlusions
+                ## Looking for Classes
+                $Classes = Find-CUClass -Item $PSitem -Exclude $PSBoundParameters['Exclude']
+                
+                If ( $Null -ne $Classes ) {
+
+                    $GraphParams = New-CUGraphParameters -InputObject $Classes -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
+
+                    If ( $PSBoundParameters['ExportFolder'] ) ## Export must be made in a specified folder
+                    {
+                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat -Show    
+                        } Else ## Show switch not used
+                        {
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat
+                        }
+                        
+                    } Else ## Export must be in the same directory
+                    {
+                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSitem.Directory -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat -Show
+                        } Else  ## Show Switch not used
+                        {
+                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSitem.Directory -ChildPath $PSitem.BaseName -OutputFormat $OutputFormat
+                        }
+                    }
+
+                } ## Empty class variable, not a class file
+            } ## Not a file
+
+            { $PSItem -is [System.Io.DirectoryInfo] } {
+                Write-Verbose "Write-CuClassDiagram -> Dealing with a Directory..."
+                
+                If ( $PSBoundParameters['Recurse'] ) {
+                    Write-Verbose "Write-CuClassDiagram -> Recurse parameter used..."
+
+                    ## If OutPutType is not specified, we must use the default value, wich is Combined
+                    If ( $OutPutType -eq 'Combined' ) {
+                        Write-Verbose "Write-CuClassDiagram -> OutPutType Per Directory..."
+                        Foreach ( $Directory in $(Get-ChildItem -path $PSItem -Directory -Recurse) ) {
+                            
+                            $Classes = Find-CUClass -Item $($Directory.FullName+'\*') -Exclude $PSBoundParameters['Exclude']
+                            
+                            ##
+                            If ( $Null -ne $Classes ) {
+
+                                $GraphParams = New-CUGraphParameters -InputObject $Classes -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
+
+                                If ( $PSBoundParameters['ExportFolder'] ) {
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $Directory.Name -OutputFormat $OutputFormat -Show
+                                    } Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $Directory.Name -OutputFormat $OutputFormat
+                                    }
+                                } Else {
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $Directory.FullName -ChildPath $Directory.Name -OutputFormat $OutputFormat -Show
+                                    } Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $Directory.FullName -ChildPath $Directory.Name -OutputFormat $OutputFormat
+                                    }    
+                                }
+                            } ## No Classe(s) found, Next directory please ..  ##>
+                        } ## No more directories to parse
+                    } ## Option Combined for OutPutType was not specified
+
+                    If ( $OutPutType -eq 'Unique' ) {
+                        Write-Verbose "Write-CuClassDiagram -> OutPutType Per File..."
+
+                        Foreach ( $Directory in $(Get-ChildItem -path $PSItem -Directory -Recurse) ) {
+                            $Classes = Find-CUClass -Item $($Directory.FullName+'\*') -Exclude $PSBoundParameters['Exclude']
+                            
+                            If ( $Null -ne $Classes ) {
+                                
+                                Foreach ( $Group in $Classes ) {
+                                    
+                                    $GraphParams = New-CUGraphParameters -InputObject $Group -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
+
+                                    If ( $PSBoundParameters['ExportFolder'] ) {
+                                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                        } Else 
+                                        {
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                        }
+                                    } Else {
+                                        If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                        } Else 
+                                        {
+                                            New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                        }
+                                        
+                                    }
+                                }
+                            } ## No Classes found
+                        } ## Foreach directory
+                    } ## Unique
+                    
+                } Else {
+                    Write-Verbose "Write-CuClassDiagram -> Recurse Parameter NOT specified..."
+                    $Classes = Find-CUClass -Item (""+$PSitem.FullName+"\*") -Exclude $PSBoundParameters['Exclude']
+                    
+                    If ( $Null -ne $Classes ) {
+                        Write-Verbose "Write-CuClassDiagram -> $($Classes.Count) Class(es) were found..."
+
+                        ## If OutPutType is not specified, we must use the default value, wich is Combined
+                        If ( $OutPutType -eq  'Combined') {
+
+                            Write-Verbose "Write-CuClassDiagram -> OutPutType Per Directory..."
+                            $GraphParams = New-CUGraphParameters -InputObject $Classes -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
+                            
+                            If ( $PSBoundParameters['ExportFolder'] ) {
+                                If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSItem.Name -OutputFormat $OutputFormat -Show
+                                } Else
+                                {
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath $PSItem.Name -OutputFormat $OutputFormat
+                                }
+                            } Else {
+                                If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSItem.FullName -ChildPath $PSitem.Name -OutputFormat $OutputFormat -Show
+                                }
+                                Else
+                                {
+                                    New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSItem.FullName -ChildPath $PSitem.Name -OutputFormat $OutputFormat
+                                }
+                            }
+                        }
+
+                        If ( $OutPutType -eq 'Unique' ) {
+                            Write-Verbose "Write-CuClassDiagram -> OutPutType Per File..."
+
+                            Foreach ( $Group in $Classes ) {
+                                $GraphParams = New-CUGraphParameters -InputObject $Group -IgnoreCase $PSBoundParameters['IgnoreCase'] -ShowComposition $PSBoundParameters['ShowComposition']
+
+                                If ( $PSBoundParameters['ExportFolder'] ) {
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                    }
+                                    Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path $PSBoundParameters['ExportFolder'] -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                    }
+                                } Else {
+                                    If ( $PSBoundParameters['show'] ) { ## Show Switch used
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat -Show
+                                    }
+                                    Else
+                                    {
+                                        New-CUGraphExport -Graph $GraphParams -PassThru $PSBoundParameters['PassThru'] -Path (get-item $group.name).Directory -ChildPath (get-item $group.name).BaseName -OutputFormat $OutputFormat
+                                    }
+                                }
+                            }
+                        }
+
+                    } ## No Classes found
+                } ## Not a directory nor a file
+            } ## Not a directory .. it's something else ... !
+
+            Default {
+                Throw 'Path Parameter must be a file or a directory...'
             }
+            ## Bye bye
         }
-        
-        $Diagram.SetOptions($Options)
-        $Diagram.GetClassObjects()
-        $Diagram.CreateGraphVizDocument()
-        $Diagram.CreateDiagram()
-        return [System.IO.FileInfo]$Diagram.Path
-
     }
     
-    End { 
-
-    }
+    End { <# The end #> }
 }
 function Write-CUInterfaceImplementation
 {
@@ -2557,11 +2423,11 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("# -- Assert")
                 [void]$sb.AppendLine("")
                 If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
-                    [void]$sb.AppendLine("$MethodCall" + '| Should -Be $null')
+                    [void]$sb.AppendLine("$MethodCall" + '| should be $null')
                 }
                 else {
                     
-                    [void]$sb.AppendLine("($MethodCall).GetType().Name | Should -Be $ReturnType")
+                    [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
                 }
 
                 
