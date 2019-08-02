@@ -1,4 +1,4 @@
-﻿#Generated at 03/10/2019 21:20:24 by Stephane van Gulick
+﻿#Generated at 08/02/2019 15:00:50 by Stephane van Gulick
 #Needed for 07_CUInterfaceAuthor
 
 using namespace System.Collections.Generic
@@ -2389,8 +2389,12 @@ Function Write-CUPesterTest {
                     [void]$sb.AppendLine("$MethodCall" + '| should be $null')
                 }
                 else {
-                    
-                    [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    if ($Method.ReturnType -like "*System.*") {
+                        [void]$sb.AppendLine("($MethodCall).GetType().FullName | should be $ReturnType")
+                    }
+                    else {
+                        [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    }
                 }
 
                 
