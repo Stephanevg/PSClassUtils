@@ -169,7 +169,7 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("")
             }else{
 
-                [void]$sb.AppendLine(". $($File.Name)")
+                [void]$sb.AppendLine(". '$($File.Name)'")
             }
         }
         
