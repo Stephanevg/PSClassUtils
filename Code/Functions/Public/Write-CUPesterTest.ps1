@@ -169,7 +169,7 @@ Function Write-CUPesterTest {
                 [void]$sb.AppendLine("")
             }else{
 
-                [void]$sb.AppendLine(". $($File.Name)")
+                [void]$sb.AppendLine(". '$($File.Name)'")
             }
         }
         
@@ -426,8 +426,11 @@ Function Write-CUPesterTest {
                     [void]$sb.AppendLine("$MethodCall" + '| should be $null')
                 }
                 else {
-                    
-                    [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    if ($Method.ReturnType -like "*System.*") {
+                        [void]$sb.AppendLine("($MethodCall).GetType().FullName | should be $ReturnType")
+                    }else {
+                        [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    }
                 }
 
                 
