@@ -426,8 +426,11 @@ Function Write-CUPesterTest {
                     [void]$sb.AppendLine("$MethodCall" + '| Should -Be $null')
                 }
                 else {
-                    
-                    [void]$sb.AppendLine("($MethodCall).GetType().Name | Should -Be $ReturnType")
+                    if ($Method.ReturnType -like "*System.*") {
+                        [void]$sb.AppendLine("($MethodCall).GetType().FullName | should be $ReturnType")
+                    }else {
+                        [void]$sb.AppendLine("($MethodCall).GetType().Name | should be $ReturnType")
+                    }
                 }
 
                 
