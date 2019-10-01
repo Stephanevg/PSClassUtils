@@ -98,8 +98,8 @@ PrivateData = @{
 
     PSData = @{
 
-        # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = 'Classes','helper','diagram','uml','psgraph','graphviz','class'
+        # Tags applied to this module. These help with module discovery in onli,ne galleries.
+        Tags = 'Classes','helper','diagram','uml','psgraph','graphviz','class','PSEdition_Desktop','PSEdition_Core'
 
         # A URL to the license for this module.
         # LicenseUri = ''
