@@ -375,7 +375,7 @@ Function Write-CUPesterTest {
 
                 [void]$sb.AppendLine($visibility)
 
-                If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
+                If (!($Method.ReturnType) -or $Method.ReturnType -eq '[void]') {
                     [void]$sb.AppendLine("It '[$($Class.Name)] --> $($Method.Name)$($Signature) Should not return anything (voided)' {")
                 }
                 else {
@@ -422,7 +422,7 @@ Function Write-CUPesterTest {
                 
                 [void]$sb.AppendLine("# -- Assert")
                 [void]$sb.AppendLine("")
-                If ($Method.ReturnType -eq '[void]' -or $Null -eq $Method.ReturnType) {
+                If (!($Method.ReturnType) -or $Method.ReturnType -eq '[void]') {
                     [void]$sb.AppendLine("$MethodCall" + '| Should -Be $null')
                 }
                 else {
