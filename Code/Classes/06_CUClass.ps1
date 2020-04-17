@@ -162,4 +162,34 @@ Class CUClass {
 
     }
 
+    [string]Sirene(){
+        $string = $null
+
+        $properties =''
+        $this.property.foreach({
+            if($_.visibility -eq 'public' ) {
+                $properties = $properties + "`n+" + $_.Type + " " + $_.Name
+            } else {
+                $properties = $properties + "`n-" + $_.Type + " " + $_.Name
+            }
+        })
+
+        $methods = ''
+        $this.method.foreach({
+            if(-not $_.static ) { $methods = $methods + "`n+" + $_.Name + "(" + ($_.Parameter.Name -join ',') + ") " + $_.ReturnType } else { "prout "}
+        })
+
+        $Composition = ''
+
+
+        $string = 
+        "class $($this.name){
+            $properties
+            $methods
+        }
+        $composition
+        "
+        return $string
+    }
+
 }
