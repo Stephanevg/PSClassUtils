@@ -21,7 +21,7 @@ All public commands will be returned.
 
 ## EXAMPLES
 
-### EXEMPLE 1
+### EXAMPLE 1
 ```
 Get-CUCommands
 ```

@@ -22,7 +22,7 @@ Long description
 
 ## EXAMPLES
 
-### EXEMPLE 1
+### EXAMPLE 1
 ```
 <example usage>
 ```

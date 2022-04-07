@@ -36,14 +36,14 @@ Or you can specify a file to get all the constructors present in this specified 
 
 ## EXAMPLES
 
-### EXEMPLE 1
+### EXAMPLE 1
 ```
 Get-CUClassMethod
 ```
 
 Return all the methods of the classes loaded in the current PSSession.
 
-### EXEMPLE 2
+### EXAMPLE 2
 ```
 Get-CUClassMethod -ClassName woop
 ```
@@ -54,7 +54,7 @@ woop    woop
 woop    woop       {String, Number}
 Return methods for the woop Class.
 
-### EXEMPLE 3
+### EXAMPLE 3
 ```
 Get-CUClassMethod -Path .\Woop.psm1
 ```
@@ -65,7 +65,7 @@ woop    woop
 woop    woop       {String, Number}
 Return methods for the woop Class present in the woop.psm1 file.
 
-### EXEMPLE 4
+### EXAMPLE 4
 ```
 Gci -recurse | Get-CUClassMethod -ClassName CuClass
 ```

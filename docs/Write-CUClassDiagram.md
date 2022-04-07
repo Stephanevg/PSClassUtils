@@ -22,7 +22,7 @@ Automatically generate a UML diagram of scripts/Modules that contain powershell 
 
 ## EXAMPLES
 
-### EXEMPLE 1
+### EXAMPLE 1
 ```
 #Generate a UML diagram of the classes located in MyClass.Ps1
 ```
@@ -31,7 +31,7 @@ Automatically generate a UML diagram of scripts/Modules that contain powershell 
 
 Write-CUClassDiagram.ps1 -File C:\Classes\MyClass.ps1
 
-### EXEMPLE 2
+### EXAMPLE 2
 ```
 #Various output formats are available using the parameter "OutPutFormat"
 ```
@@ -46,7 +46,7 @@ Mode                LastWriteTime         Length Name
 ----                -------------         ------ ----
 -a----       12.06.2018     07:47          58293 Logging.gif
 
-### EXEMPLE 3
+### EXAMPLE 3
 ```
 Write-CUClassDiagram -Path "C:\Modules\PSClassUtils\Classes\Private\" -Show
 ```
