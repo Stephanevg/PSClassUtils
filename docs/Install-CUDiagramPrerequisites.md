@@ -21,12 +21,12 @@ Installation of PSGraph
 
 ## EXAMPLES
 
-### EXEMPLE 1
+### EXAMPLE 1
 ```
 Istall-CUDiagramPrerequisites
 ```
 
-### EXEMPLE 2
+### EXAMPLE 2
 ```
 Istall-CUDiagramPrerequisites -proxy "10.10.10.10"
 ```

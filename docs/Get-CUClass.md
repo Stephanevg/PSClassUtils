@@ -22,35 +22,35 @@ You can specify a file path to explore the classes present in a ps1 or psm1 file
 
 ## EXAMPLES
 
-### EXEMPLE 1
+### EXAMPLE 1
 ```
 Get-CUClass
 ```
 
 Return all classes alreay loaded in current PSSession.
 
-### EXEMPLE 2
+### EXAMPLE 2
 ```
 Get-CUClass -ClassName CUClass
 ```
 
 Return the particuluar CUCLass.
 
-### EXEMPLE 3
+### EXAMPLE 3
 ```
 Get-CUClass -Path .\test.psm1,.\test2.psm1
 ```
 
 Return all classes present in the test.psm1 and test2.psm1 file.
 
-### EXEMPLE 4
+### EXAMPLE 4
 ```
 Get-CUClass -Path .\test.psm1 -ClassName test
 ```
 
 Return test class present in the test.psm1 file.
 
-### EXEMPLE 5
+### EXAMPLE 5
 ```
 Get-ChildItem -recurse | Get-CUClass
 ```
